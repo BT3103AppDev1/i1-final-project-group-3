@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import Login from '@/views/Login.vue'
+import OwnProfileView from '@/views/OwnProfileView.vue'
 
 const routes =[
   {
@@ -14,9 +15,13 @@ const routes =[
       name: 'Login', 
       component: Login,
 
-  }
+  }, 
+  {
+    path: '/ownprofile',
+    name: 'OwnProfile', 
+    component: OwnProfileView,
 
-
+}
 
 ]
 
