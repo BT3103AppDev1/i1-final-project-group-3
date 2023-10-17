@@ -1,0 +1,38 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400;1,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Yeseva+One:wght@400&display=swap");
+body {
+  margin: 0;
+  line-height: normal;
+}
+:root {
+  /* fonts */
+  --font-josefin-sans: "Josefin Sans";
+  --font-yeseva-one: "Yeseva One";
+  --font-inter: Inter;
+
+  /* font sizes */
+  --font-size-xl: 1.25rem;
+  --font-size-lg: 1.13rem;
+  --font-size-base: 1rem;
+  --font-size-6xl: 1.56rem;
+  --font-size-lgi: 1.19rem;
+  --font-size-29xl: 3rem;
+  --font-size-3xl: 1.38rem;
+  --font-size-41xl: 3.75rem;
+
+  /* Colors */
+  --color-mediumslateblue: #525fe1;
+  --color-white: #fff;
+  --color-darkgray: #ada6a6;
+  --color-gray-100: rgba(0, 0, 0, 0.21);
+  --color-gray-200: rgba(255, 255, 255, 0.7);
+  --color-black: #000;
+  --color-silver: #b6b6b6;
+  --color-darkorange: #f86f03;
+
+  /* Border radiuses */
+  --br-21xl: 40px;
+  --br-8xs: 5px;
+  --br-4xs: 9px;
+}
