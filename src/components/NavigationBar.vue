@@ -36,8 +36,6 @@ export default {
   align-self: left;
   position: relative;
   
-
-  
 }
 
 .studybuddy {
