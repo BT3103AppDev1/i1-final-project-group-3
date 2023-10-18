@@ -27,7 +27,7 @@
                 
                 <div class="bottom-row">
                     <div class="forgot-password">Forgot Password?</div>
-                    <button class="login-button">Login</button>
+                    <button class="login-button" @click="navigateToProfile">Login</button>
                 </div>
                 
                 
@@ -38,16 +38,20 @@
 
 <script>
 
-
 export default {
+    
     name: "Login",
 
     methods: {
+      navigateToProfile() {
+        this.$router.push({ name: 'EditProfile' });
+      },
       navigateToRegistration() {
         this.$router.push({ name: 'Registration' });
       }
     }, 
-};
+}
+
 
 </script>
 
@@ -100,16 +104,14 @@ div, input {
 
 
   .login-form {
-    position: absolute;
-    top: 350px;
-    left: 500px;
-    width: 500px;
-    height: 400px;
-    padding-top: 3px;
+    position: relative;
+    top: 50px;
+    right: 220px;
   }
 
   
   .login-form input {
+
     border: none;
     border-bottom: 1px solid #ccc;
     height: 60px;
@@ -121,7 +123,8 @@ div, input {
 }
 
 .login-form h3 {
-    margin-bottom: 10px;
+    margin-bottom: 15=0px;
+
 }
 
 input::placeholder {
