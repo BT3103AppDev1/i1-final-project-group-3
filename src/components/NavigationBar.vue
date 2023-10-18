@@ -1,149 +1,93 @@
 <template>
-<div class="profile-page-displays-all-posts">
-  <div class="header">
-        <b class="studybuddy">StudyBuddy</b>
-        <div class="header-navigation">
-            <button type="button" class ="logoutbutton"> Log Out</button>
-            <button type="button" class="profile">Profile</button>
-            <button type="button" class="chats">Chats</button>
-            <button type="button" class="posts">Posts</button>
-            <button type="button" class="home">Home</button>
-        </div>
-    </div>
-</div>
+  <div id="logged" style="align-self: center;" >
+      <b class="studybuddy" >StudyBuddy</b>
+      <div id="nav">
+          <router-link to="/home">Home</router-link>
+          <router-link to="/about">Posts</router-link>    
+          <router-link to="/Chats">Chats</router-link>
+          <router-link to="/Profile">Profile</router-link>
+          <button>Log Out</button>
+
+      </div>
+  
+  </div>
 </template>
 
 <script>
+import {getAuth, onAuthStateChanged} from "firebase/auth";
 export default {
-
+  name:'NavBar',
+  
 }
+
+
 </script>
 
-<style>
-    .header-navigation {
-    position: absolute;
-    left: 400px;
-  }
-  .logoutbutton {
-    position: absolute;
-    font-weight: 600;
-    display: inline-block;
-    top: 66px;
-    left: 1245px;
-    width: 140px;
-    height: 53px;
-    font-size: var(--font-size-3xl);
-    border-radius: var(--br-21xl);
-    background-color: var(--color-darkorange);
-    border: 1px solid var(--color-darkorange);
-    color: var(--color-white);
-    box-sizing: border-box;
-    cursor:pointer;
-  }
-  .logoutbutton:active {
-    background-color: rgb(253, 170, 147);
-    border: 1px solid rgb(253, 170, 147);
-  }
-  .profile {
-    position: absolute;
-    top: 82px;
-    left: 1078px;
-    font-weight: 600;
-    display: inline-block;
-    width: 134px;
-    height: 37px;
-    background: none;
-    border: none;
-    padding: 0;
-    margin: 0;
-    font-size: var(--font-size-3xl);
-    color: var(--color-white);
-    font-family: var(--font-josefin-sans);
-    cursor:pointer;
-  }
-  .profile:active, .chats:active, .posts:active, .home:active {
-    color: black;
-  }
-  .chats {
-    position: absolute;
-    top: 82px;
-    left: 944px;
-    font-weight: 600;
-    display: inline-block;
-    width: 134px;
-    height: 37px;
-    background: none;
-    border: none;
-    padding: 0;
-    margin: 0;
-    font-size: var(--font-size-3xl);
-    color: var(--color-white);
-    font-family: var(--font-josefin-sans);
-    cursor:pointer;
-  }
-  .posts {
-    position: absolute;
-    top: 82px;
-    left: 810px;
-    font-weight: 600;
-    display: inline-block;
-    width: 134px;
-    height: 37px;
-    background: none;
-    border: none;
-    padding: 0;
-    margin: 0;
-    font-size: var(--font-size-3xl);
-    color: var(--color-white);
-    font-family: var(--font-josefin-sans);
-    cursor:pointer;
-  }
-  .home {
-    position: absolute;
-    top: 82px;
-    left: 694px;
-    font-weight: 600;
-    display: inline-block;
-    width: 134px;
-    height: 37px;
-    background: none;
-    border: none;
-    padding: 0;
-    margin: 0;
-    font-size: var(--font-size-3xl);
-    color: var(--color-white);
-    font-family: var(--font-josefin-sans);
-    cursor:pointer;
-  }
-  .studybuddy {
-    position: absolute;
-    top: 73px;
-    left: 14px;
-    font-size: var(--font-size-29xl);
-    display: inline-block;
-    width: 401px;
-    height: 40px;
-  }
-  .header {
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    width: 100%;
-    height: 165px;
-    text-align: center;
-    font-size: var(--font-size-3xl);
-    font-family: var(--font-josefin-sans);
-    background-color: var(--color-mediumslateblue);
-    text-align: center;
-  }
-  .profile-page-displays-all-posts {
-    background-color: var(--color-white);
-    width: 1440px;
-    height: 1024px;
-    overflow: hidden;
-    text-align: left;
-    font-size: var(--font-size-lg);
-    color: var(--color-white);
-    font-family: var(--font-inter);
-  }
+<style scoped>
+
+#logged {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center; 
+  background-color: #525fe1;  
+  padding: 20px; 
+  width: 100vw;
+  height: 165px;
+  align-self: left;
+  position: relative;
+  
+
+  
+}
+
+.studybuddy {
+  color: #fff;
+  font-size: 48px;
+  font-weight: 700;
+  font-family: josefin sans;
+  top: 30px;
+  padding-left: 20px;
+  
+}
+
+
+#nav {
+  display: flex; /* To make router-links line up horizontally */
+  font-size: 22px;
+  font-family: josefin sans;
+  margin-right: 20px;
+
+}
+
+#nav a {
+  color: #fff;
+  text-decoration: none;
+  margin: 0 30px;
+  transition: color 0.3s;
+}
+
+#nav a:hover {
+  color: #ddd;
+}
+
+button {
+  background-color: #f86f03;
+  border-radius: 40px;
+  border: none;
+  color: white;
+  font-family: var(--font-josefin-sans);
+  cursor: pointer;
+  width: 130px;
+  height: 49px;
+  font-size: 22px;
+  margin-top: -19px;
+  margin-left:2px;
+
+  
+
+
+  
+}
+
 </style>
+
