@@ -6,7 +6,7 @@
             </div>
 
             <h1 class="login-main">Login</h1>
-            <div class="create-account">Don't have an account? <a class="sign-up"> Sign up here </a></div>
+            <div class="create-account">Don't have an account? <a class="sign-up" @click="navigateToRegistration"> Sign up here </a></div>
         </div>
 
         <div class="login-form">
@@ -45,9 +45,13 @@ export default {
     methods: {
       navigateToProfile() {
         this.$router.push({ name: 'EditProfile' });
+      },
+      navigateToRegistration() {
+        this.$router.push({ name: 'Registration' });
       }
     }, 
 }
+
 
 </script>
 
