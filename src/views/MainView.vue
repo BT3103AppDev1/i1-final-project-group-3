@@ -1,4 +1,5 @@
 <template>
+  
   <div class="home-page-before-login">
 
     <div class="rectangle-parent">
@@ -229,7 +230,7 @@
     box-shadow: 15px 30px 30px 5px rgba(0, 0, 0, 0.25);
     border: 1px solid var(--color-white);
     box-sizing: border-box;
-    width: 434px;
+    width: 410px;
     height: 171px;
     margin-bottom: 40px;
     
@@ -260,7 +261,7 @@
   .new-friendships, 
   .upload-homework-questions, 
   .connect-with-over {
-    font-size: 22px;
+    font-size: 20px;
     text-align: left;
     font-weight: 500;
     padding-left: 10px;
