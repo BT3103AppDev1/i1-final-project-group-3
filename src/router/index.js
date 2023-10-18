@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import MainView from '@/views/MainView.vue'
 import Login from '@/views/Login.vue'
 import OwnProfileView from '@/views/OwnProfileView.vue'
+import EditProfileView from '@/views/EditProfileView.vue'
 
 const routes =[
   {
@@ -21,7 +22,14 @@ const routes =[
     name: 'OwnProfile', 
     component: OwnProfileView,
 
-}
+}, 
+  {
+    path: '/editprofile',
+    name: 'EditProfile', 
+    component: EditProfileView,
+
+  }, 
+
 
 ]
 

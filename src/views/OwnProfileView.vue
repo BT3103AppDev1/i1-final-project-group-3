@@ -52,29 +52,29 @@
         </div>
       </div>
 
-  <div class="about-description-format">
-    <div id="about-content" class="tabcontent">
-      <div class="basic-information-header">BASIC INFORMATION</div>
-      <div class="academic-information-header">ACADEMIC INFORMATION</div>
-      
-      <div class="basic-information-container">
-        <p class="basic-information">Gender: Female</p>
-        <p class="basic-information">Email: test@gmail.com</p>
-        <p class="basic-information">Phone number: +65 8123 4567</p>
+      <div class="about-description-format">
+        <div id="about-content" class="tabcontent">
+          <div class="basic-information-header">BASIC INFORMATION</div>
+          <div class="academic-information-header">ACADEMIC INFORMATION</div>
+          
+          <div class="basic-information-container">
+            <p class="basic-information">Gender: Female</p>
+            <p class="basic-information">Email: test@gmail.com</p>
+            <p class="basic-information">Phone number: +65 8123 4567</p>
+          </div>
+          <div class="academic-container">
+            <p class="basic-information">Major: Business Analytics</p>
+            <p class="basic-information">Year: 2</p>
+            <p class="basic-information">
+              Description: Hi, I aspire to become a business analyst once I graduate.
+              I am an enthusiastic, self-motivated and hardworking person.
+            </p>
+            <p class="basic-information">
+              Current course: BT3103, IS3103, GEN2004, ST2334, CS2040
+            </p>
+          </div>
+        </div>
       </div>
-      <div class="academic-container">
-        <p class="basic-information">Major: Business Analytics</p>
-        <p class="basic-information">Year: 2</p>
-        <p class="basic-information">
-          Description: Hi, I aspire to become a business analyst once I graduate.
-          I am an enthusiastic, self-motivated and hardworking person.
-        </p>
-        <p class="basic-information">
-          Current course: BT3103, IS3103, GEN2004, ST2334, CS2040
-        </p>
-      </div>
-    </div>
-  </div>
     <div id="group-content" class="tabcontent">
       <div class="group-format">
       <b class="group-name">Manifesting for A+</b>

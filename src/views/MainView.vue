@@ -101,6 +101,8 @@
     font-family: var(--font-yeseva-one);
     font-weight: 800;
     font-size: 130px;
+    color: white;
+
   }
 
   div {
@@ -152,9 +154,10 @@
     mix-blend-mode: normal;
   }
   .are-you-ready {
-    position: center;
+    position: relative;
     font-size: 30px;
     font-weight: 500;
+    left:35px;
   }
 
   .studybuddy {
