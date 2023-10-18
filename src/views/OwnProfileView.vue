@@ -1,4 +1,5 @@
 <template>
+  <NavigationBar/>
   <div class="posts-format">
 
     
@@ -116,7 +117,7 @@
     
   </div>
 
-  <NavigationBar/>
+  
 </template>
 <script>
   import NavigationBar from '../components/NavigationBar.vue'
