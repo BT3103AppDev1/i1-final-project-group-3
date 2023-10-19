@@ -6,6 +6,7 @@ import SignUp2 from '@/views/SignUp2.vue'
 import SignUp3 from '@/views/SignUp3.vue'
 import SignUp4 from '@/views/SignUp4.vue'
 import OwnProfileView from '@/views/OwnProfileView.vue'
+import EditProfileView from '@/views/EditProfileView.vue'
 
 
 const routes =[
@@ -46,6 +47,14 @@ const routes =[
     path: '/ownprofile',
     name: 'OwnProfile', 
     component: OwnProfileView,
+
+}, 
+  {
+    path: '/editprofile',
+    name: 'EditProfile', 
+    component: EditProfileView,
+
+  }, 
   }
 
 ]
