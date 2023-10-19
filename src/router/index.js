@@ -7,6 +7,7 @@ import SignUp3 from '@/views/SignUp3.vue'
 import SignUp4 from '@/views/SignUp4.vue'
 import OwnProfileView from '@/views/OwnProfileView.vue'
 import EditProfileView from '@/views/EditProfileView.vue'
+import Home from '@/views/Home.vue'
 
 
 const routes =[
@@ -55,7 +56,12 @@ const routes =[
     component: EditProfileView,
 
   }, 
-  }
+  {
+    path: '/home',
+    name: 'Home', 
+    component: Home,
+
+  }, 
 
 ]
 
