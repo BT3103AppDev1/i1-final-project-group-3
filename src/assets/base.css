@@ -2,6 +2,8 @@
 
 @import url("https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@500;600;700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Yeseva+One:wght@400&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap");
+
 
 :root {
   --vt-c-white: #ffffff;
@@ -27,9 +29,12 @@
   /* fonts */
   --font-josefin-sans: "Josefin Sans";
   --font-yeseva-one: "Yeseva One";
+  --font-inter: Inter;
 
   /* font sizes */
   --font-size-3xl: 22px;
+  --font-size-lg: 18px;
+  --font-size-base: 16px;
 
   /* Colors */
   --color-white: #fff;

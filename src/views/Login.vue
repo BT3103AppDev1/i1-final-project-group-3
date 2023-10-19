@@ -34,6 +34,43 @@
           </form>
       </div>
   </div>
+
+    <div class="login-page">
+        <div class="rectangle-parent">
+            <div class="rectangle-group">
+                <b class="studybuddy">StudyBuddy</b>
+            </div>
+
+            <h1 class="login-main">Login</h1>
+            <div class="create-account">Don't have an account? <a class="sign-up" @click="navigateToRegistration"> Sign up here </a></div>
+        </div>
+
+        <div class="login-form">
+            <form @submit="onSubmit">
+
+                <div class="email">
+                    
+                    <h3>Email: </h3>
+                    <input type="email" v-model="email" placeholder="Example: e0123456@u.nus.edu" />
+
+                </div>
+                
+
+                <div class="password"> 
+                    <h3>Password: </h3>
+                    <input type="password" v-model="password" placeholder="Example: Abcdefg123!" /> 
+                </div>
+                
+                <div class="bottom-row">
+                    <div class="forgot-password">Forgot Password?</div>
+                    <button class="login-button" @click="navigateToProfile">Login</button>
+                </div>
+                
+                
+            </form>
+        </div>
+    </div>
+
 </template>
 
 <script>
@@ -41,13 +78,24 @@
 export default {
   
   name: "Login",
-
+ 
   methods: {
     navigateToProfile() {
       this.$router.push({ name: 'HomePage' });
     }
   }, 
+
+    methods: {
+      navigateToProfile() {
+        this.$router.push({ name: 'EditProfile' });
+      },
+      navigateToRegistration() {
+        this.$router.push({ name: 'Registration' });
+      }
+    }, 
+
 }
+
 
 </script>
 

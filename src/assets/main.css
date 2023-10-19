@@ -1,6 +1,11 @@
 @import './base.css';
 
-
+#app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-weight: normal;
+}
 
 h1, h2, h3 {
   font-family: var(--font-yeseva-one); 

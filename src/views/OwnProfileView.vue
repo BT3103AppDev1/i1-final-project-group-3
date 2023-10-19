@@ -1,5 +1,5 @@
 <template>
-  <NavigationBar/>
+  <NavigationBar class="navbar"/>
   <div class="posts-format">
 
     
@@ -8,7 +8,7 @@
     <div class="own-profile-page-body">
       <div class="users-name">Veviana Tay</div>
       <img class="profilepicture-icon" alt="" src="../assets/profilepicture-icon.jpg" />
-      <div id="post-content" class="tabcontent">
+      <div id="post-content" class="tabcontent" style="display: block;">
         <div class="post-1">
           <div class="post-rectangle-border" />
             <div class="post-content-container">
@@ -169,7 +169,7 @@
     .editprofilebutton {
         position: absolute;
         top: 216px;
-        left: 1580px;
+        left: 1200px;
         width: 203px;
         height: 63px;
         text-align: center;
@@ -383,15 +383,7 @@
   border-top: none;
 }
 
-  .own-profile-page-body {
-    position: absolute;
-    left: 10%;
-  }
-
-    .about-description-format {
-    width: 1440px;
-    height: 1024px;
-    overflow: hidden;
+  .about-description-format {
     text-align: left;
     font-size: var(--font-size-xl);
     color: var(--color-black);
@@ -400,9 +392,6 @@
   
   .posts-format {
     background-color: var(--color-white);
-    width: 1440px;
-    height: 1024px;
-    overflow: hidden;
     text-align: left;
     font-size: var(--font-size-lg);
     color: var(--color-white);
@@ -472,13 +461,14 @@
   }
   .group-format {
     background-color: var(--color-white);
-    width: 1440px;
-    height: 1024px;
-    overflow: hidden;
     text-align: left;
     font-size: var(--font-size-41xl);
     color: var(--color-white);
     font-family: var(--font-josefin-sans);
+  }
+  .navbar {
+    right: 107px;
+    bottom:557px
   }
 
 </style>
