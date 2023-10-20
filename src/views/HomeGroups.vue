@@ -28,23 +28,54 @@
 
       <div class = "display-of-profiles-and-groups">
         
-        <button class="profiles">Profiles</button>
-        <button class="groups" @click="navigateToGroups">Groups</button>
+        <button class="profiles" @click="navigateToProfiles">Profiles</button>
+        <button class="groups">Groups</button>
         
       
       </div>
+
+      <!--<div class = "display-all-profile-cards">
+          <div class="profile-card">
+            <img class="profile-image-on-card" src="../assets/profile_picture.jpg" alt="Profile 1">
+            <h1 id = "profile-name">Steffi Lim</h1>
+            <h3 id = "profile-major-and-year">Business Analytics, Year 2</h3>
+            <h3 id = "profile-description">Hi, I aspire to become a business analyst once i graduate. I am an enthusiastic, self-motivated, and hardworking person.</h3> 
  
+        </div> -->
+
         <div class = "display-all-profile-cards">
-            <div class="profile-card" v-for="profile in profiles" :key="profile.name">
-      
-            <img class="profile-image-on-card" src="../assets/profile_picture.jpg" alt="">
-         
+          <div class="profile-card">
+            <img class="profile-image-on-card" src="../assets/profile_picture.jpg" alt="Profile 1">
+            <!--
             <h1 id = "profile-name">{{ profile.name }}</h1>
-            <h3 id = "profile-major-and-year">{{profile.major}}, Year {{profile.yearOfStudy}}</h3>
-            <h3 id = "profile-description">{{profile.description}}</h3> 
+            <h3 id = "profile-major-and-year">{{profile.major}}, {{profile.yearOfStudy}}</h3>
+            <h3 id = "profile-description">{{profile.description}}</h3> -->
+ 
         </div>
+ 
+ 
+        
+          
+        
       
       </div>
+
+
+
+   
+  
+
+ 
+
+
+
+
+
+
+
+
+
+
 
 
     </div> 
@@ -55,63 +86,22 @@
 
 
 
-<script>  
-  import { getFirestore, collection, getDocs } from "firebase/firestore"
-  import firebaseApp from '../firebase.js';
+<script>
   import { defineComponent } from "vue";
   import NavigationBar from '../components/NavigationBar.vue'
  
   
 
   export default defineComponent({
-    name: "Home",
-    
+    name: "HomeGroups",
     components: {
       NavigationBar
     },
-
-    data() {
-        return {
-            profiles: []
-        };
-    },
-    
     methods: {
-      navigateToGroups() {
-        this.$router.push({ name: 'HomeGroups' });
-      },
-
-
-      async fetchDataFromFirebase() {
-        const db = getFirestore(firebaseApp); // Get Firestore instance from your initialized Firebase app
-        const usersCollection = collection(db, "Users"); // Reference to the "Users" collection
-
-        try {
-            const querySnapshot = await getDocs(usersCollection);
-            const profiles = [];
-            querySnapshot.forEach((doc) => {
-            const profileData = doc.data();
-            // Push the retrieved profile data into the profiles array
-            profiles.push({
-                name: profileData.name,
-                major: profileData.major,
-                yearOfStudy: profileData.yearOfStudy,
-                description: profileData.description,
-                // Add other fields as needed
-            });
-            });
-            // Update the component's state with retrieved profiles
-            this.profiles = profiles;
-        } catch (error) {
-            console.error("Error fetching data: ", error);
-        }
-        }
-        },
-        
-    mounted() {
-    // Call the method to fetch data from Firebase when the component is mounted
-        this.fetchDataFromFirebase();
-  }
+      navigateToProfiles() {
+        this.$router.push({ name: 'Home' });
+      }
+    }, 
   });
   
 
@@ -369,9 +359,9 @@
  
 
  
-  .profiles {
+  .groups {
     position: absolute;
-    left: 32rem;
+    left: 52rem;
     font-weight: 600;
     font-size: 1.3rem;
     display: inline-block;
@@ -386,9 +376,9 @@
 
  
 
-  .groups {
+  .profiles {
     position: absolute;
-    left: 52rem;
+    left: 32rem;
     font-weight: 600;
     font-size: 1.3rem;
     display: inline-block;
@@ -399,7 +389,6 @@
     color: #525fe1;
     border-radius: 2rem;
     cursor: pointer;
-    
 
 }
 
@@ -407,34 +396,29 @@
  .display-all-profile-cards {
     position: absolute; 
     width: 100%;
-    text-align: center;
+    text-align: left;
+    height: 40rem;
     top: 67rem;
-    margin: 0 5rem;   
+    margin: 0;
+ 
     display: flex;
     flex-wrap: wrap;
-    justify-content: flex-start;
+    justify-content: space-around;  
     padding: 20px;
-    box-sizing: border-box;  
-
- 
     
   }
-  
 
   .profile-card {
-    flex-basis: calc(22% - 20px);  
-    width: 18rem;
-    margin: 0.9rem;  
+    width:20rem;
+    height: 26rem;
+    margin: 10px; /* Adjust the margin between cards */
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
     border: 1px solid #ccc;
     border-radius: 1.3rem;
-    margin-bottom: 40px;
-    
-     
-   
+    padding: 0;
  
   
 }
