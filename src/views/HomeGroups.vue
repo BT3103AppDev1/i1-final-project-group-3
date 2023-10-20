@@ -30,54 +30,28 @@
         
         <button class="profiles" @click="navigateToProfiles">Profiles</button>
         <button class="groups">Groups</button>
+
+        <h3 id = "create-group-here"><em>Can't find a group? Click <span class = "clickHere" @click = "createGroupFormPopUp">HERE</span> to create one</em></h3>
+
+
         
       
       </div>
 
-      <!--<div class = "display-all-profile-cards">
-          <div class="profile-card">
-            <img class="profile-image-on-card" src="../assets/profile_picture.jpg" alt="Profile 1">
-            <h1 id = "profile-name">Steffi Lim</h1>
-            <h3 id = "profile-major-and-year">Business Analytics, Year 2</h3>
-            <h3 id = "profile-description">Hi, I aspire to become a business analyst once i graduate. I am an enthusiastic, self-motivated, and hardworking person.</h3> 
  
-        </div> -->
+        <div class = "display-all-group-cards">
+          <div class="group-card" v-for="group in groups" :key="group.title"> 
 
-        <div class = "display-all-profile-cards">
-          <div class="profile-card">
-            <img class="profile-image-on-card" src="../assets/profile_picture.jpg" alt="Profile 1">
-            <!--
-            <h1 id = "profile-name">{{ profile.name }}</h1>
-            <h3 id = "profile-major-and-year">{{profile.major}}, {{profile.yearOfStudy}}</h3>
-            <h3 id = "profile-description">{{profile.description}}</h3> -->
+            <h1 id = "group-name">{{ group.title }}</h1>
+            <h3 id = "group-vacancy">Vacancy: 1/{{group.members}}members</h3>
+            <h3 id = "group-description">{{group.description}}</h3> 
+            <button id="join-group" @click="joingroup">Join</button>
  
         </div>
- 
- 
-        
-          
-        
-      
+  
       </div>
 
-
-
-   
-  
-
  
-
-
-
-
-
-
-
-
-
-
-
-
     </div> 
     </div>
   
@@ -87,6 +61,8 @@
 
 
 <script>
+  import { getFirestore, collection, getDocs } from "firebase/firestore"
+   import firebaseApp from '../firebase.js';
   import { defineComponent } from "vue";
   import NavigationBar from '../components/NavigationBar.vue'
  
@@ -97,11 +73,52 @@
     components: {
       NavigationBar
     },
+
+    data() {
+        return {
+            groups: []
+        };
+    },
+
     methods: {
       navigateToProfiles() {
         this.$router.push({ name: 'Home' });
-      }
-    }, 
+      },
+
+      createGroupFormPopUp() {
+        alert("Test");
+
+      },
+
+      
+      async fetchDataFromFirebase() {
+        const db = getFirestore(firebaseApp); // Get Firestore instance from your initialized Firebase app
+        const usersCollection = collection(db, "Groups"); // Reference to the "Users" collection
+
+        try {
+            const querySnapshot = await getDocs(usersCollection);
+            const groups = [];
+            querySnapshot.forEach((doc) => {
+            const groupData = doc.data();
+            // Push the retrieved profile data into the profiles array
+            groups.push({
+                title: groupData.title,
+                description: groupData.groupDescription,
+                members: groupData.members
+       
+            });
+            });
+            // Update the component's state with retrieved profiles
+            this.groups = groups;
+        } catch (error) {
+            console.error("Error fetching data: ", error);
+        }
+        }
+    },
+
+    mounted() { 
+        this.fetchDataFromFirebase();
+  }
   });
   
 
@@ -152,7 +169,7 @@
  
 
 
-.groups:hover {
+.profiles:hover {
     background-color: #f6f3f3;
 }
 
@@ -393,70 +410,109 @@
 }
 
 
- .display-all-profile-cards {
+
+#create-group-here {
+    font-size: 1rem;
+    color: #959592; 
+    text-align: center;
+    margin-top: 5.5rem;
+ 
+    
+}
+
+.clickHere {
+  font-weight: bold;
+  text-decoration: underline;
+  cursor: pointer; 
+}
+
+
+
+ .display-all-group-cards {
     position: absolute; 
     width: 100%;
-    text-align: left;
-    height: 40rem;
+    text-align: center;
     top: 67rem;
-    margin: 0;
- 
+    margin: 0 5rem;   
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-around;  
+    justify-content: flex-start;
     padding: 20px;
+    box-sizing: border-box;  
+
+ 
     
   }
 
-  .profile-card {
-    width:20rem;
-    height: 26rem;
-    margin: 10px; /* Adjust the margin between cards */
+
+  
+
+  
+  .group-card {
+    flex-basis: calc(22% - 20px);  
+    width: 18rem;
+    height: 28rem;
+    margin: 0.9rem;  
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
     border: 1px solid #ccc;
     border-radius: 1.3rem;
-    padding: 0;
- 
-  
+    margin-bottom: 40px;
+    position: relative;
+
 }
 
-.profile-image-on-card {
-    width: 85%;
-    height: 11.4rem; 
-    object-fit: cover; 
-    margin: 1.5rem 0;  
-    border-radius: 0.7rem;
-    margin-top: 1.5rem;
-}
+
+
 
      
-#profile-name {
+#group-name {
     font-size: 1.5rem;  
     width:100%;
     margin: 0px; 
+    margin-top:6rem;
     
     
 }
 
-#profile-major-and-year {
+#group-vacancy{
     font-size: 1rem;
     margin: 0.7rem;
     width: 100%;
     text-align: center;  
     color: #525fe1; 
+    margin-top:3rem;
     
 }
 
-#profile-description {
+#group-description {
     width: 100%;
     box-sizing: border-box;
     font-size: 1rem;
     padding:0.9rem; 
+    margin-top:1rem;
  
     
+}
+ 
+  
+
+#join-group {
+    position: absolute;
+    text-align: center;
+    font-weight: 600;
+    font-size: 1.3rem; 
+    width: 7rem;
+    height: 3rem;
+    background-color: #525fe1;
+    border-radius: 2rem;
+    border: none;
+    color: white;
+    cursor: pointer;
+    margin-top: 22rem;
+ 
 }
  
  
