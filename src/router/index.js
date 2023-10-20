@@ -8,6 +8,7 @@ import SignUp4 from '@/views/SignUp4.vue'
 import OwnProfileView from '@/views/OwnProfileView.vue'
 import EditProfileView from '@/views/EditProfileView.vue'
 import Home from '@/views/Home.vue'
+import HomeGroups from '@/views/HomeGroups.vue'
 
 
 const routes =[
@@ -61,7 +62,13 @@ const routes =[
     name: 'Home', 
     component: Home,
 
-  }, 
+  },  
+  {
+    path: '/listofgroups',
+    name: 'HomeGroups', 
+    component: HomeGroups,
+
+  }
 
 ]
 
