@@ -9,6 +9,8 @@ import OwnProfileView from '@/views/OwnProfileView.vue'
 import EditProfileView from '@/views/EditProfileView.vue'
 import Home from '@/views/Home.vue'
 import HomeGroups from '@/views/HomeGroups.vue'
+import Post from '@/views/PostView.vue'
+import Chat from '@/views/ChatsView.vue'
 
 
 const routes =[
@@ -68,6 +70,17 @@ const routes =[
     name: 'HomeGroups', 
     component: HomeGroups,
 
+  }, 
+  {
+    path: '/post',
+    name: 'Post', 
+    component: Post,
+
+  },
+  {
+    path: '/chat',
+    name: 'Chat',
+    component: Chat,
   }
 
 ]

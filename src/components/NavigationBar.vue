@@ -3,8 +3,8 @@
       <b class="studybuddy" >StudyBuddy</b>
       <div id="nav">
           <router-link to="/home">Home</router-link>
-          <router-link to="/about">Posts</router-link>    
-          <router-link to="/Chats">Chats</router-link>
+          <router-link to="/post">Posts</router-link>    
+          <router-link to="/chat">Chats</router-link>
           <router-link to="/ownprofile">Profile</router-link>
           <button>Log Out</button>
 
@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import {getAuth, onAuthStateChanged} from "firebase/auth";
+
 export default {
   name:'NavBar',
   
