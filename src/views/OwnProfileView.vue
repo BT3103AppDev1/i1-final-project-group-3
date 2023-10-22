@@ -1,5 +1,5 @@
 <template>
-  <NavigationBar class="navbar"/>
+  <NavigationBar/>
   <div class="posts-format">
 
     
@@ -356,7 +356,7 @@
   .tabs {
     position: absolute;
     top: 438px;
-    left: 220px;
+    left:50px;
     width: 392px;
     height: 37px;
     font-size: var(--font-size-lgi);
@@ -471,10 +471,7 @@
     color: var(--color-white);
     font-family: var(--font-josefin-sans);
   }
-  .navbar {
-    right: 107px;
-    bottom: 32px;
-  }
+
 
 </style>
 
