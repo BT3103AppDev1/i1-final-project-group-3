@@ -86,7 +86,7 @@
   import { defineComponent } from "vue";
 
   export default defineComponent({
-    name: "HomePageBeforeLogin",
+    name: "MainView",
 
     methods: {
       navigateToLogin() {

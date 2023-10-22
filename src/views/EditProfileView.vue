@@ -1,5 +1,5 @@
 <template>
-    <NavBar/>
+    <NavBar class="navbar"/>
     <div style="text-align: center;">
 
         <titleandImage/>
@@ -72,8 +72,8 @@
                 <div id="account-content" class="tabcontent" v-show="activeTab === 'account-content'">
 
                     <div class="buttons" v-show="activeTab === 'account-content'">
-                        <button class="cancel"> Cancel </button>
-                        <button class="save-profile"> Save Profile</button>
+                        <button class="cancel" @click="navigateToCancel"> Cancel </button>
+                        <button class="save-profile" @click="navigateToSave"> Save Profile</button>
                     </div>
 
                     <div id="first-name" class="input">
@@ -145,8 +145,7 @@
                     </div>
 
                     <div class="password-buttons" v-show="activeTab === 'password-content'">
-                        <button class="cancel"> Cancel </button>
-                        <button class="save-profile"> Save</button>
+                        <button class="save-profile" @click="navigateToSave"> Save</button>
                     </div>
 
                 </div>
@@ -201,6 +200,13 @@ export default {
             this.openSection('account-content');
         },
 
+        navigateToCancel() {
+            this.$router.push({ name: 'OwnProfile' });
+        },
+
+        navigateToSave() {
+            alert("Updated!");
+        },
 
 
 
@@ -210,6 +216,13 @@ export default {
 </script>
 
 <style>
+
+.navbar {
+    top:-32px;
+    left: -32px;
+}
+
+
 h1 {
     color: #525fe1;
     margin-left: 150px;
@@ -328,7 +341,7 @@ h3 {
 
 
 .tabs {
-    margin-left: 170px;
+    margin-left: 340px;
     
 }
 
@@ -339,9 +352,7 @@ h3 {
     font-weight: bold;
     font-size: 19px;
     padding-right: 40px;
-    
-   
-    
+
     
 }
 
@@ -349,7 +360,7 @@ h3 {
 
 .tab-content {
     width: 50%;
-    margin-left: 420px;
+    margin-left: 460px;
     margin-top: 30px;
     
 }
@@ -440,7 +451,7 @@ input[id="description"] {
 .password-buttons {
     text-align: center; /* Align the buttons to the right */
     margin-top: 20px;
-    margin-right: 150px; /* Add some space between inputs and buttons */
+    margin-right: 200px; /* Add some space between inputs and buttons */
 }
 
 .password-buttons button {
