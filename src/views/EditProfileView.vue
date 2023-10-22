@@ -173,7 +173,7 @@
 </template>
 
 <script>
-import NavBar from '../components/NavigationBar.vue';
+import NavBar from '@/components/NavigationBar.vue';
 import titleandImage from '../components/titleandImage.vue';
 
 export default {

@@ -1,13 +1,6 @@
 <template>
   <div class="login-page">
-      <div class="rectangle-parent">
-          <div class="rectangle-group">
-            <b class="studybuddy" @click="navigateToRegistration">StudyBuddy</b>
-          </div>
-
-          <h1 class="login-main">Login</h1>
-          <div class="create-account">Don't have an account? <em class="sign-up" @click="navigateToRegistration"> Sign up here </em></div>
-      </div>
+      <loginBanner/>
 
       <div class="login-form">
 
@@ -38,10 +31,16 @@
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { getFirestore, collection, doc, getDoc } from "firebase/firestore";
 import firebaseApp from '../firebase.js';
-import { defineComponent } from "vue";
+import loginBanner from '../components/loginBanner.vue';
+
+
 
 export default {
   name: "Login",
+
+  components: {
+    loginBanner,
+  },
 
   data() {
     return {
@@ -50,37 +49,13 @@ export default {
     };
   },
 
-  mounted() {
-    // Add the event listener when the component is mounted
-    const studyBuddyElement = document.querySelector('.studybuddy');
-    if (studyBuddyElement) {
-        studyBuddyElement.addEventListener('click', this.navigateToMain);
-    }
-  },
-
-  beforeDestroy() {
-    // Remove the event listener when the component is destroyed
-    const studyBuddyElement = document.querySelector('.studybuddy');
-    if (studyBuddyElement) {
-        studyBuddyElement.removeEventListener('click', this.navigateToMain);
-    }
-  },
 
 
   methods: {
-    navigateToRegistration() {
-      console.log("done");
-      this.$router.push({ name: 'Registration' });
-    },
 
     navigateToProfile() {
       console.log("done");
       this.$router.push({ name: 'Home' });
-    },
-
-    navigateToMain() {
-      console.log("done");
-      this.$router.push({ name: 'MainView' });
     },
 
     async onSubmit() {
@@ -142,41 +117,6 @@ div, input {
   font-family: josefin sans;
 }
 
-.rectangle-parent {
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  width: 100%;
-  height: 319px;
-  text-align: center;
-  color: white;
-  background-color: #525fe1;
-}
-
-.studybuddy {
-  position: absolute;
-  top: 30px;
-  left: 2px;
-  font-size: 48px;
-  font-weight: 700;
-  width: 401px;
-  height: 40px;
-}
-
-.login-main {
-  position: center;
-  padding-top: 120px;
-  font-size: 100px;
-  font-weight: 300;
-  mix-blend-mode: normal;
-}
-
-.create-account {
-  position: center;
-  font-size: 24px;
-  font-weight: 500;
-  margin-top: 25px;
-}
 
 
 .login-form {
@@ -214,12 +154,7 @@ input::placeholder {
   color: #ADA6A6;
 }
 
-.sign-up {
-  color: white;
-  text-decoration: underline;
-  font-style: italic;
-  cursor: pointer;
-}
+
 
 .login-form input:focus {
 outline: none;

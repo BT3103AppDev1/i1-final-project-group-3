@@ -8,8 +8,14 @@
         <b class="studybuddy">StudyBuddy</b>
       </div>
 
-      <h1 class="welcome">Welcome!</h1>
-      <div class="are-you-ready">Are you ready to find your match?</div>
+      <div>
+        <h1 class="welcome">Welcome!</h1>
+        <div class="are-you-ready">Are you ready to find your match?</div>
+
+
+      </div>
+
+      
     </div>
 
     <div class="bottom-half">
