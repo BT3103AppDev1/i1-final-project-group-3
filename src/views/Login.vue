@@ -2,15 +2,14 @@
   <div class="login-page">
       <div class="rectangle-parent">
           <div class="rectangle-group">
-              <b class="studybuddy">StudyBuddy</b>
+            <b class="studybuddy" @click="navigateToRegistration">StudyBuddy</b>
           </div>
 
           <h1 class="login-main">Login</h1>
-          <div class="create-account">Don't have an account? <a class="sign-up"> Sign up here </a></div>
+          <div class="create-account">Don't have an account? <em class="sign-up" @click="navigateToRegistration"> Sign up here </em></div>
       </div>
 
       <div class="login-form">
-          <form @submit="onSubmit">
 
               <div class="email">
                   
@@ -27,77 +26,101 @@
               
               <div class="bottom-row">
                   <div class="forgot-password">Forgot Password?</div>
-                  <button class="login-button" @click="navigateToProfile">Login</button>
+                  <button class="login-button" @click="onSubmit">Login</button>
               </div>
               
-              
-          </form>
       </div>
   </div>
-
-    <div class="login-page">
-        <div class="rectangle-parent">
-            <div class="rectangle-group">
-                <b class="studybuddy">StudyBuddy</b>
-            </div>
-
-            <h1 class="login-main">Login</h1>
-            <div class="create-account">Don't have an account? <a class="sign-up" @click="navigateToRegistration"> Sign up here </a></div>
-        </div>
-
-        <div class="login-form">
-            <form @submit="onSubmit">
-
-                <div class="email">
-                    
-                    <h3>Email: </h3>
-                    <input type="email" v-model="email" placeholder="Example: e0123456@u.nus.edu" />
-
-                </div>
-                
-
-                <div class="password"> 
-                    <h3>Password: </h3>
-                    <input type="password" v-model="password" placeholder="Example: Abcdefg123!" /> 
-                </div>
-                
-                <div class="bottom-row">
-                    <div class="forgot-password">Forgot Password?</div>
-                    <button class="login-button" @click="navigateToProfile">Login</button>
-                </div>
-                
-                
-            </form>
-        </div>
-    </div>
 
 </template>
 
 <script>
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { getFirestore, collection, doc, getDoc } from "firebase/firestore";
+import firebaseApp from '../firebase.js';
+import { defineComponent } from "vue";
 
 export default {
-  
   name: "Login",
- 
-  methods: {
-    navigateToProfile() {
-      this.$router.push({ name: 'HomePage' });
+
+  data() {
+    return {
+      email: '',
+      password: '',
+    };
+  },
+
+  mounted() {
+    // Add the event listener when the component is mounted
+    const studyBuddyElement = document.querySelector('.studybuddy');
+    if (studyBuddyElement) {
+        studyBuddyElement.addEventListener('click', this.navigateToMain);
     }
-  }, 
+  },
 
-    methods: {
-      navigateToProfile() {
-        this.$router.push({ name: 'EditProfile' });
-      },
-      navigateToRegistration() {
-        this.$router.push({ name: 'Registration' });
+  beforeDestroy() {
+    // Remove the event listener when the component is destroyed
+    const studyBuddyElement = document.querySelector('.studybuddy');
+    if (studyBuddyElement) {
+        studyBuddyElement.removeEventListener('click', this.navigateToMain);
+    }
+  },
+
+
+  methods: {
+    navigateToRegistration() {
+      console.log("done");
+      this.$router.push({ name: 'Registration' });
+    },
+
+    navigateToProfile() {
+      console.log("done");
+      this.$router.push({ name: 'Home' });
+    },
+
+    navigateToMain() {
+      console.log("done");
+      this.$router.push({ name: 'MainView' });
+    },
+
+    async onSubmit() {
+      const auth = getAuth(firebaseApp);
+      const db = getFirestore(firebaseApp);
+      const userCollection = collection(db, "users");
+
+      try {
+        // Authenticate the user
+        await signInWithEmailAndPassword(auth, this.email.trim(), this.password.trim());
+        const user = auth.currentUser;
+
+        // Access the user's document in the users collection
+        const userDocRef = doc(userCollection, user.email);
+        const userDocSnap = await getDoc(userDocRef);
+
+        if (userDocSnap.exists()) {
+          console.log("User data:", userDocSnap.data());
+        } else {
+          console.log("No such document!");
+        }
+
+        this.navigateToProfile();
+      } catch (error) {
+        console.error("Error:", error);
+        // alert(error.message);
+        if (error.code === "auth/invalid-login-credentials") {
+          alert("Invalid email or password. Please try again.");
+        } else {
+          alert("Invalid email or password. Please try again.");
+        }
       }
-    }, 
-
-}
+    },
 
 
+  },
+};
 </script>
+
+
 
 
 <style scoped>
@@ -106,10 +129,12 @@ h1 {
   position: relative;
   left: -35px;
 }
-h3 {
 
+.password h3, 
+.email h3 {
   font-size: 40px;
   color: #ADA6A6;
+  font-family: var(--font-yeseva-one);
 
 }
 
@@ -156,8 +181,10 @@ div, input {
 
 .login-form {
   position: relative;
-  top: 400px;
-  left: 500px;
+  top: 350px;
+  left: 470px;
+
+  padding-bottom: 100px;
 }
 
 

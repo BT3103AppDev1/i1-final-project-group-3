@@ -56,7 +56,9 @@
 
 <script>
   export default {
-    name: "SignUpPage1",
+
+    name: "Registration",
+
     data() {
       return {
         bgColor: '#525fe1' // Replace with your desired background color

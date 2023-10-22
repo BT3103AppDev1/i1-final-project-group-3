@@ -3,7 +3,7 @@
   <div class="posts-format">
 
     
-    <button class="editprofilebutton">Edit Profile</button>
+    <button class="editprofilebutton" @click="navigateToEditProfile">Edit Profile</button>
 
     <div class="own-profile-page-body">
       <div class="users-name">Veviana Tay</div>
@@ -122,10 +122,11 @@
 <script>
   import NavigationBar from '../components/NavigationBar.vue'
   export default { 
-    name: "OwnProfileView",
+    name: "OwnProfile",
     components: {
       NavigationBar
     },
+
     methods: {
       openSection(evt, section) {
         // Declare all variables
@@ -146,11 +147,15 @@
         // Show the current tab, and add an "active" class to the button that opened the tab
         document.getElementById(section).style.display = "block";
         evt.currentTarget.className += " active";
+      },
+
+      navigateToEditProfile() {
+        this.$router.push({ name: 'EditProfile' });
       }
 
-    }
 
-  };
+  }
+}
 </script>
 <style scoped>
   .users-name {
