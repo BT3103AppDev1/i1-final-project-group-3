@@ -351,7 +351,7 @@
   .tabs {
     position: absolute;
     top: 438px;
-    left: 395px;
+    left: 220px;
     width: 392px;
     height: 37px;
     font-size: var(--font-size-lgi);
@@ -468,7 +468,7 @@
   }
   .navbar {
     right: 107px;
-    bottom:557px
+    bottom: 32px;
   }
 
 </style>
