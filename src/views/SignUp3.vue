@@ -24,20 +24,24 @@
       <form class="form" id="form">
         <button class="next">
           <img class="next-child" alt="" src="../assets/rectangle-48@2x.png" />
-          <span class="next1" @click="navigateToSignUp4">Next</span>
+          <span class="next1" @click="updateProfile">Next</span>
         </button>
         <input
           class="major-field"
           id="major"
           placeholder="Major"
           type="text"
+          required=""
         />
-        <input
-          class="year-field"
-          id="year"
-          placeholder="Year of Study(Numeric)"
-          type="text"
-        />
+        
+        <select name="year" id="year" class="year-field" v-model="year" required="">
+          <option value="" disabled="" selected="">Year of Study</option>
+          <option value="1">Year 1</option>
+          <option value="2">Year 2</option>
+          <option value="3">Year 3</option>
+          <option value="4">Year 4</option>
+        </select>
+        
         <input
           class="course-field"
           id="course"
@@ -58,18 +62,76 @@
   </template>
   
   <script>
+  import firebase from '@/uifire.js';
+  import 'firebase/compat/auth';
+  import * as firebaseui from 'firebaseui';
+  import 'firebaseui/dist/firebaseui.css';
+  import firebaseApp from '@/firebase.js';
+  import { getFirestore } from "firebase/firestore";
+  import { doc, setDoc, updateDoc } from "firebase/firestore";
+  import { getAuth, onAuthStateChanged } from "firebase/auth";
+
+  const db = getFirestore(firebaseApp);
+
     export default {
       name: "SignUp3",
       data() {
         return {
-          bgColor: '#525fe1' // Replace with your desired background color
+          user: false,
+          uid: null,
+          year: null,
         };
       },
       methods: {
         navigateToSignUp4() {
           this.$router.push({ name: 'SignUp4' });
-        }
+        },
+        async updateProfile(event) {
+          event.preventDefault();
+          let major = document.getElementById("major").value;
+          let year = this.year;
+          let courseInput = document.getElementById("course").value;
+          let description = document.getElementById("description").value;
+
+          let uid = this.uid;
+          console.log(uid);
+
+          let courses = courseInput
+            .split(",")
+            .map((course) => course.trim());
+
+          let validCourses = courses.filter(course => course !== "");
+
+          console.log(validCourses);
+
+          try{
+            const docRef = await updateDoc(doc(db, "Users", uid),{
+              major: major,
+              currenCourses : validCourses,
+              yearOfStudy: year,
+              description: description,
+            })
+            console.log(docRef);
+            this.$router.push({ name: 'SignUp4' });
+            
+          }
+          catch(error) {
+            console.error("Error adding document: ", error);
+          }
+        },
       }, 
+      mounted() {
+        const auth = getAuth();
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            this.user = user;
+          }
+        })
+        console.log(auth.currentUser);
+        console.log(auth.currentUser.uid);
+        this.uid = auth.currentUser.uid;
+        console.log(this.uid);
+      }
     };
   </script>
   

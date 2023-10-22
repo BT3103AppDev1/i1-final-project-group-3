@@ -1,5 +1,5 @@
 <template>
-    <div class="sign-up-page-1" :style="{ backgroundColor: bgColor }">
+    <div class="sign-up-page-1" >
       <div class="content">
       <div class="rectangle-parent" id="TopBar">
         <div @click="navigateToSignUp1">
@@ -36,7 +36,7 @@
       <form class="form" id="form">
         <button class="next">
           <img class="next-child" alt="" src="../assets/rectangle-48@2x.png" />
-          <span class="next1" @click="navigateToSignUp2">Next</span>
+          <span class="next1" @click="updateProfile">Next</span>
         </button>
         <div class="traits">
           <div class="row" v-for="(option, index) in tags" :key="index">
@@ -58,12 +58,21 @@
   </template>
   
   <script>
+  import firebase from '@/uifire.js';
+  import 'firebase/compat/auth';
+  import * as firebaseui from 'firebaseui';
+  import 'firebaseui/dist/firebaseui.css';
+  import firebaseApp from '@/firebase.js';
+  import { getFirestore } from "firebase/firestore";
+  import { doc, updateDoc } from "firebase/firestore";
+  import { getAuth, onAuthStateChanged } from "firebase/auth";
+
+  const db = getFirestore(firebaseApp);
     
     export default {
       name: "SignUp4",
       data() {
         return {
-          bgColor: '#525fe1', // Replace with your desired background color
           tags: [
             { label: 'Extroverted', checked: false },
             { label: 'Introverted', checked: false },
@@ -81,6 +90,9 @@
             { label: 'Fair-weather', checked: false },
             { label: 'Selfless', checked: false }
           ],
+          uid: false,
+          user: false,
+          moreThan5: false,
         };
       },
       methods: {
@@ -93,8 +105,58 @@
         toggleOption(index) {
           this.tags[index].checked = !this.tags[index].checked;
           console.log(this.tags);
-        }
+        },
+        async updateProfile(event) {
+          event.preventDefault();
+          let personalities = [];
+
+          this.tags.forEach((tag) => {
+            if (tag.checked) {
+              personalities.push(tag.label);
+            }
+          })
+
+          let uid = this.uid;
+          console.log(uid);
+
+          console.log(personalities);
+
+          if (personalities.length > 5) {
+            Notification.requestPermission().then((permission) => {
+              if (permission === "granted") {
+                // Create and show a notification
+                const notification = new Notification("Please select only 5 tags!");
+              }
+            });
+          } else {
+            try {
+              const docRef = await updateDoc(doc(db, "Users", uid),{
+                personalities: personalities,
+              })
+              console.log(docRef);
+              this.$router.push({ name: 'OwnProfile' });
+              
+            }
+            catch(error) {
+              console.error("Error adding document: ", error);
+            }
+          }
+
+          
+        },
       }, 
+      mounted() {
+        const auth = getAuth();
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            this.user = user;
+          }
+        })
+        console.log(auth.currentUser);
+        console.log(auth.currentUser.uid);
+        this.uid = auth.currentUser.uid;
+        console.log(this.uid);
+      }
     };
   </script>
   

@@ -30,16 +30,18 @@
           id="userName"
           placeholder="User Name"
           type="text"
+          required=""
         />
         <input
           class="phoneNum-field"
           id="phoneNumber"
           placeholder="Phone Number"
           type="text"
+          required=""
         />
         <div class="gender-radio">
             <label class="radio-option">
-                <input type="radio" value="male" v-model="gender" class="radio-input"/>Males
+                <input type="radio" value="male" v-model="gender" class="radio-input" required=""/>Males
             </label>
             <label class="radio-option">
                 <input type="radio" value="female" v-model="gender" class="radio-input"/>Females
@@ -47,13 +49,11 @@
             <label class="radio-option">
                 <input type="radio" value="others" v-model="gender" class="radio-input"/>Others
             </label>
-
-
         </div>
         
         <button class="next">
           <img class="next-child" alt="" src="../assets/rectangle-48@2x.png" />
-          <span class="next1" @click="navigateToSignUp3">Next</span>
+          <span class="next1" @click="updateProfile">Next</span>
         </button>
       </form>
       
@@ -62,18 +62,66 @@
   </template>
   
   <script>
+  import firebase from '@/uifire.js';
+  import 'firebase/compat/auth';
+  import * as firebaseui from 'firebaseui';
+  import 'firebaseui/dist/firebaseui.css';
+  import firebaseApp from '@/firebase.js';
+  import { getFirestore } from "firebase/firestore";
+  import { doc, setDoc } from "firebase/firestore";
+  import { getAuth, onAuthStateChanged } from "firebase/auth"
+
+  const db = getFirestore(firebaseApp);
+
     export default {
       name: "SignUpPage1",
       data() {
         return {
-          gender: null
+          gender: null,
+          user: false,
+          uid: null,
         };
       },
       methods: {
         navigateToSignUp3() {
           this.$router.push({ name: 'SignUp3' });
-        }
+        },
+        async updateProfile(event) {
+          event.preventDefault();
+          let userName = document.getElementById("userName").value;
+          let phoneNumber = document.getElementById("phoneNumber").value;
+          let gender = this.gender;
+
+          let uid = this.uid;
+          console.log(uid);
+
+          try{
+            const docRef = await setDoc(doc(db, "Users", uid),{
+              phoneNumber: phoneNumber,
+              userName : userName,
+              gender: gender,
+            })
+            console.log(docRef);
+            this.$router.push({ name: 'SignUp3' });
+            
+          }
+          catch(error) {
+            console.error("Error adding document: ", error);
+          }
+        },
       }, 
+      mounted() {
+        const auth = getAuth();
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            this.user = user;
+          }
+        })
+        console.log(auth.currentUser);
+        console.log(auth.currentUser.uid);
+        this.uid = auth.currentUser.uid;
+        console.log(this.uid);
+      }
     };
   </script>
   
