@@ -30,6 +30,7 @@
         <img class="next-child" alt="" src="../assets/rectangle-48@2x.png" />
         <span class="next1" @click="navigateToSignUp2">Next</span>
       </button>
+      <!--
       <input
         class="confirm-password-field"
         id="confirmPassword"
@@ -48,6 +49,8 @@
         placeholder="Email"
         type="text"
       />
+      -->
+      <div id="firebaseui-auth-container"></div>
     </form>
     <span class="credentials-for-login">Credentials for login</span>
   </div>
@@ -55,20 +58,64 @@
 </template>
 
 <script>
+import firebase from '@/uifire.js';
+import 'firebase/compat/auth';
+import * as firebaseui from 'firebaseui';
+import 'firebaseui/dist/firebaseui.css';
+import firebaseApp from '@/firebase.js';
+import { getFirestore } from "firebase/firestore";
+import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
+import { getAdditionalUserInfo, getAuth, onAuthStateChanged } from "firebase/auth";
+
   export default {
-
-    name: "Registration",
-
+    name: "SignUpPage1",
     data() {
       return {
-        bgColor: '#525fe1' // Replace with your desired background color
+        user:false,
       };
     },
     methods: {
       navigateToSignUp2() {
         this.$router.push({ name: 'SignUp2' });
-      }
+      },
     }, 
+    mounted() {
+      // const auth = getAuth();
+      // onAuthStateChanged(auth, (user) => {
+      //   if (user) {
+      //     console.log(user);
+      //     this.user = user;
+      //   }
+      // });
+      var ui = firebaseui.auth.AuthUI.getInstance();
+      if (!ui) {
+        ui = new firebaseui.auth.AuthUI(firebase.auth());
+      }
+
+      var uiConfig = {
+        signInFlow: 'popup',
+        callbacks: {
+          signInSuccessWithAuthResult: (authResult, redirectUrl) => {
+            console.log(authResult);
+            if (authResult) {
+              console.log(authResult.additionalUserInfo.isNewUser);
+              if (authResult.additionalUserInfo.isNewUser) {
+                return true;
+              } else {
+                this.$router.push('/registration2');
+                return false;
+              }
+            }
+          },
+        },
+        signInSuccessUrl:'/registration2',
+        signInOptions: [
+          firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+          firebase.auth.EmailAuthProvider.PROVIDER_ID,
+        ]
+      };
+      ui.start('#firebaseui-auth-container', uiConfig);
+    }
   };
 </script>
 
