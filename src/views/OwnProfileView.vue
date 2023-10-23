@@ -121,10 +121,28 @@
 </template>
 <script>
   import NavigationBar from '@/components/NavigationBar.vue'
+  import {getAuth} from "firebase/auth";
+  import firebaseApp from '../firebase.js';
+  
   export default { 
     name: "OwnProfile",
     components: {
       NavigationBar
+    },
+
+    data() {
+        return {
+            user: false,
+        }
+    },
+
+    mounted() {
+        const auth =getAuth();
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                this.user = user;
+            }
+        })
     },
 
     methods: {

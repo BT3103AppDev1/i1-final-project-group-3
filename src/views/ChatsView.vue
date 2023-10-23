@@ -7,6 +7,8 @@
 
 <script>
 import NavigationBar from '@/components/navigationbar.vue'
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import firebaseApp from "../firebase";
 
 export default {
     name: "Chats",
@@ -14,6 +16,21 @@ export default {
     components: {
       NavigationBar
     },
+
+    data() {
+        return {
+            user: false,
+        }
+    },
+
+    mounted() {
+        const auth =getAuth();
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                this.user = user;
+            }
+        })
+    }
 }
 </script>
 
