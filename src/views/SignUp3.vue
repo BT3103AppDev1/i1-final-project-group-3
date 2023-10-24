@@ -107,7 +107,7 @@ const db = getFirestore(firebaseApp);
         try{
           const docRef = await updateDoc(doc(db, "Users", uid),{
             major: major,
-            currenCourses : validCourses,
+            currentCourses : validCourses,
             yearOfStudy: year,
             description: description,
           })

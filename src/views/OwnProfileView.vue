@@ -6,7 +6,7 @@
     <button class="editprofilebutton" @click="navigateToEditProfile">Edit Profile</button>
 
     <div class="own-profile-page-body">
-      <div class="users-name">Veviana Tay</div>
+      <div class="users-name" v-if="user">{{user.displayName}}</div>
       <img class="profilepicture-icon" alt="" src="../assets/profilepicture-icon.jpg" />
       <div id="post-content" class="tabcontent" style="display: block;">
         <div class="post-1">
@@ -58,18 +58,18 @@
           <div class="academic-information-header">ACADEMIC INFORMATION</div>
           
           <div class="basic-information-container">
-            <p class="basic-information">Gender: Female</p>
-            <p class="basic-information">Email: test@gmail.com</p>
-            <p class="basic-information">Phone number: +65 8123 4567</p>
+            <p class="basic-information" id="gender">Gender: Female</p>
+            <p class="basic-information" id="email">Email: test@gmail.com</p>
+            <p class="basic-information" id="phoneNumber">Phone number: +65 8123 4567</p>
           </div>
           <div class="academic-container">
-            <p class="basic-information">Major: Business Analytics</p>
-            <p class="basic-information">Year: 2</p>
-            <p class="basic-information">
+            <p class="basic-information" id="major">Major: Business Analytics</p>
+            <p class="basic-information" id="year">Year: 2</p>
+            <p class="basic-information" id="description">
               Description: Hi, I aspire to become a business analyst once I graduate.
               I am an enthusiastic, self-motivated and hardworking person.
             </p>
-            <p class="basic-information">
+            <p class="basic-information" id="currentCourse">
               Current course: BT3103, IS3103, GEN2004, ST2334, CS2040
             </p>
           </div>
@@ -121,13 +121,65 @@
 </template>
 <script>
   import NavigationBar from '@/components/NavigationBar.vue'
+  import { getAuth, onAuthStateChanged } from '@firebase/auth'
+  import { doc, collection, getFirestore, getDoc } from '@firebase/firestore'
+  import firebaseApp from '../firebase'
+
+  const db = getFirestore(firebaseApp)
+
   export default { 
     name: "OwnProfile",
     components: {
       NavigationBar
     },
+    data() {
+       return {
+          user:false,
+          useremail:'',
+          uid: ''
+       }
+    },
+    
+    async mounted() {
+       const auth = getAuth();
+       onAuthStateChanged(auth, (user) => {
+         if (user) {
+           this.user = user;
+           this.useremail = user.email;
+           this.uid = user.uid;
+           this.fetchUserData(this.useremail);
+         } else {
+           this.user = null;
+           this.useremail = null;
+         }
+       })
+
+     },
 
     methods: {
+      async fetchUserData(useremail) {
+        let userDocument = await getDoc(doc(db, "Users",this.uid));
+        let userData = userDocument.data();
+
+        let gender = (userData.gender)
+        let name = (userData.name)
+        let major = (userData.major)
+        let description = (userData.description)
+        let phoneNumber = (userData.phoneNumber)
+        let yearOfStudy = (userData.yearOfStudy)
+        let currentCourse = (userData.currentCourses)
+
+        document.getElementsByClassName("users-name").innerHTML = (String(name))
+        document.getElementById("email").innerHTML = ("Email: " + String(this.useremail))
+        document.getElementById("gender").innerHTML = ("Gender: " + String(gender))
+        document.getElementById("phoneNumber").innerHTML = ("Phone Number: " + String(phoneNumber))
+        document.getElementById("major").innerHTML = ("Major: " + String(major))
+        document.getElementById("year").innerHTML = ("Year: " + String(yearOfStudy))
+        document.getElementById("description").innerHTML = ("Description: " + String(description))
+        document.getElementById("currentCourse").innerHTML = ("Current Courses: " + String(currentCourse))
+
+      }, 
+      
       openSection(evt, section) {
         // Declare all variables
         var i, tabcontent, tablinks;
@@ -146,7 +198,9 @@
 
         // Show the current tab, and add an "active" class to the button that opened the tab
         document.getElementById(section).style.display = "block";
-        evt.currentTarget.className += " active";
+        if (evt && evt.currentTarget) {
+          evt.currentTarget.classList.add("active");
+        }
       },
 
       navigateToEditProfile() {

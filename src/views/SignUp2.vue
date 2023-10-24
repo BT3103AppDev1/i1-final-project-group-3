@@ -82,6 +82,15 @@ const db = getFirestore(firebaseApp);
         uid: null,
       };
     },
+    mounted() {
+      const auth = getAuth();
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          this.user = user;
+          this.uid = auth.currentUser.uid;
+        }
+      })
+    },
     methods: {
       navigateToSignUp3() {
         this.$router.push({ name: 'SignUp3' });
@@ -93,7 +102,6 @@ const db = getFirestore(firebaseApp);
         let gender = this.gender;
 
         let uid = this.uid;
-        console.log(uid);
 
         try{
           const docRef = await setDoc(doc(db, "Users", uid),{
@@ -110,18 +118,7 @@ const db = getFirestore(firebaseApp);
         }
       },
     }, 
-    mounted() {
-      const auth = getAuth();
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          this.user = user;
-        }
-      })
-      console.log(auth.currentUser);
-      console.log(auth.currentUser.uid);
-      this.uid = auth.currentUser.uid;
-      console.log(this.uid);
-    }
+    
   };
 </script>
 
