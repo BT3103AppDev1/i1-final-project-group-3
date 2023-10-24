@@ -10,7 +10,7 @@
 
       <div>
         <h1 class="welcome">Welcome!</h1>
-        <div class="are-you-ready">Are you ready to find your match?</div>
+        <div class="are-you-ready">GOODBYE</div>
 
 
       </div>
