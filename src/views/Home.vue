@@ -73,19 +73,8 @@
 
     data() {
         return {
-            profiles: [],
-            user: false,
+            profiles: []
         };
-    },
-
-
-    mounted() {
-        const auth =getAuth();
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                this.user = user;
-            }
-        })
     },
     
     methods: {
@@ -93,6 +82,9 @@
         this.$router.push({ name: 'HomeGroups' });
       },
 
+      navigateToProfile(profileName) {
+          this.$router.push({ name: 'profile', params: { name: profileName }});
+      },
 
       async fetchDataFromFirebase() {
         const db = getFirestore(firebaseApp); // Get Firestore instance from your initialized Firebase app
