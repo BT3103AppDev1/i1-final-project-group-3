@@ -6,7 +6,7 @@
           <router-link to="/post">Posts</router-link>    
           <router-link to="/chat">Chats</router-link>
           <router-link to="/ownprofile">Profile</router-link>
-          <Logout/>
+          <button>Log Out</button>
 
       </div>
   
@@ -14,14 +14,9 @@
 </template>
 
 <script>
-import Logout from '../components/Logout.vue';
 
 export default {
   name:'NavBar',
-
-  components: {
-    Logout
-  },
   
 }
 

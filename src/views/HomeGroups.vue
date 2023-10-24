@@ -65,7 +65,6 @@
    import firebaseApp from '../firebase.js';
   import { defineComponent } from "vue";
   import NavigationBar from '../components/NavigationBar.vue'
-  import {getAuth} from "firebase/auth";
  
   
 
@@ -77,19 +76,8 @@
 
     data() {
         return {
-            groups: [], 
-            user: false,
+            groups: []
         };
-    },
-
-
-    mounted() {
-        const auth =getAuth();
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                this.user = user;
-            }
-        })
     },
 
     methods: {
