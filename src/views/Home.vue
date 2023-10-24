@@ -42,6 +42,7 @@
          
             <h1 id = "profile-name">{{ profile.name }}</h1>
             <h1>Hello</h1>
+            <h1>Hello 2</h1>
             <h3 id = "profile-major-and-year">{{profile.major}}, Year {{profile.yearOfStudy}}</h3>
             <h3 id = "profile-description">{{profile.description}}</h3> 
         </div>
