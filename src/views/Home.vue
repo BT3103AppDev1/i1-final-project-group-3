@@ -35,7 +35,7 @@
       </div>
  
         <div class = "display-all-profile-cards">
-            <div class="profile-card" v-for="profile in profiles" :key="profile.name">
+            <div class="profile-card" v-for="profile in profiles" :key="profile.name" @click ="navigateToProfile(profile.name)">
       
             <img class="profile-image-on-card" src="../assets/profile_picture.jpg" alt="">
          
@@ -61,7 +61,7 @@
   import { defineComponent } from "vue";
   import NavigationBar from '../components/NavigationBar.vue'
   import {getAuth} from "firebase/auth";
- 
+
   
 
   export default defineComponent({
@@ -93,6 +93,9 @@
         this.$router.push({ name: 'HomeGroups' });
       },
 
+      navigateToProfile(profileName) {
+          this.$router.push({ name: 'profile', params: { name: profileName }});
+      },
 
       async fetchDataFromFirebase() {
         const db = getFirestore(firebaseApp); // Get Firestore instance from your initialized Firebase app
@@ -444,7 +447,7 @@
     border: 1px solid #ccc;
     border-radius: 1.3rem;
     margin-bottom: 40px;
-    
+    cursor: pointer;
      
    
  
