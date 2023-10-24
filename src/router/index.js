@@ -28,9 +28,10 @@ const routes =[
 
   },
   {
-    path: '/lookingatprofile',
-    name: 'LookingAtProfile',
+    path: '/profile/:name',
+    name: 'profile',
     component: LookingAtProfile,
+    props: true
 
   },
   {
