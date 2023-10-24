@@ -59,8 +59,9 @@
   import { getFirestore, collection, getDocs } from "firebase/firestore"
   import firebaseApp from '../firebase.js';
   import { defineComponent } from "vue";
-  import NavigationBar from '@/components/NavigationBar.vue'
- 
+  import NavigationBar from '../components/NavigationBar.vue'
+  import {getAuth} from "firebase/auth";
+
   
 
   export default defineComponent({
@@ -72,8 +73,19 @@
 
     data() {
         return {
-            profiles: []
+            profiles: [],
+            user: false,
         };
+    },
+
+
+    mounted() {
+        const auth =getAuth();
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                this.user = user;
+            }
+        })
     },
     
     methods: {
