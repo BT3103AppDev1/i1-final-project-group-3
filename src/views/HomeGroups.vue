@@ -31,9 +31,17 @@
         <button class="profiles" @click="navigateToProfiles">Profiles</button>
         <button class="groups">Groups</button>
 
-        <h3 id = "create-group-here"><em>Can't find a group? Click <span class = "clickHere" @click = "createGroupFormPopUp">HERE</span> to create one</em></h3>
+       <!-- <h3 id = "create-group-here">
+          <em>Can't find a group? Click <span class = "clickHere" @click = "navigateToCreateGroup">HERE</span> to create one</em>
+          <em>Can't find a group? Click <router-link to="CreateGroups">HERE</router-link> to create one</em>
+        </h3> -->
 
+          <h3 id="create-group-here">
+            <em>Can't find a group? Click <span class="clickHere" @click="showCreateGroupForm">HERE</span> to create one</em>
+          </h3>
+          <CreateGroups v-if="isCreateGroupFormVisible" @create-group="handleCreateGroup" />
 
+ 
         
       
       </div>
@@ -65,17 +73,20 @@
    import firebaseApp from '../firebase.js';
   import { defineComponent } from "vue";
   import NavigationBar from '../components/NavigationBar.vue'
+  import CreateGroups from "../components/CreateGroups.vue";
  
   
 
   export default defineComponent({
     name: "HomeGroups",
     components: {
-      NavigationBar
+      NavigationBar,
+      CreateGroups
     },
 
     data() {
         return {
+            isCreateGroupFormVisible: false,
             groups: []
         };
     },
@@ -83,6 +94,19 @@
     methods: {
       navigateToProfiles() {
         this.$router.push({ name: 'Home' });
+      },
+
+      navigateToCreateGroup() {
+        this.$router.push({name: 'CreateGroup'});
+
+      },
+
+      showCreateGroupForm() {
+        this.isCreateGroupFormVisible = true;
+      },
+
+      handleCreateGroup() {
+        this.isCreateGroupFormVisible = false;
       },
 
       createGroupFormPopUp() {

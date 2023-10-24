@@ -10,6 +10,8 @@ import EditProfileView from '@/views/EditProfileView.vue'
 import Home from '@/views/Home.vue'
 import HomeGroups from '@/views/HomeGroups.vue'
 
+import CreateGroups from '@/components/CreateGroups.vue';
+
 
 const routes =[
   {
@@ -68,7 +70,12 @@ const routes =[
     name: 'HomeGroups', 
     component: HomeGroups,
 
-  }
+  }, 
+  {
+    path: '/creategroups',
+    name: CreateGroups,
+    component: CreateGroups
+  },
 
 ]
 
