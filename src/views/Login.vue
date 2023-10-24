@@ -1,8 +1,9 @@
 <template>
   <div class="login-page">
       <loginBanner/>
+      <div id="firebaseui-auth-container"></div>
 
-      <div class="login-form">
+      <div class="login-form" v-if="showLoginForm">
 
               <div class="email">
                   
@@ -33,6 +34,11 @@ import { getFirestore, collection, doc, getDoc } from "firebase/firestore";
 import firebaseApp from '../firebase.js';
 import loginBanner from '../components/loginBanner.vue';
 
+import firebase from '@/uifire.js'
+import 'firebase/compat/auth'
+import * as firebaseui from 'firebaseui'
+import 'firebaseui/dist/firebaseui.css'
+
 
 
 export default {
@@ -46,7 +52,24 @@ export default {
     return {
       email: '',
       password: '',
+      
     };
+  },
+
+  mounted() {
+    var ui = firebaseui.auth.AuthUI.getInstance() ;
+    if (!ui) {
+      ui = new firebaseui.auth.AuthUI(firebase.auth());
+    }
+
+    var uiConfig = {
+      signInSuccessUrl : '/home',
+      signInOptions : [
+        firebase.auth.EmailAuthProvider.PROVIDER_ID,
+        firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+      ],
+    };
+    ui.start('#firebaseui-auth-container', uiConfig)
   },
 
 
@@ -125,6 +148,11 @@ div, input {
   left: 470px;
 
   padding-bottom: 100px;
+}
+
+#firebaseui-auth-container {
+  position: relative;
+  top: 400px;
 }
 
 
