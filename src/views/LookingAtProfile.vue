@@ -6,8 +6,8 @@
 
     <div class ="profile-section">
         <div class="left-section">
-            <!-- Static Image -->
-            <img class="profile-image" alt = "" src="../assets/profile_picture_yj.jpg" />
+            <!-- Dynamic Image -->
+            <img class="profile-image" alt = "Profile Picture" src="profilePicture" />
             
             <!-- Action buttons -->
             <div class="buttons-container">
@@ -16,32 +16,26 @@
             </div>
 
             <p class="GroupInfo">
-                <strong>Current Group:</strong> Manifesting for A+
+                <strong>Current Group:</strong> {{  currentGroup }}
             </p>
         </div>
         <div class="right-section">
-            <h2>Zhou Yujie<span>@yujie_zhou</span></h2>
-            <h3>Business Analytics, Year 3</h3>
-            <p>
-                Hi, I aspire to become a Business Analyst once I graduate. 
-                I am an enthusiastic, self-motivated and hardworking person.
-            </p>
-            <div class="email">Email: e01234567@u.nus.edu</div>
+            <!-- Pull Details from User Profiles -->
+            <h2>{{  profile.name }}<span>{{ profile.name.split(' ').join('_').toLowerCase() }}</span></h2>
+            <h3>{{ profile.major }}. Year {{  profile.yearOfStudy }}</h3>
+            <p>{{ profile.description }}</p>
+            <div class="email">Email: {{  profile.email }}</div>
             <div class="courses">
                 <strong>Current Courses:</strong>
                 <ul>
-                    <li>BT3102</li>
-                    <li>BT3103</li>
-                    <li>IS3103</li>
-                    <li>CS2040</li>
-                    <li>GEC1015</li>
+                    <li v-for="course in profile.currentCourses" :key="course">{{ course }}</li>
                 </ul>
             </div>
             <div class="study-style">
-            Study Style: Visual Learner, loves coding and mathematics.
+                Study Style: {{ profile.studyStyle }}
             </div>
             <div class="preference">
-            Preference of StudyBuddy: I am looking for a study partner that is hardworking, focused and can keep me motivated to study.
+                Preference of StudyBuddy: {{ profile.preference }}
             </div>
         </div>
     </div>
@@ -50,15 +44,60 @@
   
 
 <script>  
-    import { defineComponent } from "vue";
-    import NavigationBar from '../components/NavigationBar.vue';
+import { defineComponent } from "vue";
+import NavigationBar from '@/components/NavigationBar.vue';
+import { doc, getDoc, getFirestore } from 'firebase/firestore';
+import firebaseApp from '@/firebase.js';
 
-    export default defineComponent({
-        name: "TopContainer",
-        components: {
-            NavigationBar
+export default defineComponent({
+    name: "profile",
+    
+    components: {
+      NavigationBar
+    },
+
+    data() {
+        return {
+            profile: {
+                name: '',
+                major: '',
+                yearOfStudy: '',
+                description: '', 
+                email: '',
+                currentCourses: [],
+                studyStyle: '',
+                preference: ''
+            },
+            profilePicture: '', // URL of the profile picture
+            currentGroup: '' // Name or details of the current group
+        };
+    },
+
+    methods: {
+        async fetchUserProfile(profileName) {
+            try {
+                const db = getFirestore(firebaseApp);
+                const userDoc = doc(db, "Users", profileName);
+                const userProfile = await getDoc(userDoc);
+
+                if (userProfile.exists()) {
+                    this.profile = userProfile.data();
+                    this.profilePicture = this.profile.profilePictureUrl || '../assets/about-icon.png'; // Set to default picture if not provided
+                    this.currentGroup = this.profile.currentGroup || 'No current group'; // Set to a default value if not provided
+                } else {
+                    console.error("User not found!");
+                }
+            } catch (error) {
+                console.error("Error fetching user profile: ", error);
+            }
         }
-    });
+    },
+
+    mounted() {
+        const profileName = this.$route.params.name;
+        this.fetchUserProfile(profileName);
+    }
+});
 </script>
 
 

@@ -59,7 +59,7 @@
   import { getFirestore, collection, getDocs } from "firebase/firestore"
   import firebaseApp from '../firebase.js';
   import { defineComponent } from "vue";
-  import NavigationBar from '../components/NavigationBar.vue'
+  import NavigationBar from '@/components/NavigationBar.vue'
  
   
 
