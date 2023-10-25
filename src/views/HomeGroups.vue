@@ -30,10 +30,13 @@
         
         <button class="profiles" @click="navigateToProfiles">Profiles</button>
         <button class="groups">Groups</button>
+ 
+          <h3 id="create-group-here">
+            <em>Can't find a group? Click <span class="clickHere" @click="showCreateGroupForm">HERE</span> to create one</em>
+          </h3>
+          <CreateGroups v-if="isCreateGroupFormVisible" @create-group="handleCreateGroup" @close-form = "closeCreateGroupForm" />
 
-        <h3 id = "create-group-here"><em>Can't find a group? Click <span class = "clickHere" @click = "createGroupFormPopUp">HERE</span> to create one</em></h3>
-
-
+ 
         
       
       </div>
@@ -61,28 +64,56 @@
 
 
 <script>
-  import { getFirestore, collection, getDocs } from "firebase/firestore"
-   import firebaseApp from '../firebase.js';
+  import { getFirestore, collection, getDocs, addDoc } from "firebase/firestore"
+  import firebaseApp from '../firebase.js';
   import { defineComponent } from "vue";
   import NavigationBar from '../components/NavigationBar.vue'
+  import CreateGroups from "../components/CreateGroups.vue";
  
+  const db = getFirestore(firebaseApp); 
   
 
   export default defineComponent({
     name: "HomeGroups",
     components: {
-      NavigationBar
+      NavigationBar,
+      CreateGroups
     },
 
     data() {
         return {
-            groups: []
+            isCreateGroupFormVisible: false,
+            groups: [],
+            groupTitle: "",
+            groupDescription: "",
+            membersCount: null
         };
     },
 
     methods: {
       navigateToProfiles() {
         this.$router.push({ name: 'Home' });
+      },
+
+      navigateToCreateGroup() {
+        this.$router.push({name: 'CreateGroup'});
+
+      },
+
+      showCreateGroupForm() {
+        this.isCreateGroupFormVisible = true;
+      },
+
+      closeCreateGroupForm() {
+        this.isCreateGroupFormVisible = false;
+      },
+ 
+
+      async handleCreateGroup() {
+        console.log("Received data");
+        this.isCreateGroupFormVisible = false;
+      
+        window.alert("Group successfully created!");
       },
 
       createGroupFormPopUp() {
@@ -92,15 +123,14 @@
 
       
       async fetchDataFromFirebase() {
-        const db = getFirestore(firebaseApp); // Get Firestore instance from your initialized Firebase app
-        const usersCollection = collection(db, "Groups"); // Reference to the "Users" collection
-
+        const db = getFirestore(firebaseApp);  
+        const usersCollection = collection(db, "Groups");  
         try {
             const querySnapshot = await getDocs(usersCollection);
             const groups = [];
             querySnapshot.forEach((doc) => {
             const groupData = doc.data();
-            // Push the retrieved profile data into the profiles array
+             
             groups.push({
                 title: groupData.title,
                 description: groupData.groupDescription,
@@ -108,7 +138,7 @@
        
             });
             });
-            // Update the component's state with retrieved profiles
+       
             this.groups = groups;
         } catch (error) {
             console.error("Error fetching data: ", error);
