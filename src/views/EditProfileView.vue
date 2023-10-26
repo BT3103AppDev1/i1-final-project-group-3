@@ -76,53 +76,54 @@
                         <button class="save-profile" @click="navigateToSave"> Save Profile</button>
                     </div>
 
-                    <div id="first-name" class="input">
+                    <div i
+                    d="first-name" class="input">
                         <h3>First Name</h3>
-                        <input type="text" v-model="firstName" placeholder="Veviana" />
+                        <input type="text" id="firstName" v-model="firstName" :placeholder="firstName" />
                     </div>
 
                     <div id="last-name" class="input">
                         <h3>Last Name</h3>
-                        <input type="text" v-model="lastName" placeholder="Tay" />
+                        <input type="text" id="lastName" v-model="lastName" :placeholder="lastName" />
                     </div>
 
                     <div id="gender" class="input">
                         <h3>Gender</h3>
-                        <select v-model="selectedGender">
+                        <select v-model="selectedGender" id="gender" :placeholder="gender">
                             <option value="male">Male</option>
                             <option value="female">Female</option>
                             <option value="others">Others</option>
                         </select>
                     </div>
 
-                    <div id="email" class="input">
+                    <div id="email" class="input" >
                         <h3>Email</h3>
-                        <input type="email" v-model="email" placeholder="vevianatay@gmail.com" />
+                        <input type="email" id="email" v-model="email" :placeholder="email" />
                     </div>
 
                     <div id="mobile" class="input">
                         <h3>Mobile Number</h3>
-                        <input type="tel" v-model="phoneNumber" placeholder="+65 8123 4567" />
+                        <input type="tel" id="phoneNumber" v-model="phoneNumber" :placeholder="phoneNumber" />
                     </div>
 
                     <div id="major" class="input">
                         <h3>Major</h3>
-                        <input type="text" v-model="course" placeholder="Business Analytics" />
+                        <input type="text" id="major" v-model="major" :placeholder="major" />
                     </div>
 
                     <div id="year-study" class="input">
                         <h3>Year of Study</h3>
-                        <input type="number" v-model="yearOfStudy" placeholder="2" />
+                        <input type="number" id="yearOfStudy" v-model="yearOfStudy" :placeholder="yearOfStudy" />
                     </div>
 
                     <div id="course" class="input">
                         <h3>Current Courses</h3>
-                        <input type="text" v-model="courses" placeholder="BT3103, BT3102, CS2040" />
+                        <input type="text" id="courses" v-model="courses" :placeholder="courses" />
                     </div>
 
                     <div id="description" class="input">
                         <h3>Description</h3>
-                        <input type="text" v-model="description" id="description" placeholder="Hi, I aspire to become a business analyst once I graduate. I am an enthusiastic, self-motivated and hardworking person." />
+                        <input type="text" id="description" v-model="description"  :placeholder="description" />
                     </div>
 
                 </div>
@@ -175,6 +176,11 @@
 <script>
 import NavBar from '@/components/NavigationBar.vue';
 import titleandImage from '../components/titleandImage.vue';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { doc, collection, getFirestore, getDoc } from '@firebase/firestore';
+import firebaseApp from '../firebase'
+
+const db = getFirestore(firebaseApp);
 
 export default {
     name: "EditProfile",
@@ -186,8 +192,36 @@ export default {
     data() {
         return {
             activeTab: 'account-content',
-        }
+
+            firstName: '',
+            lastName: '',
+            selectedGender: null,
+            email: '',
+            phoneNumber: '',
+            course: '',     
+            yearOfStudy: '',
+            courses: '',
+            description: '',
+            user: null,
+       }
     },
+
+    async mounted() {
+       const auth = getAuth();
+       onAuthStateChanged(auth, (user) => {
+         if (user) {
+           this.user = user;
+           this.useremail = user.email;
+           this.uid = user.uid;
+           this.fetchUserData(this.useremail);
+         } else {
+           this.user = null;
+           this.useremail = null;
+         }
+       })
+
+     },
+
 
     methods: { 
         openSection(evt, section) {
@@ -207,6 +241,45 @@ export default {
         navigateToSave() {
             alert("Updated!");
         },
+
+        async fetchUserData(useremail) {
+            let userDocument = await getDoc(doc(db, "Users",this.uid));
+            let userData = userDocument.data();
+
+            
+            //var firstName = (userData.name)
+            //var lastName = (userData.name)
+            var gender = (userData.gender)
+            var email = (userData.email)
+            var phoneNumber = (userData.phoneNumber)
+            var major = (userData.major)
+            var yearOfStudy = (userData.yearOfStudy)
+            var description = (userData.description)
+            var currentCourse = (userData.currentCourses)
+
+            console.log(firstName)
+            console.log(lastName)
+            console.log(gender)
+            console.log(email)
+            console.log(phoneNumber)
+            console.log(major)
+            console.log(yearOfStudy)
+            console.log(description)
+            console.log(currentCourse)
+
+            //document.getElementsById("firstName").value = firstName
+            //document.getElementsById("lasttName").value = lastName
+            document.getElementsById("gender").option = gender
+            document.getElementsById("email").value = email
+            document.getElementsById("phoneNumber").value = phoneNumber
+            document.getElementsById("major").value = major
+            document.getElementsById("yearOfStudy").value = yearOfStudy
+            document.getElementsById("description").value = description
+            document.getElementsById("courses").value = currentCourse
+
+            
+
+        }, 
 
 
 
