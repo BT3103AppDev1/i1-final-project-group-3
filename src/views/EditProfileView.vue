@@ -322,7 +322,16 @@ export default {
             let userData = userDocument.data();
             const auth = getAuth();
             const firebaseUser = auth.currentUser;
-            const displayName = firebaseUser ? firebaseUser.displayName : null;
+
+            //const displayName = firebaseUser ? firebaseUser.displayName : null;
+            let displayName;
+            if (firebaseUser) {
+                displayName = userData.firstName + " " + userData.lastName;
+            } else {
+                displayName = firebaseUser.displayName;
+            }
+
+
             
 
             const nameParts = displayName.split(' ');
@@ -333,7 +342,7 @@ export default {
                 var firstNameplaceholder = first
                 var lastNameplaceholder = last
                 var genderplaceholder = (userData.gender)
-                var emailplaceholder = firebaseUser.email
+                var emailplaceholder = (userData.email)
                 var phoneNumberplaceholder= (userData.phoneNumber)
                 var majorplaceholder = (userData.major)
                 var yearOfStudyplaceholder = (userData.yearOfStudy)
