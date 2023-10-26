@@ -78,15 +78,15 @@
 
                     <div id="first-name" class="input">
                         <h3>First Name</h3>
-                        <input type="text" id="firstName"  placeholder="First Name" />
+                        <input type="text" id="firstName"  :placeholder="firstNameplaceholder" />
                     </div>
 
                     <div id="last-name" class="input">
                         <h3>Last Name</h3>
-                        <input type="text" id="lastName"  placeholder="Last Name" />
+                        <input type="text" id="lastName"  :placeholder="lastNameplaceholder" />
                     </div>
 
-                    <div id="gender" class="input">
+                    <div id="gender-user" class="input">
                         <h3>Gender</h3>
                         <select v-model="selectedGender" id="gender" :placeholder="genderplaceholder">
                             <option value="male">Male</option>
@@ -112,7 +112,13 @@
 
                     <div id="year-study" class="input">
                         <h3>Year of Study</h3>
-                        <input type="number" id="yearOfStudy" v-model="yearOfStudy" :placeholder="yearOfStudyplaceholder" />
+                        <select id="yearOfStudy" v-model="yearOfStudy" :placeholder="yearOfStudyplaceholder" > 
+                            <option value="year1">Year 1</option>
+                            <option value="year2">Year 2</option>
+                            <option value="year3">Year 3</option>
+                            <option value="year4">Year 4</option>
+                            
+                        </select>
                     </div>
 
                     <div id="course" class="input">
@@ -176,11 +182,32 @@
 import NavBar from '@/components/NavigationBar.vue';
 import titleandImage from '../components/titleandImage.vue';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { doc, collection, getFirestore, getDoc } from '@firebase/firestore';
+import { doc, collection, getFirestore, getDoc, updateDoc } from '@firebase/firestore';
 import firebaseApp from '../firebase'
 import { ref, onMounted } from 'vue';
+import { getDatabase, update } from "firebase/database";
+
+
 
 const db = getFirestore(firebaseApp);
+const database = getDatabase(firebaseApp);
+
+async function updateProfile(uid, updates) {
+    console.log("updating profile function" );
+    console.log(uid)
+    console.log(updates);
+
+    const userRef = doc(db, 'Users/' + uid);
+    console.log("userRef");
+    try {
+        await updateDoc(userRef, updates);
+        console.log("Profile updated successfully");
+    } catch (error) {
+        console.error("Error updating profile:", error);
+    }
+}
+
+
 
 export default {
     name: "EditProfile",
@@ -193,8 +220,8 @@ export default {
         return {
             activeTab: 'account-content',
             userData: {
-                //firstName: '',
-                //lastName: '',
+                firstName: '',
+                lastName: '',
                 genderplaceholder: '',
                 emailplaceholder: '',
                 phoneNumberplaceholder: '',
@@ -215,12 +242,14 @@ export default {
        onAuthStateChanged(auth, (user) => {
             if (user) {
                 this.user = user;
-           this.useremail = user.email;
-           this.uid = user.uid;
+                this.useremail = user.email;
+                this.uid = user.uid;
                 this.fetchUserData(this.useremail);
+                //const displayName = user.displayName;
+                //console.log(displayName);
             } else {
                 this.user = null;
-           this.useremail = null;
+                this.useremail = null;
          }
        })
 
@@ -243,25 +272,76 @@ export default {
             this.$router.push({ name: 'OwnProfile' });
         },
 
-        navigateToSave() {
-            alert("Updated!");
+        async navigateToSave() {
+    
+            console.log("updating particulars");
+            var firstName = document.getElementById("firstName").value
+            var lastName = document.getElementById("lastName").value
+            var gender = document.getElementById("gender").value
+            var email = document.getElementById("email").value
+            var phoneNumber = document.getElementById("phoneNumber").value
+            var major = document.getElementById("major").value
+            var yearOfStudy = document.getElementById("yearOfStudy").value
+            var description = document.getElementById("description").value
+            var currentCourses = document.getElementById("courses").value
+            var currentCoursesArray = currentCourses.split(',').map(course => course.trim());
+
+            console.log(firstName)
+            console.log(lastName)
+            console.log(gender)
+            console.log(email)
+            console.log(phoneNumber)
+            console.log(major)
+            console.log(yearOfStudy)
+            console.log(description)
+            console.log(currentCoursesArray)
+
+            var updates = {
+                firstName: firstName,
+                lastName: lastName,
+                gender: gender,
+                email: email,
+                phoneNumber: phoneNumber,
+                major: major,
+                yearOfStudy: yearOfStudy,
+                description: description,
+                currentCourses: currentCoursesArray
+
+            }
+            console.log("received updates");
+
+            updateProfile(this.uid, updates);
+            alert("Your profile has been updated!");
+            this.$router.push({ name: 'OwnProfile' });
         },
+
+
 
         async fetchUserData(uid) {
             let userDocument = await getDoc(doc(db, "Users",this.uid));
             let userData = userDocument.data();
-            //var firstName = userData.name
-                //var lastName = (userData.name)
+            const auth = getAuth();
+            const firebaseUser = auth.currentUser;
+            const displayName = firebaseUser ? firebaseUser.displayName : null;
+            
+
+            const nameParts = displayName.split(' ');
+            let first = nameParts[0];
+            let last =  nameParts.slice(1).join(' ');
+            
+
+                var firstNameplaceholder = first
+                var lastNameplaceholder = last
                 var genderplaceholder = (userData.gender)
-                var emailplaceholder = (userData.email)
+                var emailplaceholder = firebaseUser.email
                 var phoneNumberplaceholder= (userData.phoneNumber)
                 var majorplaceholder = (userData.major)
                 var yearOfStudyplaceholder = (userData.yearOfStudy)
                 var descriptionplaceholder = (userData.description)
                 var currentCourseplaceholder = (userData.currentCourses)
 
-                //console.log(firstName)
-                //console.log(lastName)
+                console.log(firstNameplaceholder)
+                console.log(lastNameplaceholder)
                 console.log(genderplaceholder)
                 console.log(emailplaceholder)
                 console.log(phoneNumberplaceholder)
@@ -270,8 +350,8 @@ export default {
                 console.log(descriptionplaceholder)
                 console.log(currentCourseplaceholder)
 
-                //document.getElementById("firstName").value = firstName
-                //document.getElementById("lasttName").value = lastName
+                document.getElementById("firstName").value = firstNameplaceholder
+                document.getElementById("lastName").value = lastNameplaceholder
                 document.getElementById("gender").value= genderplaceholder
                 document.getElementById("email").value = emailplaceholder
                 document.getElementById("phoneNumber").value = phoneNumberplaceholder
@@ -520,6 +600,7 @@ input[id="description"] {
     text-align: left; /* Align the placeholder text to the left */
     white-space: pre-line;
     line-height: 2;
+    
 }
 
 
