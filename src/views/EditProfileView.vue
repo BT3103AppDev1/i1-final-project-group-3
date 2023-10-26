@@ -76,54 +76,53 @@
                         <button class="save-profile" @click="navigateToSave"> Save Profile</button>
                     </div>
 
-                    <div i
-                    d="first-name" class="input">
+                    <div id="first-name" class="input">
                         <h3>First Name</h3>
-                        <input type="text" id="firstName" v-model="firstName" :placeholder="firstName" />
+                        <input type="text" id="firstName"  placeholder="First Name" />
                     </div>
 
                     <div id="last-name" class="input">
                         <h3>Last Name</h3>
-                        <input type="text" id="lastName" v-model="lastName" :placeholder="lastName" />
+                        <input type="text" id="lastName"  placeholder="Last Name" />
                     </div>
 
                     <div id="gender" class="input">
                         <h3>Gender</h3>
-                        <select v-model="selectedGender" id="gender" :placeholder="gender">
+                        <select v-model="selectedGender" id="gender" :placeholder="genderplaceholder">
                             <option value="male">Male</option>
                             <option value="female">Female</option>
                             <option value="others">Others</option>
                         </select>
                     </div>
 
-                    <div id="email" class="input" >
+                    <div id="email-user" class="input" >
                         <h3>Email</h3>
-                        <input type="email" id="email" v-model="email" :placeholder="email" />
+                        <input type="email" id="email" v-model="email" :placeholder="emailplaceholder" />
                     </div>
 
                     <div id="mobile" class="input">
                         <h3>Mobile Number</h3>
-                        <input type="tel" id="phoneNumber" v-model="phoneNumber" :placeholder="phoneNumber" />
+                        <input type="tel" id="phoneNumber" v-model="phoneNumber" :placeholder="phoneNumberplaceholder" />
                     </div>
 
-                    <div id="major" class="input">
+                    <div id="major-course" class="input">
                         <h3>Major</h3>
-                        <input type="text" id="major" v-model="major" :placeholder="major" />
+                        <input type="text" id="major" v-model="major" :placeholder="majorplaceholder" />
                     </div>
 
                     <div id="year-study" class="input">
                         <h3>Year of Study</h3>
-                        <input type="number" id="yearOfStudy" v-model="yearOfStudy" :placeholder="yearOfStudy" />
+                        <input type="number" id="yearOfStudy" v-model="yearOfStudy" :placeholder="yearOfStudyplaceholder" />
                     </div>
 
                     <div id="course" class="input">
                         <h3>Current Courses</h3>
-                        <input type="text" id="courses" v-model="courses" :placeholder="courses" />
+                        <input type="text" id="courses" v-model="courses" :placeholder="currentCourseplaceholder" />
                     </div>
 
-                    <div id="description" class="input">
+                    <div id="describe" class="input">
                         <h3>Description</h3>
-                        <input type="text" id="description" v-model="description"  :placeholder="description" />
+                        <input type="text" id="description" v-model="description"  :placeholder="descriptionplaceholder " />
                     </div>
 
                 </div>
@@ -179,6 +178,7 @@ import titleandImage from '../components/titleandImage.vue';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { doc, collection, getFirestore, getDoc } from '@firebase/firestore';
 import firebaseApp from '../firebase'
+import { ref, onMounted } from 'vue';
 
 const db = getFirestore(firebaseApp);
 
@@ -192,36 +192,41 @@ export default {
     data() {
         return {
             activeTab: 'account-content',
+            userData: {
+                //firstName: '',
+                //lastName: '',
+                genderplaceholder: '',
+                emailplaceholder: '',
+                phoneNumberplaceholder: '',
+                majorplaceholder: '',
+                yearOfStudyplaceholder: '',
+                coursesplaceholder: '',
+                descriptionplaceholder: '',
+                user: null,
 
-            firstName: '',
-            lastName: '',
-            selectedGender: null,
-            email: '',
-            phoneNumber: '',
-            course: '',     
-            yearOfStudy: '',
-            courses: '',
-            description: '',
-            user: null,
+            },
+
+        
        }
     },
 
     async mounted() {
        const auth = getAuth();
        onAuthStateChanged(auth, (user) => {
-         if (user) {
-           this.user = user;
+            if (user) {
+                this.user = user;
            this.useremail = user.email;
            this.uid = user.uid;
-           this.fetchUserData(this.useremail);
-         } else {
-           this.user = null;
+                this.fetchUserData(this.useremail);
+            } else {
+                this.user = null;
            this.useremail = null;
          }
        })
 
-     },
-
+    },
+    
+    
 
     methods: { 
         openSection(evt, section) {
@@ -242,40 +247,50 @@ export default {
             alert("Updated!");
         },
 
-        async fetchUserData(useremail) {
+        async fetchUserData(uid) {
             let userDocument = await getDoc(doc(db, "Users",this.uid));
             let userData = userDocument.data();
+            //var firstName = userData.name
+                //var lastName = (userData.name)
+                var genderplaceholder = (userData.gender)
+                var emailplaceholder = (userData.email)
+                var phoneNumberplaceholder= (userData.phoneNumber)
+                var majorplaceholder = (userData.major)
+                var yearOfStudyplaceholder = (userData.yearOfStudy)
+                var descriptionplaceholder = (userData.description)
+                var currentCourseplaceholder = (userData.currentCourses)
+
+                //console.log(firstName)
+                //console.log(lastName)
+                console.log(genderplaceholder)
+                console.log(emailplaceholder)
+                console.log(phoneNumberplaceholder)
+                console.log(majorplaceholder)
+                console.log(yearOfStudyplaceholder)
+                console.log(descriptionplaceholder)
+                console.log(currentCourseplaceholder)
+
+                //document.getElementById("firstName").value = firstName
+                //document.getElementById("lasttName").value = lastName
+                document.getElementById("gender").value= genderplaceholder
+                document.getElementById("email").value = emailplaceholder
+                document.getElementById("phoneNumber").value = phoneNumberplaceholder
+                document.getElementById("major").value = majorplaceholder
+                document.getElementById("yearOfStudy").value = yearOfStudyplaceholder
+                document.getElementById("description").value = descriptionplaceholder
+                document.getElementById("courses").value = currentCourseplaceholder
+                
+                console.log("done")
+           
+
 
             
             //var firstName = (userData.name)
-            //var lastName = (userData.name)
-            var gender = (userData.gender)
-            var email = (userData.email)
-            var phoneNumber = (userData.phoneNumber)
-            var major = (userData.major)
-            var yearOfStudy = (userData.yearOfStudy)
-            var description = (userData.description)
-            var currentCourse = (userData.currentCourses)
+            
 
-            console.log(firstName)
-            console.log(lastName)
-            console.log(gender)
-            console.log(email)
-            console.log(phoneNumber)
-            console.log(major)
-            console.log(yearOfStudy)
-            console.log(description)
-            console.log(currentCourse)
 
-            //document.getElementsById("firstName").value = firstName
-            //document.getElementsById("lasttName").value = lastName
-            document.getElementsById("gender").option = gender
-            document.getElementsById("email").value = email
-            document.getElementsById("phoneNumber").value = phoneNumber
-            document.getElementsById("major").value = major
-            document.getElementsById("yearOfStudy").value = yearOfStudy
-            document.getElementsById("description").value = description
-            document.getElementsById("courses").value = currentCourse
+
+            
 
             
 
