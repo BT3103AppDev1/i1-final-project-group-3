@@ -37,17 +37,17 @@
         <div class = "display-all-profile-cards">
             <div class="profile-card" v-for="profile in profiles" :key="profile.name" @click ="navigateToProfile(profile.name)">
       
-            <img class="profile-image-on-card" src="../assets/profile_picture.jpg" alt="">
-         
-            <h1 id = "profile-name">{{ profile.name }}</h1>
-            <h3 id = "profile-major-and-year">{{profile.major}}, Year {{profile.yearOfStudy}}</h3>
-            <h3 id = "profile-description">{{profile.description}}</h3> 
-        </div>
+              <img class="profile-image-on-card" src="../assets/profile_picture.jpg" alt="">
+          
+              <h1 id = "profile-name">{{ profile.name }}</h1>
+              <h3 id = "profile-major-and-year">{{profile.major}}, Year {{profile.yearOfStudy}}</h3>
+              <h3 id = "profile-description">{{profile.description}}</h3> 
+            </div>
       
-      </div>
+        </div>
 
 
-    </div> 
+      </div> 
     </div>
   
 </template>
@@ -423,6 +423,7 @@
  
     
   }
+
   
 
   .profile-card {
@@ -442,6 +443,20 @@
  
   
 }
+
+.profile-card:hover {
+    background-color:#525fe1;
+    box-shadow: 10px 10px 20px 11px rgba(33,33,33,.2); 
+    color: white;
+    transition: ease-in-out 0.3s;
+}
+
+.profile-card:hover h1,
+.profile-card:hover h3 {
+    color: #ffffff !important; /* Set text color to white */
+    transition: color 0.3s; /* Smooth transition for text color change */
+}
+
 
 .profile-image-on-card {
     width: 85%;
