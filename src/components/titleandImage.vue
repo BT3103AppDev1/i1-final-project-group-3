@@ -1,7 +1,7 @@
 <template>
     <div class="image-and-title">
             <div class="image-update">
-                <img :src="uploadedImage || '../assets/friends.png'" class="profile-image">
+              <img :src="uploadedImage || defaultImage" class="profile-image" alt="Profile Picture">
                 <button class="camera-upload" @click="openUploadDialog">
                     <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-camera-bolt" width="30" height="30" viewBox="0 0 24 24" stroke-width="1.5" stroke="white" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
@@ -29,19 +29,49 @@
                 <button @click="removePhoto" class="remove-photo">Remove Photo</button>
             </div>
             
-        </div>
     </div>
+  </div>
 </template>
 
 <script>
+import 'firebase/storage';
+
+import { doc, collection, getFirestore, setDoc, updateDoc, getDoc } from '@firebase/firestore';
+import firebaseApp from '../firebase';
+import { getAuth, onAuthStateChanged } from '@firebase/auth'
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { getDatabase } from 'firebase/database';
+import defaultImage from '../assets/profile_picture.jpg';
+
+const storage = getStorage(firebaseApp);
+const auth = getAuth();
+const db = getFirestore();
+
 export default {
   name: "TitleAndImage",
   data() {
     return {
       showUploadDialog: false,
-      uploadedImage: null,
+      uploadedImage: false,
+      defaultImage: defaultImage,
     };
   },
+
+  async mounted() {
+       const auth = getAuth();
+       onAuthStateChanged(auth, (user) => {
+         if (user) {
+           this.user = user;
+           this.useremail = user.email;
+           this.uid = user.uid;
+           this.fetchUserProfilePicture(this.useremail);
+         } else {
+           this.user = null;
+           this.useremail = null;
+         }
+       })
+
+     },
 
   methods: {
     openUploadDialog() {
@@ -65,14 +95,63 @@ export default {
 
     handleFileUpload(event) {
       const file = event.target.files[0];
+
       if (file && file.type.startsWith('image/')) {
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = async (e) => {
           this.uploadedImage = e.target.result;
+
+          // Now, upload the image to Firebase
+          const fileRef = ref(storage, 'profile-pictures/' + file.name);
+          try {
+            const snapshot = await uploadBytes(fileRef, file);
+            console.log('File uploaded');
+            
+            const url = await getDownloadURL(fileRef);
+            console.log('File URL:', url);
+
+            // Assuming user is signed in
+            if (auth.currentUser) {
+              const uid = auth.currentUser.uid;
+              const userImageDoc = doc(db, 'Users', uid);
+              
+              await setDoc(userImageDoc, { profilePicture: url }, { merge: true });
+              console.log('Profile picture URL saved to user profile');
+            } else {
+              console.log('User not signed in');
+            }
+          } catch (error) {
+            console.log('Error:', error);
+          }
         };
         reader.readAsDataURL(file);
       }
     },
+
+    async fetchUserProfilePicture() {
+      if (auth.currentUser) {
+        const uid = auth.currentUser.uid;
+        try {
+          const userDoc = await getDoc(doc(db, 'Users', uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            console.log('User data:', userData); // Check the fetched user data
+            if (userData.profilePicture) {
+              this.uploadedImage = userData.profilePicture;
+            } else {
+              console.log('Profile picture not found in user data');
+            }
+          } else {
+            console.log('No such document!');
+          }
+        } catch (error) {
+          console.error('Error getting document:', error);
+        }
+      } else {
+        console.log('User not signed in');
+      }
+    },
+
 
     closeUploadDialogOnClickOutside(event) {
       // Check if the click event occurred outside of the popup
