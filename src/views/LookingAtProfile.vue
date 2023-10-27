@@ -24,13 +24,22 @@
         </div>
         <div class="right-section">
             
-            <h2>{{  profile.name }}<span>{{ profile.name.split(' ').join('_').toLowerCase() }}</span></h2>
+            <!--- 
+                <h2>{{  profile.name }}<span>{{ profile.name.split(' ').join('_').toLowerCase() }}</span></h2> 
+            -->
+            <div class="name-and-username">
+                <h2>HEllo</h2>
+                <h4>@hello</h4>
+            </div>
+            
             <h3>{{ profile.major }}. Year {{  profile.yearOfStudy }}</h3>
             <p>{{ profile.description }}</p>
-            <div class="email">Email: {{  profile.email }}</div>
 
-
+            <div class="email">
+                <p class="header">Email:</p>
+                 {{  profile.email }}</div>
             <div class="courses">
+
                 <p class="header">Study Style:</p>
                 <ul>
                     <li v-for="course in profile.currentCourses" :key="course">{{ course }}</li>
@@ -206,26 +215,28 @@ button {
 }
 
 .header {
-    
-    font-size:24px;
+    font-size:30px;
     font-family: var(--font-yeseva-one);
     
 }
 
+.name-and-username {
+    display: flex; 
+    align-items: center;
+    gap: 10px;
+}
+
 .right-section {
     width: 60%;
+    text-align: left;
+    
 }
 
 .right-section h2 {
-    font-size: 2.5rem;
-    color: #333;
-    margin-bottom: 0.5rem;
-}
+    font-size: 60px;
+    color: #525fe1;
+   
 
-.right-section h2 span {
-    font-size: 1.2rem;
-    color: #555;
-    margin-left: 0.5rem;
 }
 
 .right-section h3 {
@@ -236,13 +247,9 @@ button {
 
 .right-section p, .right-section div {
     margin-bottom: 1.5rem;
-    font-size: 1.1rem;
     line-height: 1.5;
 }
 
-.right-section strong {
-    font-weight: bold;
-}
 
 </style>
 
