@@ -15,27 +15,42 @@
                 <button class="block">Block</button>
             </div>
 
-            <p class="GroupInfo">
-                <strong>Current Group:</strong> {{  currentGroup }}
-            </p>
+            <div class="groupInfo">
+                <p class="header">Current Group:</p> 
+                <div class="grouparray">
+                    {{  currentGroup }}
+                </div>
+            </div>
         </div>
         <div class="right-section">
-            <!-- Pull Details from User Profiles -->
+            
             <h2>{{  profile.name }}<span>{{ profile.name.split(' ').join('_').toLowerCase() }}</span></h2>
             <h3>{{ profile.major }}. Year {{  profile.yearOfStudy }}</h3>
             <p>{{ profile.description }}</p>
             <div class="email">Email: {{  profile.email }}</div>
+
+
             <div class="courses">
-                <strong>Current Courses:</strong>
+                <p class="header">Study Style:</p>
                 <ul>
                     <li v-for="course in profile.currentCourses" :key="course">{{ course }}</li>
                 </ul>
             </div>
+
             <div class="study-style">
-                Study Style: {{ profile.studyStyle }}
+                <p class="header">Study Style:</p> 
+                <div class="grouparray">
+                    {{ profile.studyStyle }}
+                </div>
+                
             </div>
+
             <div class="preference">
-                Preference of StudyBuddy: {{ profile.preference }}
+                <p class="header">StudyBuddy preference:</p> 
+                <div class="grouparray">
+                    {{ profile.preference }}
+                </div>
+                
             </div>
         </div>
     </div>
@@ -169,16 +184,32 @@ export default defineComponent({
 .message {
     background-color: #F86F03;
     color: white;
+    border-radius: 40px;
+    font-size: 15px;
+    font-family: var(--font-josefin-sans);
+    cursor: pointer;
 }
 
 .block {
     background-color: #FF4E50;
     color: white;
+    border-radius: 40px;
+    font-size: 15px;
+    font-family: var(--font-josefin-sans);
+    cursor: pointer;
 }
 
-.GroupInfo {
-    margin-top: 1rem;
-    font-size: 1.1rem;
+button {
+    width: 130px;
+    height: 50px;
+    
+}
+
+.header {
+    
+    font-size:24px;
+    font-family: var(--font-yeseva-one);
+    
 }
 
 .right-section {
