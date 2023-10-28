@@ -1,6 +1,16 @@
 <template>
   <div class="home-profiles-page">
-     <homeBanner />
+     <div class = "top-half">
+        <div class="top-container" /> 
+     
+        <NavigationBar/>
+
+            <img class="profile-image" alt = "" src="../assets/profile_picture.jpg" />
+
+            <div class="welcome-message">Welcome <br> back, Veviana</div>
+
+            <div class="subtag">How are we feeling today?</div>
+     </div>
        
     <div class = "bottom-half">
 
@@ -57,7 +67,7 @@
   import { getFirestore, collection, getDocs, addDoc } from "firebase/firestore"
   import firebaseApp from '../firebase.js';
   import { defineComponent } from "vue";
-  import homeBanner from "../components/homeBanner.vue";
+  import NavigationBar from '../components/NavigationBar.vue'
   import CreateGroups from "../components/CreateGroups.vue";
  
   const db = getFirestore(firebaseApp); 
@@ -66,7 +76,7 @@
   export default defineComponent({
     name: "HomeGroups",
     components: {
-      homeBanner,
+      NavigationBar,
       CreateGroups
     },
 
