@@ -1,22 +1,6 @@
 <template>
   <div class="home-profiles-page">
-     <div class = "top-half">
-        <div class="top-container" /> 
-     
-        <NavigationBar/>
-
-            <!--- <img class="profile-image" alt = "" src="../assets/profile_picture.jpg" />   -->
-            <img class="profile-image" alt="Profile Image" :src="profilePicture" v-if="profilePicture" />
-
-
-             
-
-            <div class="welcome-message" v-if="user">Welcome <br> back, {{firstName}}</div> 
-            
-            
-
-            <div class="subtag">How are we feeling today?</div>
-     </div>
+     <homeBanner />
        
     <div class = "bottom-half">
 
@@ -73,12 +57,13 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'vue-router';
 import router from '../router/index.js';
 import defaultProfilePicture from '../assets/default-profile-image.jpg';
+import homeBanner from '../components/homeBanner.vue';
 
 export default defineComponent({
   name: 'Home',
 
   components: {
-    NavigationBar,
+    homeBanner,
   },
 
   setup() {
