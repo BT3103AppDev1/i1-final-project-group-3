@@ -6,8 +6,8 @@
     <button class="editprofilebutton" @click="navigateToEditProfile">Edit Profile</button>
 
     <div class="own-profile-page-body">
-      <div class="users-name" v-if="user">{{user.displayName}}</div>
-      <img class="profilepicture-icon" alt="" src="../assets/profilepicture-icon.jpg" />
+      <div id="fullname" class="users-name" v-if="user">name</div>
+      <img :src="uploadedImage || defaultImage" class="profilepicture-icon" alt="Profile Picture"/>
       <div id="post-content" class="tabcontent" style="display: block;">
         <div class="post-1">
           <div class="post-rectangle-border" />
@@ -123,7 +123,8 @@
   import NavigationBar from '@/components/NavigationBar.vue'
   import { getAuth, onAuthStateChanged } from '@firebase/auth'
   import { doc, collection, getFirestore, getDoc } from '@firebase/firestore'
-  import firebaseApp from '../firebase'
+  import firebaseApp from '../firebase';
+  import defaultImage from '../assets/profile_picture.jpg';
 
   const db = getFirestore(firebaseApp)
 
@@ -136,7 +137,9 @@
        return {
           user:false,
           useremail:'',
-          uid: ''
+          uid: '',
+          uploadedImage: false,
+          defaultImage: defaultImage,
        }
     },
     
@@ -160,17 +163,26 @@
       async fetchUserData(useremail) {
         let userDocument = await getDoc(doc(db, "Users",this.uid));
         let userData = userDocument.data();
+        let firstName = (userData.firstName)
+        let lastName = (userData.lastName)
 
         let gender = (userData.gender)
-        let name = (userData.name)
         let major = (userData.major)
         let email = (userData.email)
         let description = (userData.description)
         let phoneNumber = (userData.phoneNumber)
         let yearOfStudy = (userData.yearOfStudy)
         let currentCourse = (userData.currentCourses)
+        //modifying picture
+        let profilePicture = (userData.photoURL)
 
-        document.getElementsByClassName("users-name").innerHTML = (String(name))
+        if (userData.profilePicture) {
+            this.uploadedImage = userData.profilePicture;
+          } else {
+            console.log('Profile picture not found in user data');
+        }
+      
+        document.getElementById("fullname").innerHTML = (String(firstName) + " " + String(lastName));
         document.getElementById("email").innerHTML = ("Email: " + String(email))
         document.getElementById("gender").innerHTML = ("Gender: " + String(gender))
         document.getElementById("phoneNumber").innerHTML = ("Phone Number: " + String(phoneNumber))
@@ -178,6 +190,8 @@
         document.getElementById("year").innerHTML = ("Year: " + String(yearOfStudy))
         document.getElementById("description").innerHTML = ("Description: " + String(description))
         document.getElementById("currentCourse").innerHTML = ("Current Courses: " + String(currentCourse))
+
+
 
       }, 
       
