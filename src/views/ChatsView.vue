@@ -17,12 +17,7 @@ export default {
 }
 </script>
 
-<style scoped>
-
-.navbar{
-    top: 0px;
-    left: 0px;
-}
+<style>
 
 
 
