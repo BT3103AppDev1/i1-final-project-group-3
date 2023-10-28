@@ -2,18 +2,18 @@
   <div class="sign-up-page-1" >
     <div class="content">
     <div class="rectangle-parent" id="TopBar">
-      <div @click="navigateToSignUp1">
+      <div>
         <span class="account-details" id="accountDetails">ACCOUNT DETAILS</span>
         <img class="group-child" alt="" src="../assets/rectangle-8@2x.png" />
         <strong class="strong3">1</strong>
       </div>
-      <div @click="navigateToSignUp2">
+      <div>
         <span class="about-you">ABOUT YOU</span>
         <img class="group-item" alt="" src="../assets/rectangle-8@2x.png" />
         <strong class="strong2">2</strong>
       </div>
-      <div @click="navigateToSignUp3"></div>
-      <div @click="navigateToSignUp4"></div>
+      <div></div>
+      <div></div>
       
       
       <img class="group-inner" alt="" src="../assets/rectangle-8@2x.png" />
@@ -38,6 +38,7 @@
         <img class="next-child" alt="" src="../assets/rectangle-48@2x.png" />
         <span class="next1" @click="updateProfile">Next</span>
       </button>
+      <span class="prev" @click="navigateToSignUp3">Previous</span>
       <div class="traits">
         <div class="row" v-for="(option, index) in tags" :key="index">
           <button type="button"
@@ -96,11 +97,8 @@ const db = getFirestore(firebaseApp);
       };
     },
     methods: {
-      navigateToSignUp2() {
-        this.$router.push({ name: 'SignUp2' });
-      },
-      navigateToSignUp1() {
-        this.$router.push({ name: 'Registration' });
+      navigateToSignUp3() {
+        this.$router.push({ name: 'SignUp3' });
       },
       toggleOption(index) {
         this.tags[index].checked = !this.tags[index].checked;
@@ -122,12 +120,7 @@ const db = getFirestore(firebaseApp);
         console.log(personalities);
 
         if (personalities.length > 5) {
-          Notification.requestPermission().then((permission) => {
-            if (permission === "granted") {
-              // Create and show a notification
-              const notification = new Notification("Please select only 5 tags!");
-            }
-          });
+          alert("Please select at most 5 personality types!")
         } else {
           try {
             const docRef = await updateDoc(doc(db, "Users", uid),{
@@ -363,6 +356,15 @@ const db = getFirestore(firebaseApp);
     left: 7.5rem;
     width: 8.06rem;
     height: 2.19rem;
+  }
+
+  .prev {
+    position:absolute;
+    top: 16.51rem;
+    left: 0rem;
+    height: 2.19rem;
+    text-decoration: underline;
+    font-size: 1rem;
   }
 
   .year-field {
