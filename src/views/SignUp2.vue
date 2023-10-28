@@ -51,7 +51,7 @@
           </label>
       </div>
       
-      <button class="next">
+      <button class="next" type="submit">
         <img class="next-child" alt="" src="../assets/rectangle-48@2x.png" />
         <span class="next1" @click="updateProfile">Next</span>
       </button>
@@ -77,7 +77,7 @@ const db = getFirestore(firebaseApp);
     name: "SignUpPage1",
     data() {
       return {
-        gender: null,
+        gender: "",
         user: false,
         uid: null,
       };
@@ -103,18 +103,22 @@ const db = getFirestore(firebaseApp);
 
         let uid = this.uid;
 
-        try{
-          const docRef = await setDoc(doc(db, "Users", uid),{
-            phoneNumber: phoneNumber,
-            userName : userName,
-            gender: gender,
-          })
-          console.log(docRef);
-          this.$router.push({ name: 'SignUp3' });
-          
-        }
-        catch(error) {
-          console.error("Error adding document: ", error);
+        if (userName != "" && phoneNumber != "" && gender != "") {
+          try{
+            const docRef = await setDoc(doc(db, "Users", uid),{
+              phoneNumber: phoneNumber,
+              userName : userName,
+              gender: gender,
+            })
+            console.log(docRef);
+            this.$router.push({ name: 'SignUp3' });
+            
+          }
+          catch(error) {
+            console.error("Error adding document: ", error);
+          }
+        } else {
+          alert("Please fill in all fields!");
         }
       },
     }, 

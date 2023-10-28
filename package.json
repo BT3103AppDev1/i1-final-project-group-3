@@ -8,7 +8,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "chalk": "^4.1.2",
     "firebase": "^9.23.0",
+
     "firebaseui": "^0.600.0",
     "vue": "^3.3.4",
     "vue-router": "^4.2.4",

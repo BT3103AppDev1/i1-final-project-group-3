@@ -26,6 +26,7 @@
         <img class="next-child" alt="" src="../assets/rectangle-48@2x.png" />
         <span class="next1" @click="updateProfile">Next</span>
       </button>
+      <span class="prev" @click="navigateToSignUp2">Previous</span>
       <input
         class="major-field"
         id="major"
@@ -35,7 +36,7 @@
       />
       
       <select name="year" id="year" class="year-field" v-model="year" required="">
-        <option value="" disabled="" selected="">Year of Study</option>
+        <option value="" disabled selected>Year of Study</option>
         <option value="1">Year 1</option>
         <option value="2">Year 2</option>
         <option value="3">Year 3</option>
@@ -86,6 +87,9 @@ const db = getFirestore(firebaseApp);
       navigateToSignUp4() {
         this.$router.push({ name: 'SignUp4' });
       },
+      navigateToSignUp2() {
+        this.$router.push({ name: 'SignUp2' });
+      },
       async updateProfile(event) {
         event.preventDefault();
         let major = document.getElementById("major").value;
@@ -104,19 +108,24 @@ const db = getFirestore(firebaseApp);
 
         console.log(validCourses);
 
-        try{
-          const docRef = await updateDoc(doc(db, "Users", uid),{
-            major: major,
-            currentCourses : validCourses,
-            yearOfStudy: year,
-            description: description,
-          })
-          console.log(docRef);
-          this.$router.push({ name: 'SignUp4' });
-          
-        }
-        catch(error) {
-          console.error("Error adding document: ", error);
+        if (year != null && major != "" && validCourses.length > 0 && description != "") {
+
+          try{
+            const docRef = await updateDoc(doc(db, "Users", uid),{
+              major: major,
+              currentCourses : validCourses,
+              yearOfStudy: year,
+              description: description,
+            })
+            console.log(docRef);
+            this.$router.push({ name: 'SignUp4' });
+            
+          }
+          catch(error) {
+            console.error("Error adding document: ", error);
+          }
+        } else {
+          alert("Please fill in all fields!");
         }
       },
     }, 
@@ -337,6 +346,15 @@ const db = getFirestore(firebaseApp);
     left: 7.5rem;
     width: 8.06rem;
     height: 2.19rem;
+  }
+
+  .prev {
+    position:absolute;
+    top: 16.51rem;
+    left: 0rem;
+    height: 2.19rem;
+    text-decoration: underline;
+    font-size: 1rem;
   }
 
   .year-field {
