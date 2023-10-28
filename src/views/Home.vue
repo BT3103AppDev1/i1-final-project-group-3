@@ -87,6 +87,7 @@ export default defineComponent({
     const uid = ref('');
     const profilePicture = ref('');
     const firstName = ref('');
+    const router = useRouter();
 
     onMounted(() => {
       const auth = getAuth(firebaseApp);
@@ -117,13 +118,13 @@ export default defineComponent({
     });
 
     const navigateToGroups = () => {
-      const router = useRouter();
+     
       router.push({ name: 'HomeGroups' });
 
     };
 
     const navigateToProfile = (profileName) => {
-      this.$router.push({ name: 'profile', params: { name: profileName }});
+      router.push({ name: 'profile', params: { name: profileName }});
 
     };
 
