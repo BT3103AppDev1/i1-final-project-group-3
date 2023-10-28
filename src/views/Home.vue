@@ -5,9 +5,15 @@
      
         <NavigationBar/>
 
-            <img class="profile-image" alt = "" src="../assets/profile_picture.jpg" />
+            <img class="profile-image" alt = "" src="../assets/profile_picture.jpg" />  
+            <!--<img class="profile-image" alt="" :src="user ? user.profilePicture : ''" />-->
 
-            <div class="welcome-message">Welcome <br> back, Veviana</div>
+
+             
+
+            <div class="welcome-message" v-if="user">Welcome <br> back, {{user.displayName}}</div> 
+            
+            
 
             <div class="subtag">How are we feeling today?</div>
      </div>
@@ -19,9 +25,11 @@
             <h1 id = "study-buddy-header">Find your StudyBuddy today!</h1>
             <h2 id = "profiles-and-groups">Profiles and Groups for you to discover</h2>
             <div id="app">
-                <input id="search-input" type="text" placeholder="Search using Keywords: BT3103/ Business Analytics">
-                <img class="search-icon"  @click="search" alt = "" src="../assets/search.png" />
+              <input id="search-input" type="text" placeholder="Search using Keywords: BT3103/ Business Analytics">
+              <img class="search-icon" alt="" src="../assets/search.png" />
+
             
+          
             </div>
             
         </div>
@@ -36,8 +44,11 @@
  
         <div class = "display-all-profile-cards">
             <div class="profile-card" v-for="profile in profiles" :key="profile.name" @click ="navigateToProfile(profile.name)">
-      
-            <img class="profile-image-on-card" src="../assets/profile_picture.jpg" alt="">
+    
+            <img class="profile-image-on-card" :src="profile.profilePicture" alt="">
+            
+            
+   
          
             <h1 id = "profile-name">{{ profile.name }}</h1>
             <h3 id = "profile-major-and-year">{{profile.major}}, Year {{profile.yearOfStudy}}</h3>
@@ -60,7 +71,7 @@
   import firebaseApp from '../firebase.js';
   import { defineComponent } from "vue";
   import NavigationBar from '../components/NavigationBar.vue'
-  import {getAuth} from "firebase/auth";
+  import {getAuth, onAuthStateChanged} from "firebase/auth";
  
   
 
@@ -71,12 +82,41 @@
       NavigationBar
     },
 
+  
+
     data() {
         return {
-            profiles: []
+            profiles: [],
+            user: false,
+            uid: '',
+            profilePicture: ''
         };
     },
-    
+
+
+    async mounted() {
+            const auth = getAuth();
+            onAuthStateChanged(auth, (user) => {
+              if (user) {
+                this.user = user;
+                this.uid = user.uid;
+          
+              } else {
+                this.user = null;
+          
+              }
+            }),
+
+             this.fetchDataFromFirebase();
+
+          },
+
+
+
+     
+
+
+ 
     methods: {
       navigateToGroups() {
         this.$router.push({ name: 'HomeGroups' });
@@ -85,37 +125,38 @@
       navigateToProfile(profileName) {
           this.$router.push({ name: 'profile', params: { name: profileName }});
       },
-
+   
+  
       async fetchDataFromFirebase() {
-        const db = getFirestore(firebaseApp); // Get Firestore instance from your initialized Firebase app
-        const usersCollection = collection(db, "Users"); // Reference to the "Users" collection
+        const db = getFirestore(firebaseApp); 
+        const usersCollection = collection(db, "Users");  
 
         try {
             const querySnapshot = await getDocs(usersCollection);
             const profiles = [];
             querySnapshot.forEach((doc) => {
             const profileData = doc.data();
-            // Push the retrieved profile data into the profiles array
+           
             profiles.push({
                 name: profileData.name,
                 major: profileData.major,
                 yearOfStudy: profileData.yearOfStudy,
                 description: profileData.description,
-                // Add other fields as needed
+                profilePicture: profileData.profilePicture 
+              
             });
-            });
-            // Update the component's state with retrieved profiles
+            }); 
             this.profiles = profiles;
+    
+
         } catch (error) {
             console.error("Error fetching data: ", error);
         }
         }
         },
         
-    mounted() {
-    // Call the method to fetch data from Firebase when the component is mounted
-        this.fetchDataFromFirebase();
-  }
+
+ 
   });
   
 
@@ -254,19 +295,21 @@
 
 
 
-
-  
+ 
   .welcome-message {
     position: absolute;
     top: 14.19rem;
-    left: 5.56rem;
-    font-size: 6.25rem;
+    left: 30%; 
+    font-size: 5rem;
     font-family: 'Yeseva One';
     display: inline-block;
-    width: 45.06rem;
-    height: 15.56rem;
+    width: auto;
+    max-width: 100%;
+    transform: translateX(-50%);
     color: white;
-  }
+    text-align: center;
+}
+
 
   .subtag {
     position: absolute;
@@ -351,7 +394,7 @@
 .search-icon {
   position: absolute;
   top: 10.1em;
-  left: 64rem; 
+  left: 68rem; 
   transform: translateY(-50%);
   cursor: pointer; 
   width: 1.5rem;
