@@ -41,7 +41,7 @@ import firebaseApp from '../firebase';
 import { getAuth, onAuthStateChanged } from '@firebase/auth'
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { getDatabase } from 'firebase/database';
-import defaultImage from '../assets/profile_picture.jpg';
+import defaultImage from '../assets/default-profile-image.jpg';
 
 const storage = getStorage(firebaseApp);
 const auth = getAuth();
