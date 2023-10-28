@@ -1,22 +1,6 @@
 <template>
   <div class="home-profiles-page">
-     <div class = "top-half">
-        <div class="top-container" /> 
-     
-        <NavigationBar/>
-
-            <!--- <img class="profile-image" alt = "" src="../assets/profile_picture.jpg" />   -->
-            <img class="profile-image" alt="Profile Image" :src="profilePicture" v-if="profilePicture" />
-
-
-             
-
-            <div class="welcome-message" v-if="user">Welcome <br> back, {{firstName}}</div> 
-            
-            
-
-            <div class="subtag">How are we feeling today?</div>
-     </div>
+    <homeBanner />
        
     <div class = "bottom-half">
 
@@ -68,7 +52,7 @@
 import { ref, defineComponent, onMounted } from 'vue';
 import { getFirestore, collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import firebaseApp from '../firebase.js';
-import NavigationBar from '../components/NavigationBar.vue';
+import homeBanner from '../components/homeBanner.vue';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'vue-router';
 import router from '../router/index.js';
@@ -78,7 +62,8 @@ export default defineComponent({
   name: 'Home',
 
   components: {
-    NavigationBar,
+    homeBanner,
+
   },
 
   setup() {
@@ -220,25 +205,7 @@ export default defineComponent({
 
   
 
-  .top-container {
-    position: absolute;
-    background-color: #525fe1;
-    width: 100%;
-    height: 40rem;
-  }
  
-
-
-  .profile-image {
-    position: absolute;
-    top: 10.44rem;
-    left: 54.81rem;
-    border-radius: 50%;
-    width: 25rem;
-    height: 25rem;
-    object-fit: cover;
-  }
-
 
  
 
@@ -332,33 +299,9 @@ export default defineComponent({
 
 
  
-  .welcome-message {
-    position: absolute;
-    top: 14.19rem;
-    left: 30%; 
-    font-size: 5rem;
-    font-family: 'Yeseva One';
-    display: inline-block;
-    width: auto;
-    max-width: 100%;
-    transform: translateX(-50%);
-    color: white;
-    text-align: center;
-}
+  
 
 
-  .subtag {
-    position: absolute;
-    top: 29.75rem;
-    left: 12.19rem;
-    font-size: 2rem;
-    font-weight: 600;
-    display: inline-block;
-    width: 31.81rem;
-    height: 2.88rem;
-    font-family: 'Yeseva One';
-    color: white;
-  }
 
  
 
