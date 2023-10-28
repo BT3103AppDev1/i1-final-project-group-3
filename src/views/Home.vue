@@ -5,9 +5,15 @@
      
         <NavigationBar/>
 
-            <img class="profile-image" alt = "" src="../assets/profile_picture.jpg" />
+            <!--- <img class="profile-image" alt = "" src="../assets/profile_picture.jpg" />   -->
+            <img class="profile-image" alt="Profile Image" :src="profilePicture" v-if="profilePicture" />
 
-            <div class="welcome-message">Welcome <br> back, Veviana</div>
+
+             
+
+            <div class="welcome-message" v-if="user">Welcome <br> back, {{firstName}}</div> 
+            
+            
 
             <div class="subtag">How are we feeling today?</div>
      </div>
@@ -19,9 +25,11 @@
             <h1 id = "study-buddy-header">Find your StudyBuddy today!</h1>
             <h2 id = "profiles-and-groups">Profiles and Groups for you to discover</h2>
             <div id="app">
-                <input id="search-input" type="text" placeholder="Search using Keywords: BT3103/ Business Analytics">
-                <img class="search-icon"  @click="search" alt = "" src="../assets/search.png" />
+              <input id="search-input" type="text" placeholder="Search using Keywords: BT3103/ Business Analytics">
+              <img class="search-icon" alt="" src="../assets/search.png" />
+
             
+          
             </div>
             
         </div>
@@ -36,91 +44,160 @@
  
         <div class = "display-all-profile-cards">
             <div class="profile-card" v-for="profile in profiles" :key="profile.name" @click ="navigateToProfile(profile.name)">
+       
+             <!-- <img class="profile-image-on-card" src="../assets/profile_picture.jpg" alt="">-->
+              <img class="profile-image-on-card" :src="profile.profilePicture" alt=""> 
+          
+              <h1 id = "profile-name" >{{ profile.name }}</h1>
+              <h3 id = "profile-major-and-year">{{profile.major}}, Year {{profile.yearOfStudy}}</h3>
+              <h3 id = "profile-description">{{profile.description}}</h3> 
+            </div>
+
       
-            <img class="profile-image-on-card" src="../assets/profile_picture.jpg" alt="">
-         
-            <h1 id = "profile-name">{{ profile.name }}</h1>
-            <h3 id = "profile-major-and-year">{{profile.major}}, Year {{profile.yearOfStudy}}</h3>
-            <h3 id = "profile-description">{{profile.description}}</h3> 
         </div>
-      
-      </div>
 
 
-    </div> 
+      </div> 
     </div>
   
 </template>
 
 
 
+<script>
+import { ref, defineComponent, onMounted } from 'vue';
+import { getFirestore, collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import firebaseApp from '../firebase.js';
+import NavigationBar from '../components/NavigationBar.vue';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { useRouter } from 'vue-router';
+import router from '../router/index.js';
+import defaultProfilePicture from '../assets/default-profile-image.jpg';
 
-<script>  
-  import { getFirestore, collection, getDocs } from "firebase/firestore"
-  import firebaseApp from '../firebase.js';
-  import { defineComponent } from "vue";
-  import NavigationBar from '../components/NavigationBar.vue'
-  import {getAuth} from "firebase/auth";
- 
-  
+export default defineComponent({
+  name: 'Home',
 
-  export default defineComponent({
-    name: "Home",
-    
-    components: {
-      NavigationBar
-    },
+  components: {
+    NavigationBar,
+  },
 
-    data() {
-        return {
-            profiles: []
-        };
-    },
-    
-    methods: {
-      navigateToGroups() {
-        this.$router.push({ name: 'HomeGroups' });
-      },
+  setup() {
+    const profiles = ref([]);
+    const user = ref(null);
+    const uid = ref('');
+    const profilePicture = ref('');
+    const firstName = ref('');
+    const router = useRouter();
 
-      navigateToProfile(profileName) {
-          this.$router.push({ name: 'profile', params: { name: profileName }});
-      },
-
-      async fetchDataFromFirebase() {
-        const db = getFirestore(firebaseApp); // Get Firestore instance from your initialized Firebase app
-        const usersCollection = collection(db, "Users"); // Reference to the "Users" collection
-
-        try {
-            const querySnapshot = await getDocs(usersCollection);
-            const profiles = [];
-            querySnapshot.forEach((doc) => {
-            const profileData = doc.data();
-            // Push the retrieved profile data into the profiles array
-            profiles.push({
-                name: profileData.name,
-                major: profileData.major,
-                yearOfStudy: profileData.yearOfStudy,
-                description: profileData.description,
-                // Add other fields as needed
-            });
-            });
-            // Update the component's state with retrieved profiles
-            this.profiles = profiles;
-        } catch (error) {
-            console.error("Error fetching data: ", error);
+    onMounted(() => {
+      const auth = getAuth(firebaseApp);
+      onAuthStateChanged(auth, async (firebaseUser) => {
+        if (firebaseUser) {
+          user.value = firebaseUser;
+          
+          // Fetch user's first name and profile picture from the database
+          const db = getFirestore(firebaseApp);
+          const userDocRef = doc(db, 'Users', firebaseUser.uid);
+          try {
+            const userDoc = await getDoc(userDocRef);
+            if (userDoc.exists()) {
+              const userData = userDoc.data();
+              firstName.value = userData.firstName ;
+              profilePicture.value = userData.profilePicture ;
+            } else {
+              console.log('User document does not exist!');
+            }
+          } catch (error) {
+            console.error('Error fetching user document:', error);
+          }
+        } else {
+          user.value = null;
         }
-        }
-        },
+      });
+      fetchProfilesFromFirebase();
+    });
+
+    const navigateToGroups = () => {
+     
+      router.push({ name: 'HomeGroups' });
+
+    };
+
+    const navigateToProfile = (profileName) => {
+      router.push({ name: 'profile', params: { name: profileName }});
+
+    };
+
+    const fetchProfilesFromFirebase = async () => {
+      const db = getFirestore(firebaseApp);
+      const usersCollection = collection(db, 'Users');
+      try {
+        const querySnapshot = await getDocs(usersCollection);
+        const profilesArray = [];
         
-    mounted() {
-    // Call the method to fetch data from Firebase when the component is mounted
-        this.fetchDataFromFirebase();
-  }
-  });
-  
+        querySnapshot.forEach((doc) => {
+          const profileData = doc.data();
+          const auth = getAuth();
+          const firebaseUser = auth.currentUser;
 
-  
+          // modifying the display name
+          let displayName;
+            if (firebaseUser) {
+              if (profileData.firstName == null && profileData.lastName == null) { 
+                displayName = profileData.name; // name displayed will be their gmail account name unless they update it in the edit profile page
+              } else {
+                displayName = profileData.firstName + " " + profileData.lastName;
+              }
+                
+            } 
+
+          // modifying the year of study
+          const yearOfStudy = profileData.yearOfStudy ? String(profileData.yearOfStudy).match(/\d+/)[0] : 'Unknown';
+          const year = yearOfStudy[0];
+
+          //modifying picture
+          let profilePicture = profileData.profilePicture;
+      
+          if (!profilePicture) {
+            // If profilePicture is not available in Firestore, 
+            // you might want to fetch it from Firebase Authentication
+            // This is a simplified example; you might need to adjust based on your app's structure
+            
+            if (firebaseUser) {
+              profilePicture = profileData.photoURL;
+            }
+          }
+
+
+          profilesArray.push({
+            name: displayName,
+            major: profileData.major,
+            yearOfStudy: yearOfStudy,
+            description: profileData.description,
+            profilePicture: profileData.profilePicture || defaultProfilePicture,
+          });
+        });
+
+
+        profiles.value = profilesArray;
+      } catch (error) {
+        console.error('Error fetching data: ', error);
+      }
+    };
+
+    return {
+      profiles,
+      user,
+      uid,
+      profilePicture,
+      firstName,
+      navigateToGroups,
+      navigateToProfile,
+    };
+  },
+});
 </script>
+
 
 
 
@@ -254,19 +331,21 @@
 
 
 
-
-  
+ 
   .welcome-message {
     position: absolute;
     top: 14.19rem;
-    left: 5.56rem;
-    font-size: 6.25rem;
+    left: 30%; 
+    font-size: 5rem;
     font-family: 'Yeseva One';
     display: inline-block;
-    width: 45.06rem;
-    height: 15.56rem;
+    width: auto;
+    max-width: 100%;
+    transform: translateX(-50%);
     color: white;
-  }
+    text-align: center;
+}
+
 
   .subtag {
     position: absolute;
@@ -351,7 +430,7 @@
 .search-icon {
   position: absolute;
   top: 10.1em;
-  left: 64rem; 
+  left: 68rem; 
   transform: translateY(-50%);
   cursor: pointer; 
   width: 1.5rem;
@@ -423,6 +502,7 @@
  
     
   }
+
   
 
   .profile-card {
@@ -442,6 +522,20 @@
  
   
 }
+
+.profile-card:hover {
+    background-color:#525fe1;
+    box-shadow: 10px 10px 20px 11px rgba(33,33,33,.2); 
+    color: white;
+    transition: ease-in-out 0.3s;
+}
+
+.profile-card:hover h1,
+.profile-card:hover h3 {
+    color: #ffffff !important; /* Set text color to white */
+    transition: color 0.3s; /* Smooth transition for text color change */
+}
+
 
 .profile-image-on-card {
     width: 85%;

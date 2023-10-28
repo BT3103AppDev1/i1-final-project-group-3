@@ -15,28 +15,91 @@
                 <button class="block">Block</button>
             </div>
 
-            <p class="GroupInfo">
-                <strong>Current Group:</strong> {{  currentGroup }}
-            </p>
+            <div class="group-info">
+                <p class="header" id="current-group">Current Group:</p> 
+                <div class="grouparray">
+                    <li>abcdefghijk</li>
+                    <li>abc</li>
+                    <li>abc</li>
+                   <!--- 
+                        {{  currentGroup }}
+                     --->
+                </div>
+            </div>
         </div>
         <div class="right-section">
-            <!-- Pull Details from User Profiles -->
-            <h2>{{  profile.name }}<span>{{ profile.name.split(' ').join('_').toLowerCase() }}</span></h2>
-            <h3>{{ profile.major }}. Year {{  profile.yearOfStudy }}</h3>
-            <p>{{ profile.description }}</p>
-            <div class="email">Email: {{  profile.email }}</div>
-            <div class="courses">
-                <strong>Current Courses:</strong>
-                <ul>
-                    <li v-for="course in profile.currentCourses" :key="course">{{ course }}</li>
-                </ul>
+            
+            <!--- 
+                <h2>{{  profile.name }}<span>{{ profile.name.split(' ').join('_').toLowerCase() }}</span></h2> 
+            -->
+            <div class="name-and-username">
+                <h2>abcdefghi</h2>
+                <h4>@hello</h4>
             </div>
-            <div class="study-style">
-                Study Style: {{ profile.studyStyle }}
+
+            <div class="major-profileDescription">
+                <!---
+                    <h3>{{ profile.major }}, Year {{  profile.yearOfStudy }}</h3>
+                    <p>{{ profile.description }}</p>
+                    
+                --->
+
+                <h4>Data Science and analy, Year 3</h4>
+                <h3>hello abcdefhgh</h3>
+
+                
+
             </div>
-            <div class="preference">
-                Preference of StudyBuddy: {{ profile.preference }}
+
+            <div class="profile-info">
+
+                <p class="header">Email:</p>
+                <p>gmail.com</p>
+                    <!--- {{  profile.email }} ---> 
+
+
+                <p class="header">Study Style:</p>
+
+                <div class="course-list">
+                    <li>bt123231</li>
+                    <li>bt123231</li>
+                    <li>bt123231</li>
+                    <li>bt123231</li>
+
+                    <!---
+                    <ul>
+                        <li v-for="course in profile.currentCourses" :key="course">{{ course }}</li>
+                    </ul>
+                    --->
+                </div>
+                
+
+
+
+                <p class="header">Study Style:</p> 
+                <!---
+                    <div class="grouparray">
+                    {{ profile.studyStyle }}
+                </div>
+                    --->
+                <p>motivated etc.</p>
+                
+                    
+
+                <p class="header">StudyBuddy preference:</p> 
+                <!---
+                <div class="grouparray">
+                    {{ profile.preference }}
+                </div>
+                --->
+                <p>motivated etc.</p>
+
+                    
+
             </div>
+            
+            
+            
         </div>
     </div>
     </div>
@@ -135,6 +198,8 @@ export default defineComponent({
     flex-direction: column;
     align-items: center; 
     justify-content: center;
+    position: relative;
+    top: -100px;
 }
 
 .profile-image {
@@ -169,49 +234,120 @@ export default defineComponent({
 .message {
     background-color: #F86F03;
     color: white;
+    border-radius: 40px;
+    font-size: 15px;
+    font-family: var(--font-josefin-sans);
+    cursor: pointer;
 }
 
 .block {
     background-color: #FF4E50;
     color: white;
+    border-radius: 40px;
+    font-size: 15px;
+    font-family: var(--font-josefin-sans);
+    cursor: pointer;
 }
 
-.GroupInfo {
-    margin-top: 1rem;
-    font-size: 1.1rem;
+.group-info {
+    display: flex;
+    flex-direction: row;
+    text-align: left;
+    gap: 40px;
+}
+
+.profile-info {
+    display: grid;
+    flex-direction: column;
+    text-align: left;
+
+    grid-template-columns: repeat(2, 1fr); /* Creates 2 columns */
+    grid-template-rows: repeat(4, 1fr); /* Creates 4 rows */
+    gap: 30px; 
+}
+
+.grouparray {
+    flex-direction: row;
+    align-items: left;
+}
+
+button {
+    width: 130px;
+    height: 50px;
+    
+}
+
+.header {
+    font-size:30px;
+    font-family: var(--font-yeseva-one);
+    
+}
+
+.name-and-username {
+    display: flex; 
+    align-items: center;
+    gap: 80px;
+    margin-left: 10px;
+}
+
+h4 {
+    font-size: 1.5rem;
+    color: #ada6a6;
+    margin-bottom: 1rem;
+    font-style:italic;
+    font-weight: lighter;
+    position: relative;
+    top: -30px;
+    font-family: var(--font-josefin-sans);
+}
+
+p {
+    font-family: var(--font-josefin-sans);
+}
+
+.major-profileDescription {
+    position: relative;
+    top: -20px;
+    margin-left: 10px;
+}
+
+h3 {
+    font-family: var(--font-josefin-sans);
+    color: #ADA6A6;
+    font-size: 22px;
+    position: relative;
+    top:-30px;
+    font-size: 30px;
+    
 }
 
 .right-section {
     width: 60%;
+    text-align: left;
+    padding-left: 80px;
+
+    
 }
 
 .right-section h2 {
-    font-size: 2.5rem;
-    color: #333;
-    margin-bottom: 0.5rem;
-}
+    font-size: 60px;
+    color: #525fe1;
 
-.right-section h2 span {
-    font-size: 1.2rem;
-    color: #555;
-    margin-left: 0.5rem;
+   
+
 }
 
 .right-section h3 {
-    font-size: 1.4rem;
+    
     color: #555;
     margin-bottom: 1rem;
 }
 
 .right-section p, .right-section div {
     margin-bottom: 1.5rem;
-    font-size: 1.1rem;
     line-height: 1.5;
 }
 
-.right-section strong {
-    font-weight: bold;
-}
 
 </style>
 

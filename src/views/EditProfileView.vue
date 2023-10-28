@@ -78,51 +78,57 @@
 
                     <div id="first-name" class="input">
                         <h3>First Name</h3>
-                        <input type="text" v-model="firstName" placeholder="Veviana" />
+                        <input type="text" id="firstName"  :placeholder="firstNameplaceholder" />
                     </div>
 
                     <div id="last-name" class="input">
                         <h3>Last Name</h3>
-                        <input type="text" v-model="lastName" placeholder="Tay" />
+                        <input type="text" id="lastName"  :placeholder="lastNameplaceholder" />
                     </div>
 
-                    <div id="gender" class="input">
+                    <div id="gender-user" class="input">
                         <h3>Gender</h3>
-                        <select v-model="selectedGender">
+                        <select v-model="selectedGender" id="gender" :placeholder="genderplaceholder">
                             <option value="male">Male</option>
                             <option value="female">Female</option>
                             <option value="others">Others</option>
                         </select>
                     </div>
 
-                    <div id="email" class="input">
+                    <div id="email-user" class="input" >
                         <h3>Email</h3>
-                        <input type="email" v-model="email" placeholder="vevianatay@gmail.com" />
+                        <input type="email" id="email" v-model="email" :placeholder="emailplaceholder" />
                     </div>
 
                     <div id="mobile" class="input">
                         <h3>Mobile Number</h3>
-                        <input type="tel" v-model="phoneNumber" placeholder="+65 8123 4567" />
+                        <input type="tel" id="phoneNumber" v-model="phoneNumber" :placeholder="phoneNumberplaceholder" />
                     </div>
 
-                    <div id="major" class="input">
+                    <div id="major-course" class="input">
                         <h3>Major</h3>
-                        <input type="text" v-model="course" placeholder="Business Analytics" />
+                        <input type="text" id="major" v-model="major" :placeholder="majorplaceholder" />
                     </div>
 
                     <div id="year-study" class="input">
                         <h3>Year of Study</h3>
-                        <input type="number" v-model="yearOfStudy" placeholder="2" />
+                        <select id="yearOfStudy" v-model="yearOfStudy" :placeholder="yearOfStudyplaceholder" > 
+                            <option value="year1">Year 1</option>
+                            <option value="year2">Year 2</option>
+                            <option value="year3">Year 3</option>
+                            <option value="year4">Year 4</option>
+                            
+                        </select>
                     </div>
 
                     <div id="course" class="input">
                         <h3>Current Courses</h3>
-                        <input type="text" v-model="courses" placeholder="BT3103, BT3102, CS2040" />
+                        <input type="text" id="courses" v-model="courses" :placeholder="currentCourseplaceholder" />
                     </div>
 
-                    <div id="description" class="input">
+                    <div id="describe" class="input">
                         <h3>Description</h3>
-                        <input type="text" v-model="description" id="description" placeholder="Hi, I aspire to become a business analyst once I graduate. I am an enthusiastic, self-motivated and hardworking person." />
+                        <input type="text" id="description" v-model="description"  :placeholder="descriptionplaceholder " />
                     </div>
 
                 </div>
@@ -175,6 +181,33 @@
 <script>
 import NavBar from '@/components/NavigationBar.vue';
 import titleandImage from '../components/titleandImage.vue';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { doc, collection, getFirestore, getDoc, updateDoc } from '@firebase/firestore';
+import firebaseApp from '../firebase'
+import { ref, onMounted } from 'vue';
+import { getDatabase, update } from "firebase/database";
+
+
+
+const db = getFirestore(firebaseApp);
+const database = getDatabase(firebaseApp);
+
+async function updateProfile(uid, updates) {
+    console.log("updating profile function" );
+    console.log(uid)
+    console.log(updates);
+
+    const userRef = doc(db, 'Users/' + uid);
+    console.log("userRef");
+    try {
+        await updateDoc(userRef, updates);
+        console.log("Profile updated successfully");
+    } catch (error) {
+        console.error("Error updating profile:", error);
+    }
+}
+
+
 
 export default {
     name: "EditProfile",
@@ -186,8 +219,43 @@ export default {
     data() {
         return {
             activeTab: 'account-content',
-        }
+            userData: {
+                firstName: '',
+                lastName: '',
+                genderplaceholder: '',
+                emailplaceholder: '',
+                phoneNumberplaceholder: '',
+                majorplaceholder: '',
+                yearOfStudyplaceholder: '',
+                coursesplaceholder: '',
+                descriptionplaceholder: '',
+                user: null,
+
+            },
+
+        
+       }
     },
+
+    async mounted() {
+       const auth = getAuth();
+       onAuthStateChanged(auth, (user) => {
+            if (user) {
+                this.user = user;
+                this.useremail = user.email;
+                this.uid = user.uid;
+                this.fetchUserData(this.useremail);
+                //const displayName = user.displayName;
+                //console.log(displayName);
+            } else {
+                this.user = null;
+                this.useremail = null;
+         }
+       })
+
+    },
+    
+    
 
     methods: { 
         openSection(evt, section) {
@@ -204,9 +272,118 @@ export default {
             this.$router.push({ name: 'OwnProfile' });
         },
 
-        navigateToSave() {
-            alert("Updated!");
+        async navigateToSave() {
+    
+            console.log("updating particulars");
+            var firstName = document.getElementById("firstName").value
+            var lastName = document.getElementById("lastName").value
+            var gender = document.getElementById("gender").value
+            var email = document.getElementById("email").value
+            var phoneNumber = document.getElementById("phoneNumber").value
+            var major = document.getElementById("major").value
+            var yearOfStudy = document.getElementById("yearOfStudy").value
+            var description = document.getElementById("description").value
+            var currentCourses = document.getElementById("courses").value
+            var currentCoursesArray = currentCourses.split(',').map(course => course.trim());
+
+            console.log(firstName)
+            console.log(lastName)
+            console.log(gender)
+            console.log(email)
+            console.log(phoneNumber)
+            console.log(major)
+            console.log(yearOfStudy)
+            console.log(description)
+            console.log(currentCoursesArray)
+
+            var updates = {
+                firstName: firstName,
+                lastName: lastName,
+                gender: gender,
+                email: email,
+                phoneNumber: phoneNumber,
+                major: major,
+                yearOfStudy: yearOfStudy,
+                description: description,
+                currentCourses: currentCoursesArray
+
+            }
+            console.log("received updates");
+
+            updateProfile(this.uid, updates);
+            alert("Your profile has been updated!");
+            this.$router.push({ name: 'OwnProfile' });
         },
+
+
+
+        async fetchUserData(uid) {
+            let userDocument = await getDoc(doc(db, "Users",this.uid));
+            let userData = userDocument.data();
+            const auth = getAuth();
+            const firebaseUser = auth.currentUser;
+
+            //const displayName = firebaseUser ? firebaseUser.displayName : null;
+            let displayName;
+            if (firebaseUser) {
+                displayName = userData.firstName + " " + userData.lastName;
+            } else {
+                displayName = firebaseUser.displayName;
+            }
+
+
+            
+
+            const nameParts = displayName.split(' ');
+            let first = nameParts[0];
+            let last =  nameParts.slice(1).join(' ');
+            
+
+                var firstNameplaceholder = first
+                var lastNameplaceholder = last
+                var genderplaceholder = (userData.gender)
+                var emailplaceholder = (userData.email)
+                var phoneNumberplaceholder= (userData.phoneNumber)
+                var majorplaceholder = (userData.major)
+                var yearOfStudyplaceholder = (userData.yearOfStudy)
+                var descriptionplaceholder = (userData.description)
+                var currentCourseplaceholder = (userData.currentCourses)
+
+                console.log(firstNameplaceholder)
+                console.log(lastNameplaceholder)
+                console.log(genderplaceholder)
+                console.log(emailplaceholder)
+                console.log(phoneNumberplaceholder)
+                console.log(majorplaceholder)
+                console.log(yearOfStudyplaceholder)
+                console.log(descriptionplaceholder)
+                console.log(currentCourseplaceholder)
+
+                document.getElementById("firstName").value = firstNameplaceholder
+                document.getElementById("lastName").value = lastNameplaceholder
+                document.getElementById("gender").value= genderplaceholder
+                document.getElementById("email").value = emailplaceholder
+                document.getElementById("phoneNumber").value = phoneNumberplaceholder
+                document.getElementById("major").value = majorplaceholder
+                document.getElementById("yearOfStudy").value = yearOfStudyplaceholder
+                document.getElementById("description").value = descriptionplaceholder
+                document.getElementById("courses").value = currentCourseplaceholder
+                
+                console.log("done")
+           
+
+
+            
+            //var firstName = (userData.name)
+            
+
+
+
+            
+
+            
+
+        }, 
 
 
 
@@ -432,6 +609,7 @@ input[id="description"] {
     text-align: left; /* Align the placeholder text to the left */
     white-space: pre-line;
     line-height: 2;
+    
 }
 
 
