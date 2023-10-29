@@ -17,7 +17,11 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
+.navbar {
+    top:0px;
+    left:0px;
+}
 
 
 

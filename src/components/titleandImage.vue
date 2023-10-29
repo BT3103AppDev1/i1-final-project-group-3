@@ -41,7 +41,7 @@ import firebaseApp from '../firebase';
 import { getAuth, onAuthStateChanged } from '@firebase/auth'
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { getDatabase } from 'firebase/database';
-import defaultImage from '../assets/profile_picture.jpg';
+import defaultImage from '../assets/default-profile-image.jpg';
 
 const storage = getStorage(firebaseApp);
 const auth = getAuth();
@@ -58,20 +58,18 @@ export default {
   },
 
   async mounted() {
-       const auth = getAuth();
-       onAuthStateChanged(auth, (user) => {
-         if (user) {
-           this.user = user;
-           this.useremail = user.email;
-           this.uid = user.uid;
-           this.fetchUserProfilePicture(this.useremail);
-         } else {
-           this.user = null;
-           this.useremail = null;
-         }
-       })
-
-     },
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        this.user = user;
+        this.useremail = user.email;
+        this.uid = user.uid;
+        await this.fetchUserProfilePicture();
+      } else {
+        this.user = null;
+        this.useremail = null;
+      }
+    });
+  },
 
   methods: {
     openUploadDialog() {
@@ -88,9 +86,39 @@ export default {
       this.showUploadDialog = false;
       document.removeEventListener("click", this.closeUploadDialogOnClickOutside);
     },
+    
+    async updateProfile(uid, updatedData) {
+      const userDocRef = doc(db, 'Users', uid);
+      try {
+        await updateDoc(userDocRef, updatedData);
+        console.log('Profile updated successfully');
+      } catch (error) {
+        console.error('Error updating profile: ', error);
+      }
+    },
 
-    removePhoto() {
-      this.uploadedImage = null;
+    async removePhoto() {
+      if (this.uid) {
+        const userImageDocRef = doc(db, 'Users', this.uid);
+
+        try {
+          // Set the profile picture field in Firestore to the default image
+          await updateDoc(userImageDocRef, { profilePicture: this.defaultImage });
+
+          // Update the local state
+          this.uploadedImage = this.defaultImage;
+
+          // Remove the photoURL from the auth profile if it exists
+          if (auth.currentUser && auth.currentUser.photoURL) {
+            await updateProfile(auth.currentUser, { photoURL: null });
+          }
+          console.log('Profile picture removed');
+        } catch (error) {
+          console.error('Error removing profile picture:', error);
+        }
+      } else {
+        console.log('User not signed in');
+      }
     },
 
     handleFileUpload(event) {
