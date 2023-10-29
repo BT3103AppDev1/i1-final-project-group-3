@@ -27,8 +27,15 @@
      
       <input
         class="username-field"
-        id="userName"
-        placeholder="User Name"
+        id="firstName"
+        placeholder="First Name"
+        type="text"
+        required=""
+      />
+      <input
+        class="lastname-field"
+        id="lastName"
+        placeholder="Last Name"
         type="text"
         required=""
       />
@@ -97,17 +104,19 @@ const db = getFirestore(firebaseApp);
       },
       async updateProfile(event) {
         event.preventDefault();
-        let userName = document.getElementById("userName").value;
+        let firstName = document.getElementById("firstName").value;
+        let lastName = document.getElementById("lastName").value;
         let phoneNumber = document.getElementById("phoneNumber").value;
         let gender = this.gender;
 
         let uid = this.uid;
 
-        if (userName != "" && phoneNumber != "" && gender != "") {
+        if (firstName != "" && phoneNumber != "" && gender != "" && lastName != "") {
           try{
             const docRef = await setDoc(doc(db, "Users", uid),{
               phoneNumber: phoneNumber,
-              userName : userName,
+              firstName : firstName,
+              lastName : lastName,
               gender: gender,
             })
             console.log(docRef);
@@ -268,7 +277,7 @@ const db = getFirestore(firebaseApp);
     left: 28.19rem;
     border-radius: 15px;
     width: 23.56rem;
-    height: 29.38rem;
+    height: 30.38rem;
     object-fit: cover;
   }
   .create-account {
@@ -324,7 +333,7 @@ const db = getFirestore(firebaseApp);
     padding: 0;
     background-color: transparent;
     position: absolute;
-    top: 16.31rem;
+    top: 18.31rem;
     left: 5.5rem;
     width: 8.06rem;
     height: 2.19rem;
@@ -337,7 +346,7 @@ const db = getFirestore(firebaseApp);
     font-size: var(--font-size-lg);
     background-color: transparent;
     position: absolute;
-    top: 5.25rem;
+    top: 9rem;
     left: 0rem;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
     width: 19.25rem;
@@ -359,9 +368,24 @@ const db = getFirestore(firebaseApp);
     padding-left: 0.5rem;
   }
 
+  .lastname-field {
+    border: none;
+    display: block;
+    font-family: var(--font-josefin-sans);
+    font-size: var(--font-size-lg);
+    background-color: transparent;
+    position: absolute;
+    top: 4.5rem;
+    left: 0rem;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
+    width: 19.25rem;
+    height: 3.46rem;
+    padding-left: 0.5rem;
+  }
+
   .gender {
       position: absolute;
-      top: 35.25rem;
+      top: 38.25rem;
       left: 30.88rem;
       font-size: 1rem;
       font-family: var(--font-josefin-sans);
@@ -371,7 +395,7 @@ const db = getFirestore(firebaseApp);
 
   .gender-radio {
       position: fixed;
-      top: 37.25rem;
+      top: 40.25rem;
       left: 30.88rem;
       font-size: 1rem;
       font-family: var(--font-josefin-sans);
