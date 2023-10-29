@@ -392,11 +392,11 @@ export default {
 
 </script>
 
-<style>
+<style >
 
 .navbar {
-    top:-32px;
-    left: -32px;
+    top:0px;
+    left: 0px;
 }
 
 
