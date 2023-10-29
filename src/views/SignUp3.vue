@@ -22,7 +22,7 @@
     <h1 class="create-account">YOUR INTEREST</h1>
     <img class="sign-up-page-1-child" alt="" src="../assets/line-7@2x.png" />
     <form class="form" id="form">
-      <button class="next">
+      <button class="next" type="submit">
         <img class="next-child" alt="" src="../assets/rectangle-48@2x.png" />
         <span class="next1" @click="updateProfile">Next</span>
       </button>
@@ -36,7 +36,7 @@
       />
       
       <select name="year" id="year" class="year-field" v-model="year" required="">
-        <option value="" disabled selected>Year of Study</option>
+        <option value="" disabled="" selected="">Year of Study</option>
         <option value="1">Year 1</option>
         <option value="2">Year 2</option>
         <option value="3">Year 3</option>
