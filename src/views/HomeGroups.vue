@@ -9,7 +9,7 @@
             <h1 id = "study-buddy-header">Find your StudyBuddy today!</h1>
             <h2 id = "profiles-and-groups">Profiles and Groups for you to discover</h2>
             <div id="app">
-                <input id="search-input" type="text" placeholder="Search using Keywords: BT3103/ Business Analytics">
+                <input id="search-input" type="text" v-model="searchQuery" placeholder="Search using Keywords: BT3103/ Business Analytics">
                 <img class="search-icon"  @click="search" alt = "" src="../assets/search.png" />
             
             </div>
@@ -56,8 +56,8 @@
 <script>
   import { getFirestore, collection, getDocs, addDoc } from "firebase/firestore"
   import firebaseApp from '../firebase.js';
-  import { defineComponent } from "vue";
-
+  import { defineComponent, ref, onMounted } from "vue";
+  import { computed } from 'vue'; 
   import CreateGroups from "../components/CreateGroups.vue";
   import homeBanner from "../components/homeBanner.vue";
  
@@ -66,11 +66,12 @@
 
   export default defineComponent({
     name: "HomeGroups",
+
     components: {
       homeBanner,
       CreateGroups
     },
-
+    
     data() {
         return {
             isCreateGroupFormVisible: false,
@@ -103,7 +104,6 @@
       async handleCreateGroup() {
         console.log("Received data");
         this.isCreateGroupFormVisible = false;
-      
         window.alert("Group successfully created!");
       },
 
@@ -111,35 +111,57 @@
         alert("Test");
 
       },
+      },
 
-      
-      async fetchDataFromFirebase() {
-        const db = getFirestore(firebaseApp);  
-        const usersCollection = collection(db, "Groups");  
-        try {
-            const querySnapshot = await getDocs(usersCollection);
-            const groups = [];
-            querySnapshot.forEach((doc) => {
-            const groupData = doc.data();
-             
-            groups.push({
-                title: groupData.title,
-                description: groupData.groupDescription,
-                members: groupData.members
-       
-            });
-            });
-       
-            this.groups = groups;
-        } catch (error) {
-            console.error("Error fetching data: ", error);
-        }
-        }
-    },
+ 
 
-    mounted() { 
-        this.fetchDataFromFirebase();
-  }
+  setup() {
+  const searchQuery = ref('');
+  const groups = ref([]);
+
+  const filteredGroups = computed(() => {
+    return groups.value.filter(group => {
+      const searchRegex = new RegExp(searchQuery.value, 'i');
+      return searchRegex.test(group.title) || searchRegex.test(group.description);
+    });
+  });
+
+  const fetchDataFromFirebase = async () => {
+    const db = getFirestore(firebaseApp);
+    const usersCollection = collection(db, "Groups");
+    try {
+      const querySnapshot = await getDocs(usersCollection);
+      const fetchedGroups = [];
+      querySnapshot.forEach((doc) => {
+        const groupData = doc.data();
+        fetchedGroups.push({
+          title: groupData.title,
+          description: groupData.groupDescription,
+          members: groupData.members,
+        });
+      });
+
+      groups.value = fetchedGroups;
+    } catch (error) {
+      console.error("Error fetching data: ", error);
+    }
+  };
+
+  onMounted(() => {
+    fetchDataFromFirebase();
+  });
+
+  return {
+    groups: filteredGroups,
+    searchQuery,
+  };
+},
+    
+
+    
+ 
+
+  
   });
   
 
@@ -375,7 +397,7 @@
 .search-icon {
   position: absolute;
   top: 10.1em;
-  left: 64rem; 
+  left: 72%; 
   transform: translateY(-50%);
   cursor: pointer; 
   width: 1.5rem;
@@ -399,7 +421,7 @@
  
   .groups {
     position: absolute;
-    left: 52rem;
+    left: 55%;
     font-weight: 600;
     font-size: 1.3rem;
     display: inline-block;
@@ -416,7 +438,7 @@
 
   .profiles {
     position: absolute;
-    left: 32rem;
+    left: 36%;
     font-weight: 600;
     font-size: 1.3rem;
     display: inline-block;
