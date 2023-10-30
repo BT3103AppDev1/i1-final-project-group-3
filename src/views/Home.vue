@@ -9,7 +9,7 @@
             <h1 id = "study-buddy-header">Find your StudyBuddy today!</h1>
             <h2 id = "profiles-and-groups">Profiles and Groups for you to discover</h2>
             <div id="app">
-              <input id="search-input" type="text" placeholder="Search using Keywords: BT3103/ Business Analytics">
+              <input id="search-input" type="text" v-model="searchQuery" placeholder="Search using Keywords: BT3103/ Business Analytics">
               <img class="search-icon" alt="" src="../assets/search.png" />
 
             
@@ -28,8 +28,7 @@
  
         <div class = "display-all-profile-cards">
             <div class="profile-card" v-for="profile in profiles" :key="profile.name" @click ="navigateToProfile(profile.name)">
-       
-             <!-- <img class="profile-image-on-card" src="../assets/profile_picture.jpg" alt="">-->
+        
               <img class="profile-image-on-card" :src="profile.profilePicture" alt=""> 
           
               <h1 id = "profile-name" >{{ profile.name }}</h1>
@@ -57,6 +56,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'vue-router';
 import router from '../router/index.js';
 import defaultProfilePicture from '../assets/default-profile-image.jpg';
+import { computed } from 'vue';
 import homeBanner from '../components/homeBanner.vue';
 
 export default defineComponent({
@@ -73,6 +73,15 @@ export default defineComponent({
     const profilePicture = ref('');
     const firstName = ref('');
     const router = useRouter();
+    const searchQuery = ref('');
+
+    const filteredProfiles = computed(() => {
+      return profiles.value.filter(profile => {
+        const searchRegex = new RegExp(searchQuery.value, 'i'); // Case-insensitive search
+        return searchRegex.test(profile.name) || searchRegex.test(profile.major) || searchRegex.test(profile.description) || searchRegex.test(profile.yearOfStudy);
+      });
+    });
+  
 
     onMounted(() => {
       const auth = getAuth(firebaseApp);
@@ -171,13 +180,14 @@ export default defineComponent({
     };
 
     return {
-      profiles,
+      profiles: filteredProfiles,
       user,
       uid,
       profilePicture,
       firstName,
       navigateToGroups,
       navigateToProfile,
+      searchQuery,
     };
   },
 });
@@ -415,7 +425,7 @@ export default defineComponent({
 .search-icon {
   position: absolute;
   top: 10.1em;
-  left: 68rem; 
+  left: 72%; 
   transform: translateY(-50%);
   cursor: pointer; 
   width: 1.5rem;
@@ -439,7 +449,7 @@ export default defineComponent({
  
   .profiles {
     position: absolute;
-    left: 32rem;
+    left: 36%;
     font-weight: 600;
     font-size: 1.3rem;
     display: inline-block;
@@ -456,7 +466,7 @@ export default defineComponent({
 
   .groups {
     position: absolute;
-    left: 52rem;
+    left: 55%;
     font-weight: 600;
     font-size: 1.3rem;
     display: inline-block;
