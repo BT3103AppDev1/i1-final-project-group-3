@@ -17,6 +17,12 @@
       <button class="new">Popular</button>
     </div>
 
+    <button class="create-button" @click="navigateToCreatePost">
+      <div class="create-button-child" />
+      <div class="create-button-item" />
+      <div class="create-button-inner" />
+    </button>
+
     <div class="post1">
       <div class="comments">Comments: 1</div>
       <div class="div2">|</div>
@@ -57,6 +63,12 @@ export default {
     components: {
       NavigationBar
     },
+
+    methods: {
+      navigateToCreatePost() {
+        this.$router.push({ name: 'CreatePost' });
+      }
+    }
 }
 </script>
 
@@ -73,7 +85,7 @@ export default {
   .post-header {
     position: absolute;
     top: 12.25rem;
-    left: 11.13rem;
+    left: 11.60rem;
     font-size: var(--font-size-29xl);
     font-family: var(--font-yeseva-one);
   }
@@ -82,7 +94,7 @@ export default {
     position: absolute;
     height: 4.83%;
     width: 48.96%;
-    top: 45.22%;
+    top: 30.22%;
     right: 27.29%;
     bottom: 64.95%;
     left: 23.75%;
@@ -90,11 +102,12 @@ export default {
     border-bottom: 1px solid var(--color-black);
     box-sizing: border-box;
   }
+
   #post-search-bar {
     position: absolute;
     height: 5.91%;
     width: 48.9%;
-    top: 43.15%;
+    top: 28.15%;
     left: 23.72%;
     font-size: 1.5rem;
     display: inline-block;
@@ -104,13 +117,10 @@ export default {
     position: absolute;
     height: 2rem;
     width: 2rem;
-    top: 43.70%;
+    top: 29.50%;
     right: 29.1%;
     bottom: 65.94%;
     left: 68.99%;
-    max-width: 100%;
-    overflow: hidden;
-    max-height: 100%;
     cursor: pointer;
   }
 
@@ -146,6 +156,55 @@ export default {
     font-size: var(--font-size-mini);
     color: var(--color-mediumslateblue);
     cursor: pointer;
+  }
+
+  .create-button-child {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0%;
+    right: 0%;
+    bottom: 0%;
+    left: 0%;
+    border-radius: 50%;
+    background-color: var(--color-darkorange);
+    box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
+  }
+  .create-button-item {
+    position: absolute;
+    height: 11.86%;
+    width: 52.54%;
+    top: 44.07%;
+    right: 23.73%;
+    bottom: 44.07%;
+    left: 23.73%;
+    background-color: var(--color-white);
+  }
+  .create-button-inner {
+    position: absolute;
+    height: 11.86%;
+    width: 52.54%;
+    top: 76.27%;
+    right: 3.39%;
+    bottom: 11.86%;
+    left: 44.07%;
+    background-color: var(--color-white);
+    transform: rotate(-90deg);
+    transform-origin: 0 0;
+  }
+  .create-button {
+    position: absolute;
+    top: 54.63rem;
+    left: 82.69rem;
+    width: 3.69rem;
+    height: 3.69rem;
+    cursor: pointer;
+    background: transparent;
+    border: transparent;
+  }
+
+  .create-button-child:hover {
+    background-color: #ffb175;
   }
 
   .post1 {

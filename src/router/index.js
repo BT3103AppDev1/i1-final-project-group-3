@@ -12,6 +12,7 @@ import Home from '@/views/Home.vue'
 import HomeGroups from '@/views/HomeGroups.vue'
 import Post from '@/views/PostView.vue'
 import Chat from '@/views/ChatsView.vue'
+import CreatePost from '@/views/CreatePost.vue'
 
 
 const routes =[
@@ -86,6 +87,12 @@ const routes =[
     path: '/post',
     name: 'Post', 
     component: Post,
+
+  },
+  {
+    path: '/createpost',
+    name: 'CreatePost', 
+    component: CreatePost,
 
   },
   {
