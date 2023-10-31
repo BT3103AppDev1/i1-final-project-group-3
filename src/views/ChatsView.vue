@@ -6,6 +6,7 @@
 </template>
 
 <script>
+import firebaseApp from '../firebase';
 import NavigationBar from '@/components/navigationbar.vue'
 
 export default {
