@@ -3,9 +3,9 @@
     <div class="create-post">
         <div class="new-post">New Post</div>
         <div class="header">Header</div>
-        <input class="enter-the-header" placeholder="Enter the header here...">
+        <input v-model="header" class="enter-the-header" placeholder="Enter the header here...">
         <div class="description">Description</div>
-        <textarea class="enter-the-description" placeholder="Enter the description here..."></textarea>
+        <textarea v-model="description" class="enter-the-description" placeholder="Enter the description here..."></textarea>
         <button class="insert-image">
           <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-photo-plus" width="30" height="30" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
             <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
@@ -18,8 +18,32 @@
           </svg>
         </button>
         <button class="cancel" @click="navigateToPost">Cancel</button>   
-        <button id="post-button">Post</button>
+        <button type = "submit" id="post-button" @click="submitForm">Post</button>
+            
     </div>
+
+    <div class="popup" v-show="showErrorDialog" ref="errorDialog">
+        <div class="popup-content">
+            <h2>Error: Missing Header / Description </h2>
+            <div class="error-popup-bar-line" />
+            <div class="action-buttons">
+              <button style="width: 10.75rem; height: 2.75rem;" @click="closeErrorDialog">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="popup" v-show="showConfirmationDialog" ref="confirmationDialog">
+        <div class="popup-content">
+            <h2>Confirmation</h2>
+            <div class="popup-bar-line" />
+            <h3 style="font-size: 2.19rem; color: var(--color-darkgray-200); font-family: var(--font-josefin-sans); font-weight: 300;">Are you sure you want to publish this post?</h3>
+            <div class="action-buttons">
+              <button id= "confirmConfirmation" @click="closeConfirmationDialog">Confirm</button>
+              <button id= "cancelConfirmation" @click="closeConfirmationDialog">Cancel</button>
+            </div>
+        </div>
+    </div>
+
 </template>
 
 <script>
@@ -27,6 +51,14 @@ import NavigationBar from '@/components/navigationbar.vue'
 
 export default {
     name: "CreatePost",
+    data() {
+      return {
+        showErrorDialog: false,
+        showConfirmationDialog:false,
+        header: "",
+        description: "",
+      }
+    },
     
     components: {
       NavigationBar
@@ -35,7 +67,61 @@ export default {
     methods: {
       navigateToPost() {
         this.$router.push({ name: 'Post' });
-      }
+      },
+
+      submitForm() {
+        if (!this.header || !this.description) {
+          this.showErrorDialog = true;
+        } else {
+          this.showConfirmationDialog = true;
+        }
+      },
+
+      openErrorDialog() {
+      this.showErrorDialog = true;
+
+      // Add a click event listener to the entire document when the popup is open
+      document.addEventListener("click", this.closeErrorDialogOnClickOutside);
+
+      // Prevent the click event on the button from propagating and immediately closing the popup
+      event.stopPropagation();
+      },
+
+      closeErrorDialog() {
+        this.showErrorDialog = false;
+        document.removeEventListener("click", this.closeErrorDialogOnClickOutside);
+      },
+
+      closeErrorDialogOnClickOutside(event) {
+        // Check if the click event occurred outside of the popup
+        const popup = this.$refs.errorDialog;
+        if (popup && !popup.contains(event.target)) {
+          this.closeErrorDialog();
+        }
+      },
+
+      openConfirmationDialog() {
+      this.showConfirmationDialog = true;
+
+      // Add a click event listener to the entire document when the popup is open
+      document.addEventListener("click", this.closeConfirmationDialogOnClickOutside);
+
+      // Prevent the click event on the button from propagating and immediately closing the popup
+      event.stopPropagation();
+      },
+
+      closeConfirmationDialog() {
+        this.showConfirmationDialog = false;
+        document.removeEventListener("click", this.closeConfirmationDialogOnClickOutside);
+      },
+
+      closeConfirmationDialogOnClickOutside(event) {
+        // Check if the click event occurred outside of the popup
+        const popup = this.$refs.confirmationDialog;
+        if (popup && !popup.contains(event.target)) {
+          this.closeConfirmationDialog();
+        }
+      },
     }
 }
 
@@ -159,6 +245,56 @@ export default {
   #post-button:hover {
     background-color: #ffb175;
     border: 1px solid #ffb175;
+  }
+
+  #cancelConfirmation {
+    position: absolute; 
+    top: 15.69rem;
+    left: 14.25rem;
+    display: inline-block; 
+    width: 10.75rem;
+    height: 2.75rem;
+    border-radius: var(--br-21xl);
+    background-color: var(--color-red);
+    border: 1px solid var(--color-mediumslateblue);
+    box-sizing: border-box;
+    font-size: var(--font-size-6xl);
+    color: var(--color-mediumslateblue);
+  }
+
+  #confirmConfirmation {
+    position: absolute;
+    top: 15.69rem;
+    left: 30rem;
+    width: 10.75rem;
+    height: 2.75rem;
+    font-size: var(--font-size-6xl);
+    color: var(--color-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--br-21xl);
+    background-color: var(--color-mediumslateblue);
+  }
+
+  .popup-bar-line {
+    position: absolute;
+    height: 4.83%;
+    width: 80%;
+    top: 45.22%;
+    right: 27.29%;
+    left: 10%;
+    border-bottom: 2px solid var(--color-black);
+  }
+
+  .error-popup-bar-line {
+    position: absolute;
+    height: 4.83%;
+    width: 80%;
+    top: 50.22%;
+    right: 27.29%;
+    left: 10%;
+    border-bottom: 2px solid var(--color-black);
   }
 
 

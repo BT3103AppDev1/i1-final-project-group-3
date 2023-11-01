@@ -8,7 +8,6 @@
       <input id="post-search-bar" type="text" v-model="searchQuery" placeholder="Search using Keywords: BT3103">
       <img class="post-search-icon" alt="" src="../assets/search.png" />
     </div>
-    <img class="vector-icon" alt="" src="/vector.svg" />
 
     <div class="new-position">
       <button class="new">New</button>
