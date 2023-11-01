@@ -95,6 +95,7 @@ const db = getFirestore(firebaseApp);
         if (user) {
           this.user = user;
           this.uid = auth.currentUser.uid;
+          this.email = auth.currentUser.email;
         }
       })
     },
@@ -108,8 +109,9 @@ const db = getFirestore(firebaseApp);
         let lastName = document.getElementById("lastName").value;
         let phoneNumber = document.getElementById("phoneNumber").value;
         let gender = this.gender;
-
+        let email = this.email;
         let uid = this.uid;
+        
 
         if (firstName != "" && phoneNumber != "" && gender != "" && lastName != "") {
           try{
@@ -118,6 +120,8 @@ const db = getFirestore(firebaseApp);
               firstName : firstName,
               lastName : lastName,
               gender: gender,
+              uid: uid, 
+              email: email,
             })
             console.log(docRef);
             this.$router.push({ name: 'SignUp3' });

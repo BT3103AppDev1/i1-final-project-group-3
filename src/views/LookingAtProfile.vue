@@ -7,12 +7,12 @@
     <div class ="profile-section">
         <div class="left-section">
             <!-- Dynamic Image -->
-            <img class="profile-image" alt = "Profile Picture" src="profilePicture" />
+            <img class="profile-image" alt = "Profile Picture" src="../assets/about-icon.png" />
             
             <!-- Action buttons -->
             <div class="buttons-container">
-                <button class="message">Send a Message</button>
-                <button class="block">Block</button>
+                <button class="message" @click="openUploadMessageDialog">Send a Message</button>
+                <button class="block" @click="openUploadBlockDialog">Block</button>
             </div>
 
             <div class="group-info">
@@ -103,6 +103,31 @@
         </div>
     </div>
     </div>
+
+    <div class="popup" v-show="showMessageDialog" ref="messageDialog">
+        <div class="popup-content">
+            <h2>Send a Message!</h2>
+            <div class="action-buttons">
+                <input type="text" placeholder="Say something nice!"/>
+            
+                <button @click="sendMessage(z25KHJk1tScjiIljnupabcdef9, Siyi)" class="remove-photo">Send</button>
+            </div>
+            
+        </div>
+    </div>
+
+    <div class="popup" v-show="showBlockDialog" ref="blockDialog">
+        <div class="popup-content">
+            <h2>Are you sure you want to block user?</h2>
+            <div class="action-buttons">
+                <button @click="removePhoto" class="remove-photo">Cancel</button>
+            
+                <button @click="removePhoto" class="remove-photo">Confirm</button>
+            </div>
+            
+        </div>
+    </div>
+
 </template>
   
 
@@ -111,6 +136,16 @@ import { defineComponent } from "vue";
 import NavigationBar from '@/components/NavigationBar.vue';
 import { doc, getDoc, getFirestore } from 'firebase/firestore';
 import firebaseApp from '@/firebase.js';
+import { getDatabase } from "firebase/database";
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+
+
+
+const db = getFirestore(firebaseApp);
+const database = getDatabase(firebaseApp);
+const auth = getAuth();
+
+
 
 export default defineComponent({
     name: "profile",
@@ -132,17 +167,102 @@ export default defineComponent({
                 preference: ''
             },
             profilePicture: '', // URL of the profile picture
-            currentGroup: '' // Name or details of the current group
+            currentGroup: '', // Name or details of the current group
+            showMessageDialog: false,
+            showBlockDialog: false,
         };
     },
 
     methods: {
+
+        // message dialog
+        openUploadMessageDialog() {
+            this.showMessageDialog = true;
+            console.log("true")
+            document.addEventListener("click", this.closeMessageDialogOnClickOutside);
+            event.stopPropagation();
+
+        },
+        closeMessageDialog() {
+            this.showMessageDialog = false;
+            document.removeEventListener("click", this.closeMessageDialogOnClickOutside);
+        },
+
+        closeMessageDialogOnClickOutside(event) {
+                console.log("false")
+            // Check if the click event occurred outside of the popup
+            const popup = this.$refs.messageDialog;
+            if (popup && !popup.contains(event.target)) {
+                this.closeMessageDialog();
+            }
+        },
+
+        // block dialog
+        openUploadBlockDialog() {
+            this.showBlockDialog = true;
+            console.log("true")
+            document.addEventListener("click", this.closeBlockDialogOnClickOutside);
+            event.stopPropagation();
+
+        },
+        closeBlockDialog() {
+            this.showBlockDialog = false;
+            document.removeEventListener("click", this.closeBlockDialogOnClickOutside);
+        },
+
+        closeBlockDialogOnClickOutside(event) {
+                console.log("false")
+            // Check if the click event occurred outside of the popup
+            const popup = this.$refs.blockDialog;
+            if (popup && !popup.contains(event.target)) {
+                this.closeBlockDialog();
+            }
+        },
+
+        async sendMessage(receiverUID, receiverName) {
+            const firebaseUser = auth.currentUser;
+            const senderUID = firebaseUser.uid;
+            const senderName = firebaseUser.displayName;
+
+            const messageDocumentID = senderUID + receiverUID;
+            await this.createMessageDocument(messageDocumentID, senderUID, receiverUID, senderName, receiverName);
+            await this.addMessageToList(messageDocumentID, senderUID, receiverUID, senderName, receiverName);
+        },
+
+        async createMessageDocument(docID, senderUID, receiverUID, senderName, receiverName) {
+            const docRef = db.collection('Message').doc(docID);
+            
+
+            if (!doc.exists) {
+                await docRef.set({
+                senderUID,
+                receiverUID,
+                senderName,
+                receiverName
+                });
+            }
+        },
+
+        async addMessageToList(docID, senderUID, receiverUID, senderName, receiverName) {
+            await db.collection('Message').doc(docID).collection('msglist').add({
+                senderUID,
+                receiverUID,
+                senderName,
+                receiverName,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                // other message fields as needed
+            });
+        },
+
+
+
+
+
         async fetchUserProfile(profileName) {
             try {
-                const db = getFirestore(firebaseApp);
+                
                 const userDoc = doc(db, "Users", profileName);
                 const userProfile = await getDoc(userDoc);
-
                 if (userProfile.exists()) {
                     this.profile = userProfile.data();
                     this.profilePicture = this.profile.profilePictureUrl || '../assets/about-icon.png'; // Set to default picture if not provided
@@ -155,11 +275,15 @@ export default defineComponent({
             }
         }
     },
+    
 
     mounted() {
         const profileName = this.$route.params.name;
         this.fetchUserProfile(profileName);
-    }
+    }, 
+
+
+
 });
 </script>
 
