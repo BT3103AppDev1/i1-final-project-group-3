@@ -124,7 +124,7 @@
   import { getAuth, onAuthStateChanged } from '@firebase/auth'
   import { doc, collection, getFirestore, getDoc } from '@firebase/firestore'
   import firebaseApp from '../firebase';
-  import defaultImage from '../assets/profile_picture.jpg';
+  import defaultImage from '../assets/avatar-icon.png';
 
   const db = getFirestore(firebaseApp)
 
