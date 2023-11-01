@@ -63,12 +63,27 @@ export default {
     }
 
     var uiConfig = {
-      signInSuccessUrl : '/registration2',
-      signInOptions : [
-        firebase.auth.EmailAuthProvider.PROVIDER_ID,
-        firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-      ],
-    };
+        signInFlow: 'popup',
+        callbacks: {
+          signInSuccessWithAuthResult: (authResult, redirectUrl) => {
+            console.log(authResult);
+            if (authResult) {
+              console.log(authResult.additionalUserInfo.isNewUser);
+              if (authResult.additionalUserInfo.isNewUser) {
+                return true;
+              } else {
+                this.$router.push('/home');
+                return false;
+              }
+            }
+          },
+        },
+        signInSuccessUrl:'/registration2',
+        signInOptions: [
+          firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+          firebase.auth.EmailAuthProvider.PROVIDER_ID,
+        ]
+      };
     ui.start('#firebaseui-auth-container', uiConfig)
   },
 

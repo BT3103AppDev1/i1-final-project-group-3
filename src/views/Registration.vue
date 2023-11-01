@@ -102,7 +102,7 @@ import { getAdditionalUserInfo, getAuth, onAuthStateChanged } from "firebase/aut
               if (authResult.additionalUserInfo.isNewUser) {
                 return true;
               } else {
-                this.$router.push('/registration2');
+                this.$router.push('/home');
                 return false;
               }
             }
