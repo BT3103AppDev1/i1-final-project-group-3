@@ -1,5 +1,5 @@
 <template>
-    <NavigationBar class="navbar"/>
+    <NavigationBar/>
     <div class="posts-page">
     <div class="post-header">Posts</div>
 
@@ -76,7 +76,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 
   .posts-page {
   width: 100%;
@@ -95,10 +95,10 @@ export default {
   }
 
     .post-search-bar-line {
-    position: absolute;
+    position: relative;
     height: 4.83%;
     width: 48.96%;
-    top: 30.22%;
+    top: 160px;
     right: 27.29%;
     bottom: 64.95%;
     left: 23.75%;
@@ -108,23 +108,21 @@ export default {
   }
 
   #post-search-bar {
-    position: absolute;
+    position: relative;
     height: 5.91%;
     width: 48.9%;
-    top: 28.15%;
+    top: 100px;
     left: 23.72%;
     font-size: 1.5rem;
     display: inline-block;
     color: #ada6a6;
   }
   .post-search-icon {
-    position: absolute;
+    position: relative;
     height: 2rem;
     width: 2rem;
-    top: 29.50%;
-    right: 29.1%;
-    bottom: 65.94%;
-    left: 68.99%;
+    top: 110px;
+    left:20%;
     cursor: pointer;
   }
 
