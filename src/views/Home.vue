@@ -213,28 +213,6 @@ export default defineComponent({
     font-family: var(--font-inter);
   }
 
-  
-
-  .top-container {
-    position: absolute;
-    background-color: #525fe1;
-    width: 100%;
-    height: 40rem;
-  }
- 
-
-
-  .profile-image {
-    position: absolute;
-    top: 10.44rem;
-    left: 54.81rem;
-    border-radius: 50%;
-    width: 25rem;
-    height: 25rem;
-    object-fit: cover;
-  }
-
-
  
 
 
@@ -242,118 +220,8 @@ export default defineComponent({
     background-color: #f6f3f3;
 }
 
-  .routers {
-    color: white;
-    font-family: sans-serif;
-  }
-
-
   
-  
-  .log-out {
-    position: absolute;
-    top: 4.7rem;
-    left: 78rem;
-    font-weight: 600;
-    font-size: 1rem;
-    display: inline-block;
-    width: 8rem;
-    height: 2.4rem;
-    background-color: #f86f03;
-    border-radius: 2rem;
-    border: none;
-    color: white;
-    cursor: pointer;
-  }
 
-  .profile {
-    position: absolute;
-    top: 5.13rem;
-    left: 67.38rem;
-    font-weight: 600;
-    display: inline-block;
-    width: 8.38rem;
-    height: 2.31rem; 
-    
-  }
-
-  .chats {
-    position: absolute;
-    top: 5.13rem;
-    left: 59rem;
-    font-weight: 600;
-    display: inline-block;
-    width: 8.38rem;
-    height: 2.31rem;
-  }
-
-  .posts {
-    position: absolute;
-    top: 5.13rem;
-    left: 50.63rem;
-    font-weight: 600;
-    display: inline-block;
-    width: 8.38rem;
-    height: 2.31rem;
-  }
-
-  .home {
-    position: absolute;
-    top: 5.25rem;
-    left: 43.38rem;
-    font-weight: 600;
-    display: inline-block;
-    width: 8.38rem;
-    height: 2.31rem;
-  }
-
- 
-
-
- 
-
-  .studybuddy {
-    position: absolute;
-    top: 4rem;
-    left: 1rem;
-    font-size: 3rem;
-    display: inline-block;
-    width: 25rem;
-    height: 2.5rem;
-    color: white;
-    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
-  }
-
-
-
- 
-  .welcome-message {
-    position: absolute;
-    top: 14.19rem;
-    left: 30%; 
-    font-size: 5rem;
-    font-family: 'Yeseva One';
-    display: inline-block;
-    width: auto;
-    max-width: 100%;
-    transform: translateX(-50%);
-    color: white;
-    text-align: center;
-}
-
-
-  .subtag {
-    position: absolute;
-    top: 29.75rem;
-    left: 12.19rem;
-    font-size: 2rem;
-    font-weight: 600;
-    display: inline-block;
-    width: 31.81rem;
-    height: 2.88rem;
-    font-family: 'Yeseva One';
-    color: white;
-  }
 
  
 
@@ -433,17 +301,18 @@ export default defineComponent({
 }
 
 
+.display-of-profiles-and-groups {
+    display: flex;
+    height: 300px;
+    top: 53rem;
+    position: relative;
 
- .display-of-profiles-and-groups {
-    position: absolute; 
-    width: 100%;
-    text-align: left;
-    height: 40rem;
-    top: 60rem;
-    margin: 0;
-    padding: 0; 
+    justify-content: left;
+    align-items: center;
     
-  }
+}
+
+
  
 
  
@@ -460,6 +329,7 @@ export default defineComponent({
     border: none;
     color: white;
     cursor: pointer;
+    font-family: var(--font-yeseva-one);
   }
 
  
@@ -477,6 +347,7 @@ export default defineComponent({
     color: #525fe1;
     border-radius: 2rem;
     cursor: pointer;
+    font-family: var(--font-yeseva-one);
     
 
 }

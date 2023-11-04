@@ -29,8 +29,8 @@
                 <button @click="removePhoto" class="remove-photo">Remove Photo</button>
             </div>
             
+        </div>
     </div>
-  </div>
 </template>
 
 <script>

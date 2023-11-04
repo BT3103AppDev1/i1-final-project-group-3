@@ -20,6 +20,7 @@ import { getFirestore, collection, getDocs, doc, getDoc } from 'firebase/firesto
 import firebaseApp from '../firebase.js';
 import NavigationBar from '@/components/navigationbar.vue';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import defaultProfilePicture from '../assets/default-profile-image.jpg';
 
 
 export default { 
@@ -45,12 +46,13 @@ export default {
             // Fetch user's first name and profile picture from the database
             const db = getFirestore(firebaseApp);
             const userDocRef = doc(db, 'Users', firebaseUser.uid);
+            
             try {
                 const userDoc = await getDoc(userDocRef);
                 if (userDoc.exists()) {
                 const userData = userDoc.data();
                 firstName.value = userData.firstName ;
-                profilePicture.value = userData.profilePicture ;
+                profilePicture.value = userData.profilePicture || defaultProfilePicture ;
                 } else {
                 console.log('User document does not exist!');
                 }
@@ -129,7 +131,7 @@ h1{
     display: inline-block;
     width: 31.81rem;
     height: 2.88rem;
-    font-family: 'Yeseva One';
+    font-family: var(--font-josefin-sans);
     color: white;
   }
 

@@ -7,12 +7,12 @@
     <div class ="profile-section">
         <div class="left-section">
             <!-- Dynamic Image -->
-            <img class="profile-image" alt = "Profile Picture" src="profilePicture" />
+            <img class="profile-image" alt = "Profile Picture" src="../assets/about-icon.png" />
             
             <!-- Action buttons -->
             <div class="buttons-container">
-                <button class="message">Send a Message</button>
-                <button class="block">Block</button>
+                <button class="message" @click="openUploadMessageDialog">Send a Message</button>
+                <button class="block" @click="openUploadBlockDialog">Block</button>
             </div>
 
             <div class="group-info">
@@ -103,14 +103,46 @@
         </div>
     </div>
     </div>
+
+    <div class="popup" v-show="showMessageDialog" ref="messageDialog">
+        <div class="popup-content">
+            <h2>Send a Message!</h2>
+            <div class="action-buttons">
+                <input type="text" placeholder="Say something nice!" v-model="messageText" />
+                <button @click="sendMessage('z25KHJk1tScjiIljnupJUSBWIDW', 'Siyi')" class="remove-photo">Send</button> 
+                <!--- currently set Siyi account as receiver--->
+            </div>
+
+            
+        </div>
+    </div>
+
+    <div class="popup" v-show="showBlockDialog" ref="blockDialog">
+        <div class="popup-content">
+            <h2>Are you sure you want to block user?</h2>
+            <div class="action-buttons">
+                <button @click="removePhoto" class="remove-photo">Cancel</button>
+            
+                <button @click="removePhoto" class="remove-photo">Confirm</button>
+            </div>
+            
+        </div>
+    </div>
+
 </template>
   
 
 <script>  
 import { defineComponent } from "vue";
 import NavigationBar from '@/components/NavigationBar.vue';
-import { doc, getDoc, getFirestore } from 'firebase/firestore';
+import { doc, getDoc, getFirestore, setDoc, addDoc, serverTimestamp, collection } from 'firebase/firestore';
 import firebaseApp from '@/firebase.js';
+import { getAuth } from 'firebase/auth';
+
+
+const db = getFirestore(firebaseApp);
+const auth = getAuth();
+
 
 export default defineComponent({
     name: "profile",
@@ -132,17 +164,118 @@ export default defineComponent({
                 preference: ''
             },
             profilePicture: '', // URL of the profile picture
-            currentGroup: '' // Name or details of the current group
+            currentGroup: '', // Name or details of the current group
+            showMessageDialog: false,
+            showBlockDialog: false, 
+            messageText: '',
         };
     },
 
     methods: {
+
+        // message dialog
+        openUploadMessageDialog() {
+            this.showMessageDialog = true;
+            console.log("true")
+            document.addEventListener("click", this.closeMessageDialogOnClickOutside);
+            event.stopPropagation();
+
+        },
+        closeMessageDialog() {
+            this.showMessageDialog = false;
+            document.removeEventListener("click", this.closeMessageDialogOnClickOutside);
+        },
+
+        closeMessageDialogOnClickOutside(event) {
+                console.log("false")
+            // Check if the click event occurred outside of the popup
+            const popup = this.$refs.messageDialog;
+            if (popup && !popup.contains(event.target)) {
+                this.closeMessageDialog();
+            }
+        },
+
+        // block dialog
+        openUploadBlockDialog() {
+            this.showBlockDialog = true;
+            console.log("true")
+            document.addEventListener("click", this.closeBlockDialogOnClickOutside);
+            event.stopPropagation();
+
+        },
+        closeBlockDialog() {
+            this.showBlockDialog = false;
+            document.removeEventListener("click", this.closeBlockDialogOnClickOutside);
+        },
+
+        closeBlockDialogOnClickOutside(event) {
+                console.log("false")
+            // Check if the click event occurred outside of the popup
+            const popup = this.$refs.blockDialog;
+            if (popup && !popup.contains(event.target)) {
+                this.closeBlockDialog();
+            }
+        },
+
+         sendMessage(receiverUID, receiverName) {
+            console.log(receiverUID);
+            console.log(receiverName);
+            try {
+                const firebaseUser = auth.currentUser;
+                
+                if (firebaseUser) {
+                    const senderUID = firebaseUser.uid;
+                    const senderName = firebaseUser.displayName || ''; // If displayName is null, set it to an empty string or handle accordingly
+                    const messageDocumentID = senderUID + receiverUID;
+
+                     this.createMessageDocument(messageDocumentID, senderUID, receiverUID, senderName, receiverName);
+                     this.addMessageToList(messageDocumentID, senderUID, receiverUID, senderName, receiverName, this.messageText);
+                    // After creating the conversation document, you might want to add a message to it, using addMessageToList() method
+                } else {
+                    console.error("User is not authenticated");
+                }
+            } catch (error) {
+                console.error("Error sending message: ", error);
+            }
+        },
+
+        async createMessageDocument(docID, senderUID, receiverUID, senderName, receiverName) {
+            const docRef = doc(db, 'Message', docID);
+            const docSnap = await getDoc(docRef);
+            
+            if (!docSnap.exists()) {
+                await setDoc(docRef, {
+                    senderUID,
+                    receiverUID,
+                    senderName,
+                    receiverName,
+                    createdAt: serverTimestamp(),
+                });
+                
+            }
+        },
+
+        async addMessageToList(docID, senderUID, receiverUID, senderName, receiverName, messageContent) {
+            const msgListRef = collection(db, 'Message', docID, 'msglist');
+            await addDoc(msgListRef, {
+                senderUID,
+                receiverUID,
+                senderName,
+                receiverName,
+                message: messageContent,
+                timestamp: serverTimestamp(),
+            });
+        },
+
+
+
+
+
         async fetchUserProfile(profileName) {
             try {
-                const db = getFirestore(firebaseApp);
+                
                 const userDoc = doc(db, "Users", profileName);
                 const userProfile = await getDoc(userDoc);
-
                 if (userProfile.exists()) {
                     this.profile = userProfile.data();
                     this.profilePicture = this.profile.profilePictureUrl || '../assets/about-icon.png'; // Set to default picture if not provided
@@ -155,11 +288,15 @@ export default defineComponent({
             }
         }
     },
+    
 
     mounted() {
         const profileName = this.$route.params.name;
         this.fetchUserProfile(profileName);
-    }
+    }, 
+
+
+
 });
 </script>
 
