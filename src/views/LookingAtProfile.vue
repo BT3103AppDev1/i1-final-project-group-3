@@ -102,6 +102,39 @@
             
         </div>
     </div>
+    <div class="post-section">
+        <div class="post-header">Posts</div>
+        <div class="post1">
+        <div class="comments">Comments: 1</div>
+        <div class="div2">|</div>
+        <div class="likes">Likes: 3</div>
+        <b class="post-title">DAO1704x hw1 answer</b>
+        <img class="post-user-image" alt="" src="../assets/profile_picture.jpg" />
+        <div class="user-name">Liu Siyi</div>
+        <div class="post-date">14/2/2023</div>
+        <div class="post-content-container">
+        <p class="post-content">Anyone has the hw1 answer key?</p>
+        </div>
+        <div class="post-divider-line" />
+    </div>
+
+        <div class="post2">
+        <div class="comments">Comments: 1</div>
+        <div class="div2">|</div>
+        <div class="likes">Likes: 3</div>
+        <b class="post-title">DAO1704x hw1 answer</b>
+        <img class="post-user-image" alt="" src="../assets/profile_picture.jpg" />
+        <div class="user-name">Liu Siyi</div>
+        <div class="post-date">14/2/2023</div>
+        <div class="post-content-container">
+        <p class="post-content">Anyone has the hw1 answer key?</p>
+        </div>
+        <div class="post-divider-line" />
+    </div>
+
+
+
+    </div>
     </div>
 </template>
   
@@ -171,14 +204,12 @@ export default defineComponent({
     left: 0;
     text-align: center;
     overflow-y: auto;
-    position: fixed;
     font-size: var(--font-size-lg);
     color: var(--color-black);
     font-family: var(--font-inter);
 }
   
 .navigation {
-    position: absolute;
     background-color: #525fe1;
     width: 100%;
     height: 10rem;
@@ -188,7 +219,7 @@ export default defineComponent({
     display: flex;
     justify-content: center;
     padding: 2rem;
-    margin-top: 15rem;  /* Adjusting for the navigation height */
+    margin-top: 5rem;  /* Adjusting for the navigation height */
 }
 
 .left-section {
@@ -199,7 +230,6 @@ export default defineComponent({
     align-items: center; 
     justify-content: center;
     position: relative;
-    top: -100px;
 }
 
 .profile-image {
@@ -333,12 +363,9 @@ h3 {
     font-size: 60px;
     color: #525fe1;
 
-   
-
 }
 
 .right-section h3 {
-    
     color: #555;
     margin-bottom: 1rem;
 }
@@ -348,6 +375,92 @@ h3 {
     line-height: 1.5;
 }
 
+.post-section {
+    width: 100%;
+    text-align: left;
+    font-size: var(--font-size-xl);
+    color: var(--color-black);
+    font-family: var(--font-josefin-sans);
+    margin-top: 3rem; 
+}
+
+.post-header {
+    font-size: var(--font-size-29xl);
+    font-family: var(--font-yeseva-one);
+    margin-bottom: 2rem;
+
+}
+
+.post1, .post2 {
+    width: 23.69rem;
+    height: 8.69rem;
+    margin-bottom: 2rem;
+  }
+
+  .comments {
+    font-size: var(--font-size-base);
+    font-family: var(--font-inter);
+    color: var(--color-dimgray);
+    width: 100%;
+  }
+  .div2 {
+    font-size: var(--font-size-base);
+    font-family: var(--font-inter);
+    color: var(--color-dimgray);
+  }
+  .likes {
+    font-size: var(--font-size-base);
+    font-family: var(--font-inter);
+    color: var(--color-dimgray);
+    width: 100%;
+  }
+  .post-title {
+    top: 43.88%;
+    left: 0%;
+    font-weight: bold;
+  }
+  .post-user-image {
+    height: 30.94%;
+    width: 11.35%;
+    top: 0%;
+    right: 88.65%;
+    bottom: 69.06%;
+    left: 0%;
+    border-radius: 50%;
+    max-width: 100%;
+    overflow: hidden;
+    max-height: 100%;
+    object-fit: cover;
+  }
+  .user-name {
+    top: 5.04%;
+    left: 14.78%;
+    font-weight: 500;
+  }
+
+  .post-date {
+    top: 5.04%;
+    left: 59.63%;
+    font-weight: 500;
+  }
+  .post-content {
+    margin: 0;
+  }
+  .post-content-container {
+    top: 71.22%;
+    left: 0%;
+    font-weight: 300;
+  }
+
+  .post-divider-line {
+    height: 4.83%;
+    width: 280%;
+    bottom: -30%;
+    right: 27.29%;
+    left: -1%;
+    border-bottom: 1px solid var(--color-black);
+    box-sizing: border-box;
+  }
+
 
 </style>
-

@@ -22,35 +22,19 @@
       <div class="create-button-inner" />
     </button>
 
-    <div class="post1">
-      <div class="comments">Comments: 1</div>
-      <div class="div2">|</div>
-      <div class="likes">Likes: 3</div>
-      <b class="post-title">DAO1704x hw1 answer</b>
-      <img class="post-user-image" alt="" src="../assets/profile_picture.jpg" />
-      <div class="user-name">Liu Siyi</div>
-      <div class="post-date">14/2/2023</div>
-      <div class="post-content-container">
-        <p class="post-content">Anyone has the hw1 answer key?</p>
-      </div>
-      <div class="post-divider-line" />
+    <div v-for="post in posts" :key="post.id" class="post">
+    <div class="comments">Comments: {{ post.comments.length }}</div>
+    <div class="likes">Likes: {{ post.likes }}</div>
+    <b class="post-title">{{ post.title }}</b>
+    <img class="post-user-image" :src="post.userImage" />
+    <div class="user-name">{{ post.username }}</div>
+    <div class="post-date">{{ post.date }}</div>
+    <div class="post-content-container">
+      <p class="post-content">{{ post.content }}</p>
     </div>
-
-    <div class="post2">
-      <div class="comments">Comments: 1</div>
-      <div class="div2">|</div>
-      <div class="likes">Likes: 3</div>
-      <b class="post-title">DAO1704x hw1 answer</b>
-      <img class="post-user-image" alt="" src="../assets/profile_picture.jpg" />
-      <div class="user-name">Liu Siyi</div>
-      <div class="post-date">14/2/2023</div>
-      <div class="post-content-container">
-        <p class="post-content">Anyone has the hw1 answer key?</p>
-      </div>
-      <div class="post-divider-line" />
+    <div class="post-divider-line" />
     </div>
-  </div>
-
+    </div>
 </template>
 
 <script>
@@ -63,7 +47,28 @@ export default {
       NavigationBar
     },
 
+    data() {
+      return {
+        posts: []
+      }
+    }, 
+    
+    created() {
+      this.fetchPosts();
+    },
+
     methods: {
+      async fetchUserPosts(profileName) {
+        try {
+          const db = getFirestore(firebaseApp);
+          const userDoc = doc(db, "Users", profileName);
+          const postsSnapshot = await db.collection('Posts').get();
+          this.posts = postsSnapshot.docs.map(doc => {
+            let post = doc.data();
+            post.id = doc.id;
+            return post;
+          });
+      },
       navigateToCreatePost() {
         this.$router.push({ name: 'CreatePost' });
       }
