@@ -27,6 +27,7 @@
                 </div>
             </div>
         </div>
+
         <div class="right-section">
             
             <!--- 
@@ -51,20 +52,23 @@
 
             </div>
 
-            <div class="profile-info">
+            <div class="profile-details">
 
-                <p class="header">Email:</p>
-                <p>gmail.com</p>
+                <p class="header-profile">Email:</p>
+                <p class="profile-info" >shoppingtraining@gmail.com</p>
                     <!--- {{  profile.email }} ---> 
 
 
-                <p class="header">Study Style:</p>
+                <p class="header-profile">Study Style:</p>
 
-                <div class="course-list">
+                <div id="course-list" class="profile-info">
                     <li>bt123231</li>
                     <li>bt123231</li>
                     <li>bt123231</li>
                     <li>bt123231</li>
+                    <li>bt123231</li>
+                    <li>bt123231</li>
+                    
 
                     <!---
                     <ul>
@@ -76,23 +80,23 @@
 
 
 
-                <p class="header">Study Style:</p> 
+                <p class="header-profile">Study Style:</p> 
                 <!---
                     <div class="grouparray">
                     {{ profile.studyStyle }}
                 </div>
                     --->
-                <p>motivated etc.</p>
+                <p class="profile-info">hello testing</p>
                 
                     
 
-                <p class="header">StudyBuddy preference:</p> 
+                <p class="header-profile">StudyBuddy preference:</p> 
                 <!---
                 <div class="grouparray">
                     {{ profile.preference }}
                 </div>
                 --->
-                <p>motivated etc.</p>
+                <p class="profile-info">motivated lah blahetc.motivated lah blahetc.motivated lah blahetc.motivated lah blahetc.</p>
 
                     
 
@@ -353,6 +357,8 @@ export default defineComponent({
     justify-content: space-between;
     width: 75%;
     padding: 1rem 0;  
+    position: relative;
+    left:-15px;
 }
 
 .message, .block {
@@ -390,20 +396,25 @@ export default defineComponent({
     display: flex;
     flex-direction: row;
     text-align: left;
+    position: relative;
     gap: 40px;
+    left: -20px;
 }
 
-.profile-info {
-    display: grid;
+.profile-details {
+
     flex-direction: column;
     text-align: left;
-
+    display: grid;
     grid-template-columns: repeat(2, 1fr); /* Creates 2 columns */
-    grid-template-rows: repeat(4, 1fr); /* Creates 4 rows */
-    gap: 30px; 
+    grid-template-rows: repeat(4, auto); /* Each row's height will be determined by its content */
+    gap: 20px;
+    
 }
 
 .grouparray {
+    position: relative;
+    top: 30px;
     flex-direction: row;
     align-items: left;
 }
@@ -417,7 +428,22 @@ button {
 .header {
     font-size:30px;
     font-family: var(--font-yeseva-one);
-    
+    position:relative;
+    top:20px;
+    left: 0px;
+}
+
+.header-profile {
+    font-size: 30px;
+    font-family: var(--font-yeseva-one);
+}
+
+.profile-info {
+    position: relative;
+    font-size: 25px;
+    font-family: var(--font-josefin-sans);
+    margin-left: 25px;
+    top: 10px
 }
 
 .name-and-username {
