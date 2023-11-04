@@ -7,12 +7,12 @@
     <div class ="profile-section">
         <div class="left-section">
             <!-- Dynamic Image -->
-            <img class="profile-image" alt = "Profile Picture" src="profilePicture" />
+            <img class="profile-image" alt = "Profile Picture" src="../assets/about-icon.png" />
             
             <!-- Action buttons -->
             <div class="buttons-container">
-                <button class="message">Send a Message</button>
-                <button class="block">Block</button>
+                <button class="message" @click="openUploadMessageDialog">Send a Message</button>
+                <button class="block" @click="openUploadBlockDialog">Block</button>
             </div>
 
             <div class="group-info">
@@ -27,6 +27,7 @@
                 </div>
             </div>
         </div>
+
         <div class="right-section">
             
             <!--- 
@@ -51,20 +52,23 @@
 
             </div>
 
-            <div class="profile-info">
+            <div class="profile-details">
 
-                <p class="header">Email:</p>
-                <p>gmail.com</p>
+                <p class="header-profile">Email:</p>
+                <p class="profile-info" >shoppingtraining@gmail.com</p>
                     <!--- {{  profile.email }} ---> 
 
 
-                <p class="header">Study Style:</p>
+                <p class="header-profile">Study Style:</p>
 
-                <div class="course-list">
+                <div id="course-list" class="profile-info">
                     <li>bt123231</li>
                     <li>bt123231</li>
                     <li>bt123231</li>
                     <li>bt123231</li>
+                    <li>bt123231</li>
+                    <li>bt123231</li>
+                    
 
                     <!---
                     <ul>
@@ -76,23 +80,23 @@
 
 
 
-                <p class="header">Study Style:</p> 
+                <p class="header-profile">Study Style:</p> 
                 <!---
                     <div class="grouparray">
                     {{ profile.studyStyle }}
                 </div>
                     --->
-                <p>motivated etc.</p>
+                <p class="profile-info">hello testing</p>
                 
                     
 
-                <p class="header">StudyBuddy preference:</p> 
+                <p class="header-profile">StudyBuddy preference:</p> 
                 <!---
                 <div class="grouparray">
                     {{ profile.preference }}
                 </div>
                 --->
-                <p>motivated etc.</p>
+                <p class="profile-info">motivated lah blahetc.motivated lah blahetc.motivated lah blahetc.motivated lah blahetc.</p>
 
                     
 
@@ -136,14 +140,46 @@
 
     </div>
     </div>
+
+    <div class="popup" v-show="showMessageDialog" ref="messageDialog">
+        <div class="popup-content">
+            <h2>Send a Message!</h2>
+            <div class="action-buttons">
+                <input type="text" placeholder="Say something nice!" v-model="messageText" />
+                <button @click="sendMessage('z25KHJk1tScjiIljnupJUSBWIDW', 'Siyi')" class="remove-photo">Send</button> 
+                <!--- currently set Siyi account as receiver--->
+            </div>
+
+            
+        </div>
+    </div>
+
+    <div class="popup" v-show="showBlockDialog" ref="blockDialog">
+        <div class="popup-content">
+            <h2>Are you sure you want to block user?</h2>
+            <div class="action-buttons">
+                <button @click="removePhoto" class="remove-photo">Cancel</button>
+            
+                <button @click="removePhoto" class="remove-photo">Confirm</button>
+            </div>
+            
+        </div>
+    </div>
+
 </template>
   
 
 <script>  
 import { defineComponent } from "vue";
 import NavigationBar from '@/components/NavigationBar.vue';
-import { doc, getDoc, getFirestore } from 'firebase/firestore';
+import { doc, getDoc, getFirestore, setDoc, addDoc, serverTimestamp, collection } from 'firebase/firestore';
 import firebaseApp from '@/firebase.js';
+import { getAuth } from 'firebase/auth';
+
+
+const db = getFirestore(firebaseApp);
+const auth = getAuth();
+
 
 export default defineComponent({
     name: "profile",
@@ -165,17 +201,118 @@ export default defineComponent({
                 preference: ''
             },
             profilePicture: '', // URL of the profile picture
-            currentGroup: '' // Name or details of the current group
+            currentGroup: '', // Name or details of the current group
+            showMessageDialog: false,
+            showBlockDialog: false, 
+            messageText: '',
         };
     },
 
     methods: {
+
+        // message dialog
+        openUploadMessageDialog() {
+            this.showMessageDialog = true;
+            console.log("true")
+            document.addEventListener("click", this.closeMessageDialogOnClickOutside);
+            event.stopPropagation();
+
+        },
+        closeMessageDialog() {
+            this.showMessageDialog = false;
+            document.removeEventListener("click", this.closeMessageDialogOnClickOutside);
+        },
+
+        closeMessageDialogOnClickOutside(event) {
+                console.log("false")
+            // Check if the click event occurred outside of the popup
+            const popup = this.$refs.messageDialog;
+            if (popup && !popup.contains(event.target)) {
+                this.closeMessageDialog();
+            }
+        },
+
+        // block dialog
+        openUploadBlockDialog() {
+            this.showBlockDialog = true;
+            console.log("true")
+            document.addEventListener("click", this.closeBlockDialogOnClickOutside);
+            event.stopPropagation();
+
+        },
+        closeBlockDialog() {
+            this.showBlockDialog = false;
+            document.removeEventListener("click", this.closeBlockDialogOnClickOutside);
+        },
+
+        closeBlockDialogOnClickOutside(event) {
+                console.log("false")
+            // Check if the click event occurred outside of the popup
+            const popup = this.$refs.blockDialog;
+            if (popup && !popup.contains(event.target)) {
+                this.closeBlockDialog();
+            }
+        },
+
+         sendMessage(receiverUID, receiverName) {
+            console.log(receiverUID);
+            console.log(receiverName);
+            try {
+                const firebaseUser = auth.currentUser;
+                
+                if (firebaseUser) {
+                    const senderUID = firebaseUser.uid;
+                    const senderName = firebaseUser.displayName || ''; // If displayName is null, set it to an empty string or handle accordingly
+                    const messageDocumentID = senderUID + receiverUID;
+
+                     this.createMessageDocument(messageDocumentID, senderUID, receiverUID, senderName, receiverName);
+                     this.addMessageToList(messageDocumentID, senderUID, receiverUID, senderName, receiverName, this.messageText);
+                    // After creating the conversation document, you might want to add a message to it, using addMessageToList() method
+                } else {
+                    console.error("User is not authenticated");
+                }
+            } catch (error) {
+                console.error("Error sending message: ", error);
+            }
+        },
+
+        async createMessageDocument(docID, senderUID, receiverUID, senderName, receiverName) {
+            const docRef = doc(db, 'Message', docID);
+            const docSnap = await getDoc(docRef);
+            
+            if (!docSnap.exists()) {
+                await setDoc(docRef, {
+                    senderUID,
+                    receiverUID,
+                    senderName,
+                    receiverName,
+                    createdAt: serverTimestamp(),
+                });
+                
+            }
+        },
+
+        async addMessageToList(docID, senderUID, receiverUID, senderName, receiverName, messageContent) {
+            const msgListRef = collection(db, 'Message', docID, 'msglist');
+            await addDoc(msgListRef, {
+                senderUID,
+                receiverUID,
+                senderName,
+                receiverName,
+                message: messageContent,
+                timestamp: serverTimestamp(),
+            });
+        },
+
+
+
+
+
         async fetchUserProfile(profileName) {
             try {
-                const db = getFirestore(firebaseApp);
+                
                 const userDoc = doc(db, "Users", profileName);
                 const userProfile = await getDoc(userDoc);
-
                 if (userProfile.exists()) {
                     this.profile = userProfile.data();
                     this.profilePicture = this.profile.profilePictureUrl || '../assets/about-icon.png'; // Set to default picture if not provided
@@ -188,11 +325,15 @@ export default defineComponent({
             }
         }
     },
+    
 
     mounted() {
         const profileName = this.$route.params.name;
         this.fetchUserProfile(profileName);
-    }
+    }, 
+
+
+
 });
 </script>
 
@@ -246,6 +387,8 @@ export default defineComponent({
     justify-content: space-between;
     width: 75%;
     padding: 1rem 0;  
+    position: relative;
+    left:-15px;
 }
 
 .message, .block {
@@ -283,20 +426,25 @@ export default defineComponent({
     display: flex;
     flex-direction: row;
     text-align: left;
+    position: relative;
     gap: 40px;
+    left: -20px;
 }
 
-.profile-info {
-    display: grid;
+.profile-details {
+
     flex-direction: column;
     text-align: left;
-
+    display: grid;
     grid-template-columns: repeat(2, 1fr); /* Creates 2 columns */
-    grid-template-rows: repeat(4, 1fr); /* Creates 4 rows */
-    gap: 30px; 
+    grid-template-rows: repeat(4, auto); /* Each row's height will be determined by its content */
+    gap: 20px;
+    
 }
 
 .grouparray {
+    position: relative;
+    top: 30px;
     flex-direction: row;
     align-items: left;
 }
@@ -310,7 +458,22 @@ button {
 .header {
     font-size:30px;
     font-family: var(--font-yeseva-one);
-    
+    position:relative;
+    top:20px;
+    left: 0px;
+}
+
+.header-profile {
+    font-size: 30px;
+    font-family: var(--font-yeseva-one);
+}
+
+.profile-info {
+    position: relative;
+    font-size: 25px;
+    font-family: var(--font-josefin-sans);
+    margin-left: 25px;
+    top: 10px
 }
 
 .name-and-username {
