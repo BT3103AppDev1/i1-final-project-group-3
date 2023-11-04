@@ -126,6 +126,7 @@
   import firebaseApp from '../firebase';
   import defaultImage from '../assets/default-profile-image.jpg';
 
+
   const db = getFirestore(firebaseApp)
 
   export default { 
