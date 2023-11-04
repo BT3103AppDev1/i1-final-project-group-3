@@ -108,10 +108,11 @@
         <div class="popup-content">
             <h2>Send a Message!</h2>
             <div class="action-buttons">
-                <input type="text" placeholder="Say something nice!"/>
-            
-                <button @click="sendMessage(z25KHJk1tScjiIljnupabcdef9, Siyi)" class="remove-photo">Send</button>
+                <input type="text" placeholder="Say something nice!" v-model="messageText" />
+                <button @click="sendMessage('z25KHJk1tScjiIljnupJUSBWIDW', 'Siyi')" class="remove-photo">Send</button> 
+                <!--- currently set Siyi account as receiver--->
             </div>
+
             
         </div>
     </div>
@@ -134,17 +135,13 @@
 <script>  
 import { defineComponent } from "vue";
 import NavigationBar from '@/components/NavigationBar.vue';
-import { doc, getDoc, getFirestore } from 'firebase/firestore';
+import { doc, getDoc, getFirestore, setDoc, addDoc, serverTimestamp, collection } from 'firebase/firestore';
 import firebaseApp from '@/firebase.js';
-import { getDatabase } from "firebase/database";
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
-
+import { getAuth } from 'firebase/auth';
 
 
 const db = getFirestore(firebaseApp);
-const database = getDatabase(firebaseApp);
 const auth = getAuth();
-
 
 
 export default defineComponent({
@@ -169,7 +166,8 @@ export default defineComponent({
             profilePicture: '', // URL of the profile picture
             currentGroup: '', // Name or details of the current group
             showMessageDialog: false,
-            showBlockDialog: false,
+            showBlockDialog: false, 
+            messageText: '',
         };
     },
 
@@ -219,38 +217,53 @@ export default defineComponent({
             }
         },
 
-        async sendMessage(receiverUID, receiverName) {
-            const firebaseUser = auth.currentUser;
-            const senderUID = firebaseUser.uid;
-            const senderName = firebaseUser.displayName;
+         sendMessage(receiverUID, receiverName) {
+            console.log(receiverUID);
+            console.log(receiverName);
+            try {
+                const firebaseUser = auth.currentUser;
+                
+                if (firebaseUser) {
+                    const senderUID = firebaseUser.uid;
+                    const senderName = firebaseUser.displayName || ''; // If displayName is null, set it to an empty string or handle accordingly
+                    const messageDocumentID = senderUID + receiverUID;
 
-            const messageDocumentID = senderUID + receiverUID;
-            await this.createMessageDocument(messageDocumentID, senderUID, receiverUID, senderName, receiverName);
-            await this.addMessageToList(messageDocumentID, senderUID, receiverUID, senderName, receiverName);
-        },
-
-        async createMessageDocument(docID, senderUID, receiverUID, senderName, receiverName) {
-            const docRef = db.collection('Message').doc(docID);
-            
-
-            if (!doc.exists) {
-                await docRef.set({
-                senderUID,
-                receiverUID,
-                senderName,
-                receiverName
-                });
+                     this.createMessageDocument(messageDocumentID, senderUID, receiverUID, senderName, receiverName);
+                     this.addMessageToList(messageDocumentID, senderUID, receiverUID, senderName, receiverName, this.messageText);
+                    // After creating the conversation document, you might want to add a message to it, using addMessageToList() method
+                } else {
+                    console.error("User is not authenticated");
+                }
+            } catch (error) {
+                console.error("Error sending message: ", error);
             }
         },
 
-        async addMessageToList(docID, senderUID, receiverUID, senderName, receiverName) {
-            await db.collection('Message').doc(docID).collection('msglist').add({
+        async createMessageDocument(docID, senderUID, receiverUID, senderName, receiverName) {
+            const docRef = doc(db, 'Message', docID);
+            const docSnap = await getDoc(docRef);
+            
+            if (!docSnap.exists()) {
+                await setDoc(docRef, {
+                    senderUID,
+                    receiverUID,
+                    senderName,
+                    receiverName,
+                    createdAt: serverTimestamp(),
+                });
+                
+            }
+        },
+
+        async addMessageToList(docID, senderUID, receiverUID, senderName, receiverName, messageContent) {
+            const msgListRef = collection(db, 'Message', docID, 'msglist');
+            await addDoc(msgListRef, {
                 senderUID,
                 receiverUID,
                 senderName,
                 receiverName,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                // other message fields as needed
+                message: messageContent,
+                timestamp: serverTimestamp(),
             });
         },
 
