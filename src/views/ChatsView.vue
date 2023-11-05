@@ -1,5 +1,6 @@
 <template>
     <NavigationBar class="navbar"/>
+<<<<<<< Updated upstream
     <div class = "profile-and-groups">
 
       <div class="chat-tabs">
@@ -20,17 +21,28 @@
         </div>
 
       </div>
+=======
+    <div class="hello"> 
+        <h1>Chat Page</h1>
+        <ChatWindow :chatID = "chat" />
+>>>>>>> Stashed changes
     </div>
 </template>
 
 <script>
+<<<<<<< Updated upstream
 import firebaseApp from '../firebase';
 import NavigationBar from '@/components/navigationbar.vue';
+=======
+import NavigationBar from '@/components/navigationbar.vue';
+import ChatWindow from '@/components/ChatWindow.vue';
+>>>>>>> Stashed changes
 
 export default {
     name: "Chat",
     
     components: {
+<<<<<<< Updated upstream
       NavigationBar, 
 
     },
@@ -45,6 +57,15 @@ export default {
         this.activeTab = section;
       },
 
+=======
+      NavigationBar,
+      ChatWindow,
+    },
+    data() {
+        return {
+            chat: "81tjP5n0p9AZH51zdgai",
+        }
+>>>>>>> Stashed changes
     }
 }
 </script>
