@@ -1,13 +1,12 @@
 <template>
     <div class="looking-at-profile-page">
-       <div class = "navigation"> 
-          <NavigationBar/>
-       </div>
+       <NavigationBar class = "navigation"/> 
 
-    <div class ="profile-section">
+
+    <div class ="profile-section" v-if="userProfile">
         <div class="left-section">
             <!-- Dynamic Image -->
-            <img class="profile-image" alt = "Profile Image" :src="profilePicture" v-if="profilePicture" />
+            <img class="profile-image" :alt = "userProfile.name" :src="userProfile.profilePicture || defaultProfilePicture" v-if="userProfile.profilePicture" />
             
             <!-- Action buttons -->
             <div class="buttons-container">
@@ -18,91 +17,37 @@
             <div class="group-info">
                 <p class="header" id="current-group">Current Group:</p> 
                 <div class="grouparray">
-                    <li>abcdefghijk</li>
-                    <li>abc</li>
-                    <li>abc</li>
-                   <!--- 
-                        {{  currentGroup }}
-                     --->
+                    <li v-for="group in userProfile.currentGroup" :key="group">{{ group }}</li>
                 </div>
             </div>
         </div>
 
         <div class="right-section">
-            
-            <!--- 
-                <h2>{{  profile.name }}<span>{{ profile.name.split(' ').join('_').toLowerCase() }}</span></h2> 
-            -->
             <div class="name">
-                <h2>abcdefghi</h2>
+                <h2>{{ userProfile.name }}</h2>
             </div>
 
             <div class="major-profileDescription">
-                <!---
-                    <h3>{{ profile.major }}, Year {{  profile.yearOfStudy }}</h3>
-                    <p>{{ profile.description }}</p>
-                    
-                --->
-
-                <h4>Data Science and analy, Year 3</h4>
-                <h3>hello abcdefhgh</h3>
-
-                
-
+                <h3>{{ userProfile.major }}, Year {{ userProfile.yearOfStudy }}</h3>
+                <p>{{ userProfile.description }}</p>
             </div>
 
             <div class="profile-details">
-
                 <p class="header-profile">Email:</p>
-                <p class="profile-info" >shoppingtraining@gmail.com</p>
-                    <!--- {{  profile.email }} ---> 
+                <p class="profile-info" >{{ userProfile.email }}</p>
 
 
-                <p class="header-profile">Current Course:</p>
-
-                <div id="course-list" class="profile-info">
-                    <li>bt123231</li>
-                    <li>bt123231</li>
-                    <li>bt123231</li>
-                    <li>bt123231</li>
-                    <li>bt123231</li>
-                    <li>bt123231</li>
-                    
-
-                    <!---
-                    <ul>
-                        <li v-for="course in profile.currentCourses" :key="course">{{ course }}</li>
-                    </ul>
-                    --->
-                </div>
-                
-
-
+                <p class="header-profile">Current Courses:</p>
+                <ul id="course-list" class="profile-info">
+                    <li v-for="course in userProfile.currentCourses" :key="course">{{ course }}</li>
+                </ul>
 
                 <p class="header-profile">Description:</p> 
-                <!---
-                    <div class="grouparray">
-                    {{ profile.studyStyle }}
-                </div>
-                    --->
-                <p class="profile-info">hello testing</p>
-                
-                    
+                <p class="profile-info">{{ userProfile.description }}</p>
 
                 <p class="header-profile">My Personalities:</p> 
-                <!---
-                <div class="grouparray">
-                    {{ profile.preference }}
-                </div>
-                --->
-                <p class="profile-info">motivated lah blahetc.motivated lah blahetc.motivated lah blahetc.motivated lah blahetc.</p>
-
-                    
-
+                <p class="profile-info">{{ userProfile.personalities }}</p>
             </div>
-            
-            
-            
         </div>
     </div>
     <div class="post-section">
@@ -164,7 +109,6 @@
             
         </div>
     </div>
-
 </template>
   
 
@@ -172,6 +116,7 @@
 import { ref, defineComponent, onMounted, onUnmounted } from "vue";
 import NavigationBar from '@/components/NavigationBar.vue';
 import { doc, getDoc, getFirestore, setDoc, addDoc, serverTimestamp, collection, getDocs } from 'firebase/firestore';
+import { useRoute } from 'vue-router';
 import firebaseApp from '@/firebase.js';
 import { getAuth } from 'firebase/auth';
 
@@ -184,7 +129,7 @@ export default defineComponent({
     },
 
     setup() {
-        const profiles = ref([]);
+        const userProfile = ref(null);
         const showMessageDialog = ref(false);
         const showBlockDialog = ref(false);
         const messageDialogRef = ref(null);
@@ -193,21 +138,21 @@ export default defineComponent({
         const defaultProfilePicture = '../assets/default-profile-image.jpg';
         const db = getFirestore(firebaseApp);
         const auth = getAuth();
+        const route = useRoute();
 
         // message dialog
         const openUploadMessageDialog = () => {
             showMessageDialog.value = true;
             this.showMessageDialog = true; // maybe dn
             console.log("true")
-            Vue.nextTick(() => {
-                document.addEventListener('click', closeMessageDialogOnClickOutside);
+            onUnmounted(() => {
+                document.removeEventListener('click', closeMessageDialogOnClickOutside);
             });
         };
 
         const closeMessageDialog = () => {
             showMessageDialog.value = false;
-            this.showMessageDialog = false;
-            document.removeEventListener("click", this.closeMessageDialogOnClickOutside);
+            document.removeEventListener("click", closeMessageDialogOnClickOutside);
         };
 
         const closeMessageDialogOnClickOutside = (event) => {
@@ -222,16 +167,14 @@ export default defineComponent({
         // block dialog
         const openUploadBlockDialog = () => {
             showBlockDialog.value = true;
-            this.showBlockDialog = true; // maybe dn
             console.log("true")
-            Vue.nextTick(() => {
-                document.addEventListener('click', closeBlockDialogOnClickOutside);
+            onUnmounted(() => {
+                document.removeEventListener('click', closeBlockDialogOnClickOutside);
             });
         };
 
         const closeBlockDialog = () => {
             showBlockDialog.value = false;
-            this.showBlockDialog = false;
             document.removeEventListener("click", this.closeBlockDialogOnClickOutside);
         };
 
@@ -295,36 +238,40 @@ export default defineComponent({
         };
 
         const fetchUserProfileFromFirebase = async () => {
-            const usersCollection = collection(db, 'Users');
+            const auth = getAuth(firebaseApp);
+            const firebaseUser = auth.currentUser;
+
+            if (!firebaseUser) {
+                console.error('No user is currently signed in.');
+                return;
+            }
+
+            const userId = firebaseUser.uid; // Use the uid of the currently signed-in user
+            const userDocRef = doc(db, 'Users', userId);
+
             try {
-                const querySnapshot = await getDocs(usersCollection);
-                profiles.value = querySnapshot.docs.map((docSnapshot) => {
-                    const profileData = docSnapshot.data();
-                    const displayName = profileData.firstName && profileData.lastName
-                        ? `${profileData.firstName} ${profileData.lastName}`
-                        : profileData.name;
-                    const yearOfStudy = profileData.yearOfStudy ? String(profileData.yearOfStudy).match(/\d+/)[0] : 'Unknown';
-                    const profilePicture = profileData.profilePicture || defaultProfilePicture;
-        
-                    return {
-                        name: displayName,
-                        major: profileData.major,
-                        yearOfStudy: yearOfStudy,
-                        email: profileData.email,
-                        courses: profileData.currentCourses,
-                        personalities: profileData.personalities,
-                        description: profileData.description,
-                        profilePicture: profilePicture,
+                const userDocSnap = await getDoc(userDocRef);
+                if (userDocSnap.exists()) {
+                    const profileData = userDocSnap.data();
+                        userProfile.value = {
+                            name: profileData.name || 'No name provided',
+                            major: profileData.major || 'No major provided',
+                            yearOfStudy: profileData.yearOfStudy || 'Year unknown',
+                            email: profileData.email || 'No email provided',
+                            courses: profileData.courses || [], // Assuming 'courses' is an array
+                            personalities: profileData.personalities || 'No personalities provided',
+                            description: profileData.description || 'No description provided',
+                            profilePicture: profileData.profilePicture || '../assets/default-profile-image.jpg'
                         };
-                });
+                    } else {
+                        console.error('Profile document does not exist!');
+                    }
             } catch (error) {
-                console.error('Error fetching data: ', error);
+                console.error('Error fetching profile: ', error);
             }
         };
 
-        onMounted(() => {
-            fetchUserProfileFromFirebase();
-        });
+        onMounted(fetchUserProfileFromFirebase);
 
         onUnmounted(() => {
             document.removeEventListener('click', closeMessageDialogOnClickOutside);
@@ -332,7 +279,7 @@ export default defineComponent({
         });
 
         return {
-            profiles,
+            userProfile,
             showMessageDialog,
             showBlockDialog,
             messageText,
@@ -345,8 +292,8 @@ export default defineComponent({
             sendMessage,
             createMessageDocument,
             addMessageToList
-    };
-  },
+        };
+    },
 });
 </script>
 
