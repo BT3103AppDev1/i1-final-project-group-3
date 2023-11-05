@@ -12,6 +12,8 @@
         </button>
 
       </div>
+
+
         
       
     </div>
@@ -32,7 +34,7 @@ export default {
 
     methods: {
       navigateToProfiles() {
-        this.$router.push({ name: 'ChatProfiles' });
+        this.$router.push({ name: 'Chat' });
       },
 
     }

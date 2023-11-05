@@ -12,8 +12,18 @@
         </button>
 
       </div>
+
+      <div class="chats">
+        <div class="profile-card" v-for="profile in profiles" :key="profile.name" @click ="navigateToProfile(profile.name)">
         
-      
+            <img class="profile-image-on-card" :src="profile.profilePicture" alt=""> 
+        
+            <h1 id = "profile-name" >{{ profile.name }}</h1>
+            <h3 id = "profile-major-and-year">{{profile.major}}, Year {{profile.yearOfStudy}}</h3>
+            <h3 id = "profile-description">{{profile.description}}</h3> 
+          </div>
+
+      </div>
     </div>
 </template>
 
@@ -22,7 +32,7 @@ import firebaseApp from '../firebase';
 import NavigationBar from '@/components/navigationbar.vue';
 
 export default {
-    name: "ChatProfiles",
+    name: "Chat",
     
     components: {
       NavigationBar, 
