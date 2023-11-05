@@ -39,6 +39,8 @@
 
 <script>
 import NavigationBar from '@/components/navigationbar.vue'
+import { doc, getDoc, getDocs, getFirestore } from 'firebase/firestore';
+import firebaseApp from '@/firebase.js';
 
 export default {
     name: "Post",
@@ -53,28 +55,40 @@ export default {
       }
     }, 
     
-    created() {
-      this.fetchPosts();
+    async created() {
+      await this.fetchUserPosts('someProfileName');
     },
 
     methods: {
       async fetchUserPosts(profileName) {
         try {
           const db = getFirestore(firebaseApp);
-          const userDoc = doc(db, "Users", profileName);
-          const postsSnapshot = await db.collection('Posts').get();
-          this.posts = postsSnapshot.docs.map(doc => {
-            let post = doc.data();
-            post.id = doc.id;
-            return post;
-          });
+          const userDocRef = doc(db, "Users", profileName);
+          const userDocSnap = await getDocs(userDocRef);
+
+          if (userDocSnap.exists()) {
+            const postsSnapshot = await getDocs(collection(db, 'Posts'));
+            this.posts = postsSnapshot.docs.map(doc => {
+              let post = doc.data();
+              post.id = doc.id;
+              return post;
+            });
+          } else {
+            console.error("User not found!"); 
+          }
+        } catch (error) {
+          console.error("Error fetching posts: ", error);
+        }
       },
       navigateToCreatePost() {
         this.$router.push({ name: 'CreatePost' });
       }
     }
-}
+  }
 </script>
+
+
+
 
 <style scoped>
 

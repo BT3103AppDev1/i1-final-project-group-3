@@ -7,7 +7,7 @@
     <div class ="profile-section">
         <div class="left-section">
             <!-- Dynamic Image -->
-            <img class="profile-image" alt = "Profile Picture" src="../assets/about-icon.png" />
+            <img class="profile-image" alt = "Profile Image" :src="profilePicture" v-if="profilePicture" />
             
             <!-- Action buttons -->
             <div class="buttons-container">
@@ -33,9 +33,8 @@
             <!--- 
                 <h2>{{  profile.name }}<span>{{ profile.name.split(' ').join('_').toLowerCase() }}</span></h2> 
             -->
-            <div class="name-and-username">
+            <div class="name">
                 <h2>abcdefghi</h2>
-                <h4>@hello</h4>
             </div>
 
             <div class="major-profileDescription">
@@ -59,7 +58,7 @@
                     <!--- {{  profile.email }} ---> 
 
 
-                <p class="header-profile">Study Style:</p>
+                <p class="header-profile">Current Course:</p>
 
                 <div id="course-list" class="profile-info">
                     <li>bt123231</li>
@@ -80,7 +79,7 @@
 
 
 
-                <p class="header-profile">Study Style:</p> 
+                <p class="header-profile">Description:</p> 
                 <!---
                     <div class="grouparray">
                     {{ profile.studyStyle }}
@@ -90,7 +89,7 @@
                 
                     
 
-                <p class="header-profile">StudyBuddy preference:</p> 
+                <p class="header-profile">My Personalities:</p> 
                 <!---
                 <div class="grouparray">
                     {{ profile.preference }}
@@ -170,15 +169,11 @@
   
 
 <script>  
-import { defineComponent } from "vue";
+import { ref, defineComponent, onMounted, onUnmounted } from "vue";
 import NavigationBar from '@/components/NavigationBar.vue';
-import { doc, getDoc, getFirestore, setDoc, addDoc, serverTimestamp, collection } from 'firebase/firestore';
+import { doc, getDoc, getFirestore, setDoc, addDoc, serverTimestamp, collection, getDocs } from 'firebase/firestore';
 import firebaseApp from '@/firebase.js';
 import { getAuth } from 'firebase/auth';
-
-
-const db = getFirestore(firebaseApp);
-const auth = getAuth();
 
 
 export default defineComponent({
@@ -188,73 +183,68 @@ export default defineComponent({
       NavigationBar
     },
 
-    data() {
-        return {
-            profile: {
-                name: '',
-                major: '',
-                yearOfStudy: '',
-                description: '', 
-                email: '',
-                currentCourses: [],
-                studyStyle: '',
-                preference: ''
-            },
-            profilePicture: '', // URL of the profile picture
-            currentGroup: '', // Name or details of the current group
-            showMessageDialog: false,
-            showBlockDialog: false, 
-            messageText: '',
-        };
-    },
-
-    methods: {
+    setup() {
+        const profiles = ref([]);
+        const showMessageDialog = ref(false);
+        const showBlockDialog = ref(false);
+        const messageDialogRef = ref(null);
+        const blockDialogRef = ref(null);
+        const messageText = ref('');
+        const defaultProfilePicture = '../assets/default-profile-image.jpg';
+        const db = getFirestore(firebaseApp);
+        const auth = getAuth();
 
         // message dialog
-        openUploadMessageDialog() {
-            this.showMessageDialog = true;
+        const openUploadMessageDialog = () => {
+            showMessageDialog.value = true;
+            this.showMessageDialog = true; // maybe dn
             console.log("true")
-            document.addEventListener("click", this.closeMessageDialogOnClickOutside);
-            event.stopPropagation();
+            Vue.nextTick(() => {
+                document.addEventListener('click', closeMessageDialogOnClickOutside);
+            });
+        };
 
-        },
-        closeMessageDialog() {
+        const closeMessageDialog = () => {
+            showMessageDialog.value = false;
             this.showMessageDialog = false;
             document.removeEventListener("click", this.closeMessageDialogOnClickOutside);
-        },
+        };
 
-        closeMessageDialogOnClickOutside(event) {
-                console.log("false")
+        const closeMessageDialogOnClickOutside = (event) => {
+            console.log("false")
             // Check if the click event occurred outside of the popup
-            const popup = this.$refs.messageDialog;
-            if (popup && !popup.contains(event.target)) {
-                this.closeMessageDialog();
+            if (messageDialogRef.value && !messageDialogRef.value.contains(event.target)) {
+                showMessageDialog.value = false;
+                document.removeEventListener('click', closeMessageDialogOnClickOutside);
             }
-        },
+        };
 
         // block dialog
-        openUploadBlockDialog() {
-            this.showBlockDialog = true;
+        const openUploadBlockDialog = () => {
+            showBlockDialog.value = true;
+            this.showBlockDialog = true; // maybe dn
             console.log("true")
-            document.addEventListener("click", this.closeBlockDialogOnClickOutside);
-            event.stopPropagation();
+            Vue.nextTick(() => {
+                document.addEventListener('click', closeBlockDialogOnClickOutside);
+            });
+        };
 
-        },
-        closeBlockDialog() {
+        const closeBlockDialog = () => {
+            showBlockDialog.value = false;
             this.showBlockDialog = false;
             document.removeEventListener("click", this.closeBlockDialogOnClickOutside);
-        },
+        };
 
-        closeBlockDialogOnClickOutside(event) {
-                console.log("false")
+        const closeBlockDialogOnClickOutside = (event) => {
+            console.log("false")
             // Check if the click event occurred outside of the popup
-            const popup = this.$refs.blockDialog;
-            if (popup && !popup.contains(event.target)) {
-                this.closeBlockDialog();
+            if (blockDialogRef.value && !blockDialogRef.value.contains(event.target)) {
+                showBlockDialog.value = false;
+                document.removeEventListener('click', closeBlockDialogOnClickOutside);
             }
-        },
+        };
 
-         sendMessage(receiverUID, receiverName) {
+        const sendMessage = async(receiverUID, receiverName) => {
             console.log(receiverUID);
             console.log(receiverName);
             try {
@@ -265,8 +255,8 @@ export default defineComponent({
                     const senderName = firebaseUser.displayName || ''; // If displayName is null, set it to an empty string or handle accordingly
                     const messageDocumentID = senderUID + receiverUID;
 
-                     this.createMessageDocument(messageDocumentID, senderUID, receiverUID, senderName, receiverName);
-                     this.addMessageToList(messageDocumentID, senderUID, receiverUID, senderName, receiverName, this.messageText);
+                        this.createMessageDocument(messageDocumentID, senderUID, receiverUID, senderName, receiverName);
+                        this.addMessageToList(messageDocumentID, senderUID, receiverUID, senderName, receiverName, this.messageText);
                     // After creating the conversation document, you might want to add a message to it, using addMessageToList() method
                 } else {
                     console.error("User is not authenticated");
@@ -274,9 +264,9 @@ export default defineComponent({
             } catch (error) {
                 console.error("Error sending message: ", error);
             }
-        },
+        };
 
-        async createMessageDocument(docID, senderUID, receiverUID, senderName, receiverName) {
+        const createMessageDocument = async (docID, senderUID, receiverUID, senderName, receiverName) => {
             const docRef = doc(db, 'Message', docID);
             const docSnap = await getDoc(docRef);
             
@@ -290,9 +280,9 @@ export default defineComponent({
                 });
                 
             }
-        },
+        };
 
-        async addMessageToList(docID, senderUID, receiverUID, senderName, receiverName, messageContent) {
+        const addMessageToList = async (docID, senderUID, receiverUID, senderName, receiverName, messageContent) => {
             const msgListRef = collection(db, 'Message', docID, 'msglist');
             await addDoc(msgListRef, {
                 senderUID,
@@ -302,38 +292,61 @@ export default defineComponent({
                 message: messageContent,
                 timestamp: serverTimestamp(),
             });
-        },
+        };
 
-
-
-
-
-        async fetchUserProfile(profileName) {
+        const fetchUserProfileFromFirebase = async () => {
+            const usersCollection = collection(db, 'Users');
             try {
-                
-                const userDoc = doc(db, "Users", profileName);
-                const userProfile = await getDoc(userDoc);
-                if (userProfile.exists()) {
-                    this.profile = userProfile.data();
-                    this.profilePicture = this.profile.profilePictureUrl || '../assets/about-icon.png'; // Set to default picture if not provided
-                    this.currentGroup = this.profile.currentGroup || 'No current group'; // Set to a default value if not provided
-                } else {
-                    console.error("User not found!");
-                }
+                const querySnapshot = await getDocs(usersCollection);
+                profiles.value = querySnapshot.docs.map((docSnapshot) => {
+                    const profileData = docSnapshot.data();
+                    const displayName = profileData.firstName && profileData.lastName
+                        ? `${profileData.firstName} ${profileData.lastName}`
+                        : profileData.name;
+                    const yearOfStudy = profileData.yearOfStudy ? String(profileData.yearOfStudy).match(/\d+/)[0] : 'Unknown';
+                    const profilePicture = profileData.profilePicture || defaultProfilePicture;
+        
+                    return {
+                        name: displayName,
+                        major: profileData.major,
+                        yearOfStudy: yearOfStudy,
+                        email: profileData.email,
+                        courses: profileData.currentCourses,
+                        personalities: profileData.personalities,
+                        description: profileData.description,
+                        profilePicture: profilePicture,
+                        };
+                });
             } catch (error) {
-                console.error("Error fetching user profile: ", error);
+                console.error('Error fetching data: ', error);
             }
-        }
-    },
-    
+        };
 
-    mounted() {
-        const profileName = this.$route.params.name;
-        this.fetchUserProfile(profileName);
-    }, 
+        onMounted(() => {
+            fetchUserProfileFromFirebase();
+        });
 
+        onUnmounted(() => {
+            document.removeEventListener('click', closeMessageDialogOnClickOutside);
+            document.removeEventListener('click', closeBlockDialogOnClickOutside);
+        });
 
-
+        return {
+            profiles,
+            showMessageDialog,
+            showBlockDialog,
+            messageText,
+            messageDialogRef,
+            blockDialogRef,
+            openUploadMessageDialog,
+            closeMessageDialog,
+            openUploadBlockDialog,
+            closeBlockDialog,
+            sendMessage,
+            createMessageDocument,
+            addMessageToList
+    };
+  },
 });
 </script>
 
