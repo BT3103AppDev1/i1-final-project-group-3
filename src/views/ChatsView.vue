@@ -14,14 +14,10 @@
       </div>
 
       <div class="chats">
-        <div class="profile-card" v-for="profile in profiles" :key="profile.name" @click ="navigateToProfile(profile.name)">
-        
-            <img class="profile-image-on-card" :src="profile.profilePicture" alt=""> 
-        
-            <h1 id = "profile-name" >{{ profile.name }}</h1>
-            <h3 id = "profile-major-and-year">{{profile.major}}, Year {{profile.yearOfStudy}}</h3>
-            <h3 id = "profile-description">{{profile.description}}</h3> 
-          </div>
+        <div class="profiles">
+          <img src="../assets/default-profile-image.jpg" alt="Profile" class="profile-pic">
+          <h4>name</h4>
+        </div>
 
       </div>
     </div>
@@ -57,6 +53,10 @@ export default {
 .navbar {
     top:0px;
     left:0px;
+}
+
+h4 {
+  color: black
 }
 
 
@@ -118,6 +118,12 @@ export default {
   transition: 1s;
   background-position: left bottom;
 
+
+}
+
+#profiles {
+  display: flex;
+  flex-direction: row;
 
 }
 
