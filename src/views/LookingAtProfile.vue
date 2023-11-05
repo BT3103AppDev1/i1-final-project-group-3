@@ -1,13 +1,12 @@
 <template>
     <div class="looking-at-profile-page">
-       <div class = "navigation"> 
-          <NavigationBar/>
-       </div>
+       <NavigationBar class = "navigation"/> 
 
-    <div class ="profile-section">
+
+    <div class ="profile-section" v-if="userProfile">
         <div class="left-section">
             <!-- Dynamic Image -->
-            <img class="profile-image" alt = "Profile Picture" src="../assets/about-icon.png" />
+            <img class="profile-image" :alt = "userProfile.name" :src="userProfile.profilePicture || defaultProfilePicture" v-if="userProfile.profilePicture" />
             
             <!-- Action buttons -->
             <div class="buttons-container">
@@ -18,93 +17,71 @@
             <div class="group-info">
                 <p class="header" id="current-group">Current Group:</p> 
                 <div class="grouparray">
-                    <li>abcdefghijk</li>
-                    <li>abc</li>
-                    <li>abc</li>
-                   <!--- 
-                        {{  currentGroup }}
-                     --->
+                    <li v-for="group in userProfile.currentGroup" :key="group">{{ group }}</li>
                 </div>
             </div>
         </div>
 
         <div class="right-section">
-            
-            <!--- 
-                <h2>{{  profile.name }}<span>{{ profile.name.split(' ').join('_').toLowerCase() }}</span></h2> 
-            -->
-            <div class="name-and-username">
-                <h2>abcdefghi</h2>
-                <h4>@hello</h4>
+            <div class="name">
+                <h2>{{ userProfile.name }}</h2>
             </div>
 
             <div class="major-profileDescription">
-                <!---
-                    <h3>{{ profile.major }}, Year {{  profile.yearOfStudy }}</h3>
-                    <p>{{ profile.description }}</p>
-                    
-                --->
-
-                <h4>Data Science and analy, Year 3</h4>
-                <h3>hello abcdefhgh</h3>
-
-                
-
+                <h3>{{ userProfile.major }}, Year {{ userProfile.yearOfStudy }}</h3>
+                <p>{{ userProfile.description }}</p>
             </div>
 
             <div class="profile-details">
-
                 <p class="header-profile">Email:</p>
-                <p class="profile-info" >shoppingtraining@gmail.com</p>
-                    <!--- {{  profile.email }} ---> 
+                <p class="profile-info" >{{ userProfile.email }}</p>
 
 
-                <p class="header-profile">Study Style:</p>
+                <p class="header-profile">Current Courses:</p>
+                <ul id="course-list" class="profile-info">
+                    <li v-for="course in userProfile.currentCourses" :key="course">{{ course }}</li>
+                </ul>
 
-                <div id="course-list" class="profile-info">
-                    <li>bt123231</li>
-                    <li>bt123231</li>
-                    <li>bt123231</li>
-                    <li>bt123231</li>
-                    <li>bt123231</li>
-                    <li>bt123231</li>
-                    
+                <p class="header-profile">Description:</p> 
+                <p class="profile-info">{{ userProfile.description }}</p>
 
-                    <!---
-                    <ul>
-                        <li v-for="course in profile.currentCourses" :key="course">{{ course }}</li>
-                    </ul>
-                    --->
-                </div>
-                
-
-
-
-                <p class="header-profile">Study Style:</p> 
-                <!---
-                    <div class="grouparray">
-                    {{ profile.studyStyle }}
-                </div>
-                    --->
-                <p class="profile-info">hello testing</p>
-                
-                    
-
-                <p class="header-profile">StudyBuddy preference:</p> 
-                <!---
-                <div class="grouparray">
-                    {{ profile.preference }}
-                </div>
-                --->
-                <p class="profile-info">motivated lah blahetc.motivated lah blahetc.motivated lah blahetc.motivated lah blahetc.</p>
-
-                    
-
+                <p class="header-profile">My Personalities:</p> 
+                <p class="profile-info">{{ userProfile.personalities }}</p>
             </div>
-            
-            
-            
         </div>
+    </div>
+    <div class="post-section">
+        <div class="post-header">Posts</div>
+        <div class="post1">
+        <div class="comments">Comments: 1</div>
+        <div class="div2">|</div>
+        <div class="likes">Likes: 3</div>
+        <b class="post-title">DAO1704x hw1 answer</b>
+        <img class="post-user-image" alt="" src="../assets/profile_picture.jpg" />
+        <div class="user-name">Liu Siyi</div>
+        <div class="post-date">14/2/2023</div>
+        <div class="post-content-container">
+        <p class="post-content">Anyone has the hw1 answer key?</p>
+        </div>
+        <div class="post-divider-line" />
+    </div>
+
+        <div class="post2">
+        <div class="comments">Comments: 1</div>
+        <div class="div2">|</div>
+        <div class="likes">Likes: 3</div>
+        <b class="post-title">DAO1704x hw1 answer</b>
+        <img class="post-user-image" alt="" src="../assets/profile_picture.jpg" />
+        <div class="user-name">Liu Siyi</div>
+        <div class="post-date">14/2/2023</div>
+        <div class="post-content-container">
+        <p class="post-content">Anyone has the hw1 answer key?</p>
+        </div>
+        <div class="post-divider-line" />
+    </div>
+
+
+
     </div>
     </div>
 
@@ -132,20 +109,16 @@
             
         </div>
     </div>
-
 </template>
   
 
 <script>  
-import { defineComponent } from "vue";
+import { ref, defineComponent, onMounted, onUnmounted } from "vue";
 import NavigationBar from '@/components/NavigationBar.vue';
-import { doc, getDoc, getFirestore, setDoc, addDoc, serverTimestamp, collection } from 'firebase/firestore';
+import { doc, getDoc, getFirestore, setDoc, addDoc, serverTimestamp, collection, getDocs } from 'firebase/firestore';
+import { useRoute } from 'vue-router';
 import firebaseApp from '@/firebase.js';
 import { getAuth } from 'firebase/auth';
-
-
-const db = getFirestore(firebaseApp);
-const auth = getAuth();
 
 
 export default defineComponent({
@@ -155,73 +128,66 @@ export default defineComponent({
       NavigationBar
     },
 
-    data() {
-        return {
-            profile: {
-                name: '',
-                major: '',
-                yearOfStudy: '',
-                description: '', 
-                email: '',
-                currentCourses: [],
-                studyStyle: '',
-                preference: ''
-            },
-            profilePicture: '', // URL of the profile picture
-            currentGroup: '', // Name or details of the current group
-            showMessageDialog: false,
-            showBlockDialog: false, 
-            messageText: '',
-        };
-    },
-
-    methods: {
+    setup() {
+        const userProfile = ref(null);
+        const showMessageDialog = ref(false);
+        const showBlockDialog = ref(false);
+        const messageDialogRef = ref(null);
+        const blockDialogRef = ref(null);
+        const messageText = ref('');
+        const defaultProfilePicture = '../assets/default-profile-image.jpg';
+        const db = getFirestore(firebaseApp);
+        const auth = getAuth();
+        const route = useRoute();
 
         // message dialog
-        openUploadMessageDialog() {
-            this.showMessageDialog = true;
+        const openUploadMessageDialog = () => {
+            showMessageDialog.value = true;
+            this.showMessageDialog = true; // maybe dn
             console.log("true")
-            document.addEventListener("click", this.closeMessageDialogOnClickOutside);
-            event.stopPropagation();
+            onUnmounted(() => {
+                document.removeEventListener('click', closeMessageDialogOnClickOutside);
+            });
+        };
 
-        },
-        closeMessageDialog() {
-            this.showMessageDialog = false;
-            document.removeEventListener("click", this.closeMessageDialogOnClickOutside);
-        },
+        const closeMessageDialog = () => {
+            showMessageDialog.value = false;
+            document.removeEventListener("click", closeMessageDialogOnClickOutside);
+        };
 
-        closeMessageDialogOnClickOutside(event) {
-                console.log("false")
+        const closeMessageDialogOnClickOutside = (event) => {
+            console.log("false")
             // Check if the click event occurred outside of the popup
-            const popup = this.$refs.messageDialog;
-            if (popup && !popup.contains(event.target)) {
-                this.closeMessageDialog();
+            if (messageDialogRef.value && !messageDialogRef.value.contains(event.target)) {
+                showMessageDialog.value = false;
+                document.removeEventListener('click', closeMessageDialogOnClickOutside);
             }
-        },
+        };
 
         // block dialog
-        openUploadBlockDialog() {
-            this.showBlockDialog = true;
+        const openUploadBlockDialog = () => {
+            showBlockDialog.value = true;
             console.log("true")
-            document.addEventListener("click", this.closeBlockDialogOnClickOutside);
-            event.stopPropagation();
+            onUnmounted(() => {
+                document.removeEventListener('click', closeBlockDialogOnClickOutside);
+            });
+        };
 
-        },
-        closeBlockDialog() {
-            this.showBlockDialog = false;
+        const closeBlockDialog = () => {
+            showBlockDialog.value = false;
             document.removeEventListener("click", this.closeBlockDialogOnClickOutside);
-        },
+        };
 
-        closeBlockDialogOnClickOutside(event) {
-                console.log("false")
+        const closeBlockDialogOnClickOutside = (event) => {
+            console.log("false")
             // Check if the click event occurred outside of the popup
-            const popup = this.$refs.blockDialog;
-            if (popup && !popup.contains(event.target)) {
-                this.closeBlockDialog();
+            if (blockDialogRef.value && !blockDialogRef.value.contains(event.target)) {
+                showBlockDialog.value = false;
+                document.removeEventListener('click', closeBlockDialogOnClickOutside);
             }
-        },
+        };
 
-         sendMessage(receiverUID, receiverName) {
+        const sendMessage = async(receiverUID, receiverName) => {
             console.log(receiverUID);
             console.log(receiverName);
             try {
@@ -232,8 +198,8 @@ export default defineComponent({
                     const senderName = firebaseUser.displayName || ''; // If displayName is null, set it to an empty string or handle accordingly
                     const messageDocumentID = senderUID + receiverUID;
 
-                     this.createMessageDocument(messageDocumentID, senderUID, receiverUID, senderName, receiverName);
-                     this.addMessageToList(messageDocumentID, senderUID, receiverUID, senderName, receiverName, this.messageText);
+                        this.createMessageDocument(messageDocumentID, senderUID, receiverUID, senderName, receiverName);
+                        this.addMessageToList(messageDocumentID, senderUID, receiverUID, senderName, receiverName, this.messageText);
                     // After creating the conversation document, you might want to add a message to it, using addMessageToList() method
                 } else {
                     console.error("User is not authenticated");
@@ -241,9 +207,9 @@ export default defineComponent({
             } catch (error) {
                 console.error("Error sending message: ", error);
             }
-        },
+        };
 
-        async createMessageDocument(docID, senderUID, receiverUID, senderName, receiverName) {
+        const createMessageDocument = async (docID, senderUID, receiverUID, senderName, receiverName) => {
             const docRef = doc(db, 'Message', docID);
             const docSnap = await getDoc(docRef);
             
@@ -257,9 +223,9 @@ export default defineComponent({
                 });
                 
             }
-        },
+        };
 
-        async addMessageToList(docID, senderUID, receiverUID, senderName, receiverName, messageContent) {
+        const addMessageToList = async (docID, senderUID, receiverUID, senderName, receiverName, messageContent) => {
             const msgListRef = collection(db, 'Message', docID, 'msglist');
             await addDoc(msgListRef, {
                 senderUID,
@@ -269,38 +235,65 @@ export default defineComponent({
                 message: messageContent,
                 timestamp: serverTimestamp(),
             });
-        },
+        };
 
+        const fetchUserProfileFromFirebase = async () => {
+            const auth = getAuth(firebaseApp);
+            const firebaseUser = auth.currentUser;
 
-
-
-
-        async fetchUserProfile(profileName) {
-            try {
-                
-                const userDoc = doc(db, "Users", profileName);
-                const userProfile = await getDoc(userDoc);
-                if (userProfile.exists()) {
-                    this.profile = userProfile.data();
-                    this.profilePicture = this.profile.profilePictureUrl || '../assets/about-icon.png'; // Set to default picture if not provided
-                    this.currentGroup = this.profile.currentGroup || 'No current group'; // Set to a default value if not provided
-                } else {
-                    console.error("User not found!");
-                }
-            } catch (error) {
-                console.error("Error fetching user profile: ", error);
+            if (!firebaseUser) {
+                console.error('No user is currently signed in.');
+                return;
             }
-        }
+
+            const userId = firebaseUser.uid; // Use the uid of the currently signed-in user
+            const userDocRef = doc(db, 'Users', userId);
+
+            try {
+                const userDocSnap = await getDoc(userDocRef);
+                if (userDocSnap.exists()) {
+                    const profileData = userDocSnap.data();
+                        userProfile.value = {
+                            name: profileData.name || 'No name provided',
+                            major: profileData.major || 'No major provided',
+                            yearOfStudy: profileData.yearOfStudy || 'Year unknown',
+                            email: profileData.email || 'No email provided',
+                            courses: profileData.courses || [], // Assuming 'courses' is an array
+                            personalities: profileData.personalities || 'No personalities provided',
+                            description: profileData.description || 'No description provided',
+                            profilePicture: profileData.profilePicture || '../assets/default-profile-image.jpg'
+                        };
+                    } else {
+                        console.error('Profile document does not exist!');
+                    }
+            } catch (error) {
+                console.error('Error fetching profile: ', error);
+            }
+        };
+
+        onMounted(fetchUserProfileFromFirebase);
+
+        onUnmounted(() => {
+            document.removeEventListener('click', closeMessageDialogOnClickOutside);
+            document.removeEventListener('click', closeBlockDialogOnClickOutside);
+        });
+
+        return {
+            userProfile,
+            showMessageDialog,
+            showBlockDialog,
+            messageText,
+            messageDialogRef,
+            blockDialogRef,
+            openUploadMessageDialog,
+            closeMessageDialog,
+            openUploadBlockDialog,
+            closeBlockDialog,
+            sendMessage,
+            createMessageDocument,
+            addMessageToList
+        };
     },
-    
-
-    mounted() {
-        const profileName = this.$route.params.name;
-        this.fetchUserProfile(profileName);
-    }, 
-
-
-
 });
 </script>
 
@@ -312,14 +305,12 @@ export default defineComponent({
     left: 0;
     text-align: center;
     overflow-y: auto;
-    position: fixed;
     font-size: var(--font-size-lg);
     color: var(--color-black);
     font-family: var(--font-inter);
 }
   
 .navigation {
-    position: absolute;
     background-color: #525fe1;
     width: 100%;
     height: 10rem;
@@ -329,7 +320,7 @@ export default defineComponent({
     display: flex;
     justify-content: center;
     padding: 2rem;
-    margin-top: 15rem;  /* Adjusting for the navigation height */
+    margin-top: 5rem;  /* Adjusting for the navigation height */
 }
 
 .left-section {
@@ -340,7 +331,6 @@ export default defineComponent({
     align-items: center; 
     justify-content: center;
     position: relative;
-    top: -100px;
 }
 
 .profile-image {
@@ -496,12 +486,9 @@ h3 {
     font-size: 60px;
     color: #525fe1;
 
-   
-
 }
 
 .right-section h3 {
-    
     color: #555;
     margin-bottom: 1rem;
 }
@@ -511,6 +498,92 @@ h3 {
     line-height: 1.5;
 }
 
+.post-section {
+    width: 100%;
+    text-align: left;
+    font-size: var(--font-size-xl);
+    color: var(--color-black);
+    font-family: var(--font-josefin-sans);
+    margin-top: 3rem; 
+}
+
+.post-header {
+    font-size: var(--font-size-29xl);
+    font-family: var(--font-yeseva-one);
+    margin-bottom: 2rem;
+
+}
+
+.post1, .post2 {
+    width: 23.69rem;
+    height: 8.69rem;
+    margin-bottom: 2rem;
+  }
+
+  .comments {
+    font-size: var(--font-size-base);
+    font-family: var(--font-inter);
+    color: var(--color-dimgray);
+    width: 100%;
+  }
+  .div2 {
+    font-size: var(--font-size-base);
+    font-family: var(--font-inter);
+    color: var(--color-dimgray);
+  }
+  .likes {
+    font-size: var(--font-size-base);
+    font-family: var(--font-inter);
+    color: var(--color-dimgray);
+    width: 100%;
+  }
+  .post-title {
+    top: 43.88%;
+    left: 0%;
+    font-weight: bold;
+  }
+  .post-user-image {
+    height: 30.94%;
+    width: 11.35%;
+    top: 0%;
+    right: 88.65%;
+    bottom: 69.06%;
+    left: 0%;
+    border-radius: 50%;
+    max-width: 100%;
+    overflow: hidden;
+    max-height: 100%;
+    object-fit: cover;
+  }
+  .user-name {
+    top: 5.04%;
+    left: 14.78%;
+    font-weight: 500;
+  }
+
+  .post-date {
+    top: 5.04%;
+    left: 59.63%;
+    font-weight: 500;
+  }
+  .post-content {
+    margin: 0;
+  }
+  .post-content-container {
+    top: 71.22%;
+    left: 0%;
+    font-weight: 300;
+  }
+
+  .post-divider-line {
+    height: 4.83%;
+    width: 280%;
+    bottom: -30%;
+    right: 27.29%;
+    left: -1%;
+    border-bottom: 1px solid var(--color-black);
+    box-sizing: border-box;
+  }
+
 
 </style>
-
