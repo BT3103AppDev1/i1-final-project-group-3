@@ -11,9 +11,11 @@ import EditProfileView from '@/views/EditProfileView.vue'
 import Home from '@/views/Home.vue'
 import HomeGroups from '@/views/HomeGroups.vue'
 import Post from '@/views/PostView.vue'
-import Chat from '@/views/ChatsView.vue'
+/*import Chat from '@/views/ChatsView.vue'*/
 import ChatGroups from '@/views/ChatGroups.vue'
 import CreatePost from '@/views/CreatePost.vue'
+
+import Chat from '@/views/PrivateChat.vue'
 
 
 
@@ -98,12 +100,12 @@ const routes =[
     component: CreatePost,
 
   },
-  {
+  /*{
     path: '/chat',
     name: 'Chat',
     component: Chat,
 
-  }, 
+  }, */
 
   {
     path: '/chat-groups',
@@ -111,6 +113,13 @@ const routes =[
     component: ChatGroups,
 
   }, 
+
+  {
+    path: '/chat',
+    name: 'Chat',
+    component: Chat,
+
+  },
 
 
 
