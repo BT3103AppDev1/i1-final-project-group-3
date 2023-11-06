@@ -1,63 +1,19 @@
 <template>
     <NavigationBar class="navbar"/>
-<<<<<<< Updated upstream
-    <div class = "profile-and-groups">
-
-      <div class="chat-tabs">
-        <button id="chat-profiles" class="chat-tab">
-          Profiles
-        </button>
-
-        <button id="chat-groups" class="chat-tabs" @click="navigateToChatGroups" >
-            Groups
-        </button>
-
-      </div>
-
-      <div class="chats">
-        <div class="profiles">
-          <img src="../assets/default-profile-image.jpg" alt="Profile" class="profile-pic">
-          <h4>name</h4>
-        </div>
-
-      </div>
-=======
     <div class="hello"> 
         <h1>Chat Page</h1>
         <ChatWindow :chatID = "chat" />
->>>>>>> Stashed changes
     </div>
 </template>
 
 <script>
-<<<<<<< Updated upstream
-import firebaseApp from '../firebase';
-import NavigationBar from '@/components/navigationbar.vue';
-=======
 import NavigationBar from '@/components/navigationbar.vue';
 import ChatWindow from '@/components/ChatWindow.vue';
->>>>>>> Stashed changes
 
 export default {
     name: "Chat",
     
     components: {
-<<<<<<< Updated upstream
-      NavigationBar, 
-
-    },
-
-    methods: {
-      navigateToChatGroups() {
-        this.$router.push({ name: 'ChatGroups' });
-      },
-
-      openSection(evt, section) {
-                
-        this.activeTab = section;
-      },
-
-=======
       NavigationBar,
       ChatWindow,
     },
@@ -65,7 +21,6 @@ export default {
         return {
             chat: "81tjP5n0p9AZH51zdgai",
         }
->>>>>>> Stashed changes
     }
 }
 </script>
