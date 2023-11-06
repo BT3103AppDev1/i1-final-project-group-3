@@ -3,9 +3,9 @@
     <div class="create-post">
         <div class="new-post">New Post</div>
         <div class="header">Header</div>
-        <input v-model="header" class="enter-the-header" placeholder="Enter the header here...">
+        <input v-model="header" class="enter-the-header" id="enter-the-header" placeholder="Enter the header here...">
         <div class="description">Description</div>
-        <textarea v-model="description" class="enter-the-description" placeholder="Enter the description here..."></textarea>
+        <textarea v-model="description" class="enter-the-description" id= "enter-the-description" placeholder="Enter the description here..."></textarea>
         <button class="insert-image">
           <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-photo-plus" width="30" height="30" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
             <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
@@ -38,7 +38,7 @@
             <div class="popup-bar-line" />
             <h3 style="font-size: 2.19rem; color: var(--color-darkgray-200); font-family: var(--font-josefin-sans); font-weight: 300;">Are you sure you want to publish this post?</h3>
             <div class="action-buttons">
-              <button id= "confirmConfirmation" @click="closeConfirmationDialog">Confirm</button>
+              <button id= "confirmConfirmation" @click="confirmSubmitForm">Confirm</button>
               <button id= "cancelConfirmation" @click="closeConfirmationDialog">Cancel</button>
             </div>
         </div>
@@ -48,6 +48,13 @@
 
 <script>
 import NavigationBar from '@/components/navigationbar.vue'
+import firebase from '@/uifire.js';
+import 'firebase/compat/auth';
+import * as firebaseui from 'firebaseui';
+import 'firebaseui/dist/firebaseui.css';
+import firebaseApp from '@/firebase.js';
+import { doc, collection, getFirestore, getDoc, updateDoc, addDoc, getDocs, setDoc } from "firebase/firestore";
+import { getAuth, onAuthStateChanged } from "firebase/auth"
 
 export default {
     name: "CreatePost",
@@ -57,9 +64,27 @@ export default {
         showConfirmationDialog:false,
         header: "",
         description: "",
+        uid: "",
+        user:false,
+        likes: "",
+        comments: "",
+        date: "",
+        username: "",
       }
     },
-    
+    mounted() {
+      const auth = getAuth();
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          this.user = user;      
+          this.useremail = user.email;
+          this.uid = user.uid;
+        } else {
+          this.user = null;
+          this.useremail = null;
+         }
+      })
+    },
     components: {
       NavigationBar
     },
@@ -69,12 +94,69 @@ export default {
         this.$router.push({ name: 'Post' });
       },
 
+      getCurrentDate() {
+        const currentDate = new Date();
+        return currentDate;
+      },
+
       submitForm() {
         if (!this.header || !this.description) {
           this.showErrorDialog = true;
         } else {
           this.showConfirmationDialog = true;
         }
+      },
+
+      async confirmSubmitForm() {
+        const db = getFirestore(firebaseApp);
+        let uid = this.uid;
+        let header = document.getElementById("enter-the-header").value;
+        let description = document.getElementById("enter-the-description").value;
+        let index = 0;
+        let likes = 0;
+        let comments = 0;
+        try{
+          const auth = getAuth();
+          const user = auth.currentUser;
+
+          const userDocRef = doc(db, "Users", uid);
+          const userDocument = await getDoc(userDocRef);
+          const userData = userDocument.data();
+
+          const postCollectionRef = collection(userDocRef, "Posts");
+          // Get the documents in the 'Posts' subcollection
+          const querySnapshot = await getDocs(postCollectionRef);
+          const numberOfPosts = querySnapshot.size;
+          let username = (userData.firstName) + " " + (userData.lastName);
+
+          if (user) {
+            const newPost = {
+              index : numberOfPosts + 1,
+              header: header,
+              description: description,
+              likes: likes,
+              comments: comments,
+              date: this.getCurrentDate().toDateString(),
+              username: username,
+              userid : this.uid
+            }
+
+            const postDocRef = await addDoc(postCollectionRef, newPost);
+            const postRef = collection(db, 'Posts');
+            const allPostsRef = await addDoc(postRef, newPost);
+
+            this.closeConfirmationDialog()
+            this.navigateToPost()
+            console.log('Post created successfully!');
+          } else {
+            console.error('No user is logged in.');
+        }
+
+          
+        }
+        catch(error) {
+          console.error("Error adding document: ", error);
+          }
       },
 
       openErrorDialog() {
@@ -127,7 +209,7 @@ export default {
 
 </script>
 
-<style>
+<style scoped>
     .create-post {
         background-color: var(--color-white);
         width: 1440px;

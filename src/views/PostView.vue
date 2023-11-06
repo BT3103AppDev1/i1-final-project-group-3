@@ -22,25 +22,36 @@
       <div class="create-button-inner" />
     </button>
 
-    <div v-for="post in posts" :key="post.id" class="post">
-    <div class="comments">Comments: {{ post.comments.length }}</div>
-    <div class="likes">Likes: {{ post.likes }}</div>
-    <b class="post-title">{{ post.title }}</b>
-    <img class="post-user-image" :src="post.userImage" />
-    <div class="user-name">{{ post.username }}</div>
-    <div class="post-date">{{ post.date }}</div>
-    <div class="post-content-container">
-      <p class="post-content">{{ post.content }}</p>
-    </div>
-    <div class="post-divider-line" />
-    </div>
+    <div class="post-list">
+      <div v-for="post in posts" :key="post.id" class="post">
+        <div class="comments">Comments: {{ post.comments }}</div>
+        <div class="likes">Likes: {{ post.likes }}</div>
+        <b class="post-title">{{ post.header }}</b>
+        <img class="post-user-image" :src="post.userImage" />
+        <div class="user-name">{{ post.username }}</div>
+        <div class="post-date">{{ post.date }}</div>
+        <div class="post-content-container">
+          <p class="post-content">{{ post.description }}</p>
+        </div>
+        <div class="post-divider-line" />
+        </div>
+      </div>
+
     </div>
 </template>
 
 <script>
 import NavigationBar from '@/components/navigationbar.vue'
-import { doc, getDoc, getDocs, getFirestore } from 'firebase/firestore';
+
+import { doc, getDoc, getDocs, getFirestore, collection } from 'firebase/firestore';
 import firebaseApp from '@/firebase.js';
+import { getAuth, onAuthStateChanged } from "firebase/auth"
+import firebase from '@/uifire.js';
+import 'firebase/compat/auth';
+import * as firebaseui from 'firebaseui';
+import 'firebaseui/dist/firebaseui.css';
+
+
 
 export default {
     name: "Post",
@@ -51,31 +62,46 @@ export default {
 
     data() {
       return {
-        posts: []
+        uid: "",
+        user: false,
+        useremail:'',
+        posts: [],
       }
     }, 
     
-    async created() {
-      await this.fetchUserPosts('someProfileName');
-    },
+    async mounted() {
+       const auth = getAuth();
+       onAuthStateChanged(auth, (user) => {
+         if (user) {
+           this.user = user;
+           this.useremail = user.email;
+           this.uid = user.uid;
+           this.fetchUserPosts(this.useremail);
+           
+         } else {
+           this.user = null;
+           this.useremail = null;
+         }
+       })
+     },
 
     methods: {
-      async fetchUserPosts(profileName) {
+      async fetchUserPosts(useremail) {
         try {
-          const db = getFirestore(firebaseApp);
-          const userDocRef = doc(db, "Users", profileName);
-          const userDocSnap = await getDocs(userDocRef);
+          const db = getFirestore(firebaseApp)
+          const postsSnapshot = await getDocs(collection(db, 'Posts'));
 
-          if (userDocSnap.exists()) {
-            const postsSnapshot = await getDocs(collection(db, 'Posts'));
-            this.posts = postsSnapshot.docs.map(doc => {
-              let post = doc.data();
-              post.id = doc.id;
-              return post;
-            });
-          } else {
-            console.error("User not found!"); 
-          }
+          postsSnapshot.docs.map( async (document) => {
+            let post = document.data();
+            let userId = post.userid;
+            
+            let userDocument = await getDoc(doc(db, 'Users', userId));
+            let userData = userDocument.data();
+            post.userImage = userData.profilePicture;
+            post.id = document.id;
+            this.posts.push(post);
+          });
+
         } catch (error) {
           console.error("Error fetching posts: ", error);
         }
@@ -223,101 +249,80 @@ export default {
     background-color: #ffb175;
   }
 
-  .post1 {
-    position: absolute;
-    top: 28.31rem;
-    left: 11.88rem;
-    width: 23.69rem;
-    height: 8.69rem;
+  .post-list {
+    margin-top: 230px;
+    width: 1000px;
+    margin-left: 180px;
+
+  }
+  .post {
+    position: relative;
+    margin-bottom: 20px;
+    font-size: var(--font-size-base);
+    font-family: var(--font-inter);
+    color: var(--color-dimgray);
+    height: 10rem;
+    
   }
 
   .comments {
     position: absolute;
-    top: 9.15rem;
-    left: 59.31rem;
-    font-size: var(--font-size-base);
-    font-family: var(--font-inter);
-    color: var(--color-dimgray);
-    width: 100%;
-  }
-  .div2 {
-    position: absolute;
-    top: 9.19rem;
-    left: 57.81rem;
-    font-size: var(--font-size-base);
-    font-family: var(--font-inter);
-    color: var(--color-dimgray);
+    margin-left: 870px;
+    width: 120px;
+    bottom: 5px;
   }
   .likes {
     position: absolute;
-    top: 9.19rem;
-    left: 53.06rem;
-    font-size: var(--font-size-base);
-    font-family: var(--font-inter);
-    color: var(--color-dimgray);
-    width: 100%;
+    margin-left: 770px;
+    width: 120px;
+    bottom: 5px;
   }
   .post-title {
     position: absolute;
-    top: 43.88%;
-    left: 0%;
     font-weight: bold;
+    top: 70px;
+    margin-left: 40px;
   }
   .post-user-image {
     position: absolute;
-    height: 30.94%;
-    width: 11.35%;
-    top: 0%;
-    right: 88.65%;
-    bottom: 69.06%;
-    left: 0%;
     border-radius: 50%;
-    max-width: 100%;
-    overflow: hidden;
-    max-height: 100%;
+    width: 50px;
+    height: 50px;
+    margin-left: 40px;
+    top: 5px;
     object-fit: cover;
+    
   }
   .user-name {
     position: absolute;
-    top: 5.04%;
-    left: 14.78%;
+    top: 20px;
+    margin-left: 110px;
     font-weight: 500;
+    font-weight: bold;
   }
 
   .post-date {
     position: absolute;
-    top: 5.04%;
-    left: 59.63%;
+    top: 20px;
+    margin-left: 250px;
     font-weight: 500;
-  }
-  .post-content {
-    margin: 0;
   }
   .post-content-container {
     position: absolute;
-    top: 71.22%;
-    left: 0%;
     font-weight: 300;
+    top: 100px;
+    margin-left: 40px;
   }
 
   .post-divider-line {
     position: absolute;
     height: 4.83%;
-    width: 280%;
-    bottom: -30%;
-    right: 27.29%;
-    left: -1%;
+    top: 160px;
+    right: 0%;
+    left: 0%;
     border-bottom: 1px solid var(--color-black);
     box-sizing: border-box;
-  }
-
-  .post2 {
-    position: absolute;
-    top: 42.31rem;
-    left: 11.88rem;
-    width: 23.69rem;
-    height: 8.69rem;
-  }
+  } 
 
 
 </style>
