@@ -21,6 +21,7 @@
       <div class="create-button-item" />
       <div class="create-button-inner" />
     </button>
+
     <div class="post-list">
       <div v-for="post in posts" :key="post.id" class="post">
         <div class="comments">Comments: {{ post.comments }}</div>
@@ -35,11 +36,13 @@
         <div class="post-divider-line" />
         </div>
       </div>
+
     </div>
 </template>
 
 <script>
 import NavigationBar from '@/components/navigationbar.vue'
+
 import { doc, getDoc, getDocs, getFirestore, collection } from 'firebase/firestore';
 import firebaseApp from '@/firebase.js';
 import { getAuth, onAuthStateChanged } from "firebase/auth"
@@ -47,6 +50,7 @@ import firebase from '@/uifire.js';
 import 'firebase/compat/auth';
 import * as firebaseui from 'firebaseui';
 import 'firebaseui/dist/firebaseui.css';
+
 
 
 export default {
@@ -106,8 +110,11 @@ export default {
         this.$router.push({ name: 'CreatePost' });
       }
     }
-}
+  }
 </script>
+
+
+
 
 <style scoped>
 

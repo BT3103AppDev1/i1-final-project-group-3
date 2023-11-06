@@ -17,7 +17,7 @@
             <path d="M19 16v6"></path>
           </svg>
         </button>
-        <button class="cancel" @click="navigateToPost">Cancel</button>   
+        <button class="cancelCreatepost" @click="navigateToPost">Cancel</button>   
         <button type = "submit" id="post-button" @click="submitForm">Post</button>
             
     </div>
@@ -288,7 +288,7 @@ export default {
     border: 1px solid #a7a7a7;
   }
 
-  .cancel {
+  .cancelCreatepost {
     position: absolute;
     top: 877px;
     left: 804px;
@@ -303,8 +303,15 @@ export default {
     display: inline-block;
     cursor: pointer;
     font-size: var(--font-size-6xl);
+    background-color: white;
 
   }
+
+  .cancelCreatepost:hover {
+    background-color: var(--color-mediumslateblue);
+    color: white;
+  }
+
   #post-button {
     position: absolute;
     top: 876px;

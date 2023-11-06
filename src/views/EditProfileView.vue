@@ -113,10 +113,10 @@
                     <div id="year-study" class="input">
                         <h3>Year of Study</h3>
                         <select id="yearOfStudy" v-model="yearOfStudy" :placeholder="yearOfStudyplaceholder" > 
-                            <option value="year1">Year 1</option>
-                            <option value="year2">Year 2</option>
-                            <option value="year3">Year 3</option>
-                            <option value="year4">Year 4</option>
+                            <option value="1">Year 1</option>
+                            <option value="2">Year 2</option>
+                            <option value="3">Year 3</option>
+                            <option value="4">Year 4</option>
                             
                         </select>
                     </div>
@@ -157,7 +157,7 @@
                 </div>
 
                 <div id="blocked-content" class="tabcontent" v-show="activeTab === 'blocked-content'">
-                    <h1>hello2</h1>
+                    <h1>We have not develop this function.</h1>
 
                 </div>
 
