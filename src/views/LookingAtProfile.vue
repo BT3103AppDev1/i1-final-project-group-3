@@ -203,31 +203,73 @@ export default defineComponent({
         });
 
 
-        const sendMessage = async(receiverUID, receiverName) => {
+        const sendMessage = async (receiverUID, receiverName) => {
             console.log(receiverUID);
             console.log(receiverName);
 
             try {
                 const firebaseUser = auth.currentUser;
-                
+
                 if (firebaseUser) {
                     const senderUID = firebaseUser.uid;
-                    const senderName = firebaseUser.displayName || ''; // If displayName is null, set it to an empty string or handle accordingly
-                    const messageDocRef = doc(collection(db, 'Message'));
-                    const messageDocumentID = messageDocRef.id;
+                    console.log(senderUID);
 
+                    const userProfileRef = doc(db, 'Users', senderUID);
+                    const userProfileSnap = await getDoc(userProfileRef);
+                    const userProfile = userProfileSnap.data();
+                    const senderName = (userProfile.firstName || '') + " " + (userProfile.lastName || '');
+                    console.log(senderName);
+
+                    // Check if a chat already exists between the two users
+                    // Id = uid of first person who start convo + receiver uid
+
+                    const existingChatId = await getExistingChatId(senderUID, receiverUID);
+                    console.log(existingChatId)
+                    let messageDocumentID = existingChatId
+
+                    // just creating the document in the user profiles. if no existing chats between the 2, create new one
+                    if (!existingChatId) {
+                        // If no existing chat, update the chat IDs for both users
+                        messageDocumentID = senderUID + receiverUID;
                         await createMessageDocument(messageDocumentID, senderUID, receiverUID, senderName, receiverName);
-                        await addMessageToList(messageDocumentID, senderUID, receiverUID, senderName, receiverName, messageText.value);
-                        await updateUserChatIds(senderUID, messageDocumentID );
-                        await updateUserChatIds(receiverUID, messageDocumentID );
-                        closeMessageDialog();
-                    // After creating the conversation document, you might want to add a message to it, using addMessageToList() method
+                        await updateUserChatIds(senderUID, messageDocumentID);
+                        await updateUserChatIds(receiverUID, messageDocumentID);
+                    }
+
+                    // adding message to the document
+                    await addMessageToList(messageDocumentID, senderUID, receiverUID, senderName, receiverName, messageText.value);
+                    closeMessageDialog();
                 } else {
                     console.error("User is not authenticated");
                 }
             } catch (error) {
                 console.error("Error sending message: ", error);
             }
+        };
+
+        const getExistingChatId = async(senderUID, receiverUID) => {
+            // fetch senderUID chatIds
+            const senderRef = doc(db, 'Users', senderUID);
+            const senderSnap = await getDoc(senderRef);
+            const senderData = senderSnap.data();
+            const senderChatIds = senderData.chatIds;
+            if (senderChatIds === undefined) {
+                return null;
+            } else {
+                for (const chatId of senderChatIds) {
+                if (chatId.includes(receiverUID)) {
+                    return chatId;
+                }
+            }
+
+            }
+
+            //iterating through the Chatid array to find the chatid that contains the receiverUID
+            
+
+            return null;
+
+
         };
 
         const updateUserChatIds = async(userId, chatId) => {
