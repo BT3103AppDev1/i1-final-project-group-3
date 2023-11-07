@@ -26,7 +26,7 @@
       </div>
  
         <div class = "display-all-profile-cards">
-            <div class="profile-card" v-for="profile in profiles" :key="profile.name" @click ="navigateToProfile(profile.name)">
+            <div class="profile-card" v-for="profile in profiles" :key="profile.uid" @click ="navigateToProfile(profile.uid)">
         
               <img class="profile-image-on-card" :src="profile.profilePicture" alt=""> 
           
@@ -50,7 +50,6 @@
 import { ref, defineComponent, onMounted } from 'vue';
 import { getFirestore, collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import firebaseApp from '../firebase.js';
-import NavigationBar from '../components/NavigationBar.vue';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'vue-router';
 import router from '../router/index.js';
@@ -128,8 +127,8 @@ export default defineComponent({
 
     };
 
-    const navigateToProfile = (profileName) => {
-      router.push({ name: 'profile', params: { name: profileName }});
+    const navigateToProfile = (userId) => {
+      router.push({ name: 'profile', params: { userId }});
 
     };
 
@@ -142,6 +141,7 @@ export default defineComponent({
         
         querySnapshot.forEach((doc) => {
           const profileData = doc.data();
+          const profileId = doc.id;
           const auth = getAuth();
           const firebaseUser = auth.currentUser;
 
@@ -175,6 +175,7 @@ export default defineComponent({
 
 
           profilesArray.push({
+            uid: profileId,
             name: displayName,
             major: profileData.major,
             yearOfStudy: yearOfStudy,

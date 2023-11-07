@@ -6,7 +6,7 @@
     <div class ="profile-section" v-if="userProfile">
         <div class="left-section">
             <!-- Dynamic Image -->
-            <img class="profile-image" :alt = "userProfile.name" :src="userProfile.profilePicture || defaultProfilePicture" v-if="userProfile.profilePicture" />
+            <img class="profile-image" :alt = "userProfile.name" :src="userProfile.profilePicture || defaultProfilePicture" />
             
             <!-- Action buttons -->
             <div class="buttons-container">
@@ -14,7 +14,7 @@
                 <button class="block" @click="openUploadBlockDialog">Block</button>
             </div>
 
-            <div class="group-info">
+            <div class="group-info" v-if="userProfile.currentGroup">
                 <p class="header" id="current-group">Current Group:</p> 
                 <div class="grouparray">
                     <li v-for="group in userProfile.currentGroup" :key="group">{{ group }}</li>
@@ -24,7 +24,7 @@
 
         <div class="right-section">
             <div class="name">
-                <h2>{{ userProfile.name }}</h2>
+                <h2>{{ userProfile.displayName }}</h2>
             </div>
 
             <div class="major-profileDescription">
@@ -42,11 +42,10 @@
                     <li v-for="course in userProfile.currentCourses" :key="course">{{ course }}</li>
                 </ul>
 
-                <p class="header-profile">Description:</p> 
-                <p class="profile-info">{{ userProfile.description }}</p>
-
                 <p class="header-profile">My Personalities:</p> 
-                <p class="profile-info">{{ userProfile.personalities }}</p>
+                <ul id="personality-list" class ="profile-info">
+                    <li v-for="personality in userProfile.personalities" :key="personality">{{ personality }}</li>
+                </ul>
             </div>
         </div>
     </div>
@@ -113,12 +112,13 @@
   
 
 <script>  
-import { ref, defineComponent, onMounted, onUnmounted } from "vue";
+import { ref, defineComponent, onMounted, onUnmounted, computed } from "vue";
 import NavigationBar from '@/components/NavigationBar.vue';
-import { doc, getDoc, getFirestore, setDoc, addDoc, serverTimestamp, collection, getDocs } from 'firebase/firestore';
+import { doc, getDoc, setDoc, addDoc, getFirestore, collection } from 'firebase/firestore';
 import { useRoute } from 'vue-router';
-import firebaseApp from '@/firebase.js';
 import { getAuth } from 'firebase/auth';
+import firebaseApp from '@/firebase.js';
+
 
 
 export default defineComponent({
@@ -129,7 +129,6 @@ export default defineComponent({
     },
 
     setup() {
-        const userProfile = ref(null);
         const showMessageDialog = ref(false);
         const showBlockDialog = ref(false);
         const messageDialogRef = ref(null);
@@ -140,10 +139,20 @@ export default defineComponent({
         const auth = getAuth();
         const route = useRoute();
 
+        const userProfile = ref({
+            name: '',
+            major: '', 
+            yearOfStudy: '', 
+            email: '',
+            courses: '',
+            personalities: '',
+            description: '', 
+            profilePicture: defaultProfilePicture // Assuming defaultProfilePicture is defined
+        });
+
         // message dialog
         const openUploadMessageDialog = () => {
             showMessageDialog.value = true;
-            this.showMessageDialog = true; // maybe dn
             console.log("true")
             onUnmounted(() => {
                 document.removeEventListener('click', closeMessageDialogOnClickOutside);
@@ -238,34 +247,43 @@ export default defineComponent({
         };
 
         const fetchUserProfileFromFirebase = async () => {
-            const auth = getAuth(firebaseApp);
-            const firebaseUser = auth.currentUser;
+            const db = getFirestore(firebaseApp);
+            const userId = route.params.userId;
 
-            if (!firebaseUser) {
-                console.error('No user is currently signed in.');
+            if (!userId) {
+                console.error('No user ID provided');
                 return;
             }
 
-            const userId = firebaseUser.uid; // Use the uid of the currently signed-in user
             const userDocRef = doc(db, 'Users', userId);
 
             try {
                 const userDocSnap = await getDoc(userDocRef);
                 if (userDocSnap.exists()) {
                     const profileData = userDocSnap.data();
-                        userProfile.value = {
-                            name: profileData.name || 'No name provided',
-                            major: profileData.major || 'No major provided',
-                            yearOfStudy: profileData.yearOfStudy || 'Year unknown',
-                            email: profileData.email || 'No email provided',
-                            courses: profileData.courses || [], // Assuming 'courses' is an array
-                            personalities: profileData.personalities || 'No personalities provided',
-                            description: profileData.description || 'No description provided',
-                            profilePicture: profileData.profilePicture || '../assets/default-profile-image.jpg'
-                        };
-                    } else {
-                        console.error('Profile document does not exist!');
+
+                    // Constructing the display name
+                    let displayName = profileData.name; // default to the 'name' field
+                    if (profileData.firstName || profileData.lastName) {
+                        displayName = `${profileData.firstName || ''} ${profileData.lastName || ''}`.trim();
                     }
+
+                    // Extracting the year of study
+                    const yearMatch = profileData.yearOfStudy ? String(profileData.yearOfStudy).match(/\d+/) : null;
+                    const yearOfStudy = yearMatch ? yearMatch[0] : 'Unknown';
+
+                    // Handling the profile picture
+                    let profilePicture = profileData.profilePicture || defaultProfilePicture;
+
+                    userProfile.value = {
+                        ...profileData, 
+                        displayName,
+                        yearOfStudy, 
+                        profilePicture
+                    };
+                } else {
+                    console.error('Profile document does not exist!');
+                }
             } catch (error) {
                 console.error('Error fetching profile: ', error);
             }
