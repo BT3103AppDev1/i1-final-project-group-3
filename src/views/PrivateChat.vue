@@ -4,6 +4,7 @@
 <div class="container">
 <div class="messaging">
       <div class="inbox_msg">
+        <!--INBOX TO BE UPDATED (FETCH FROM FIREBASE) -->
         <div class="inbox_people">
           <div class="headind_srch">
             <div class="group=parent">
@@ -87,24 +88,27 @@
           </div>
         </div>
         <div class="mesgs">
+
           <div class="msg_history">
-            <div v-for = "message in messages">
-              <div :class = "[message.author == authUser.displayName? 'sent_msg': 'received_msg']" >
-       
-                <div class="received_withd_msg">
-                  <p>{{message.message}}</p>
-                  <span class="name-of-sender">{{message.author}}</span></div>
+              <div v-for="message in messages">
+                <div :class="[message.author === authUser.displayName ? 'sent_msg' : 'received_msg']">
+                  <img v-if="message.imageUrl" :src="message.imageUrl" alt="Uploaded Image" class="uploaded-image">
+                  <div v-else class="received_withd_msg">
+                    <p>{{ message.message }}</p>
+                    <span class="name-of-sender">{{ message.author }}</span>
+                  </div>
+                </div>
               </div>
             </div>
-      
-
-          </div>
-          <div class="type_msg">
-            <div class="input_msg_write">
-              <input @keyup.enter = "saveMessage" v-model = "message" type="text" class="write_msg" placeholder="Type a message" />
-              <img class="msg_send_btn" alt = "" src="../assets/send.png" @click="sendMessageOnClick"/>
+            <div class="type_msg">
+              <div class="input_msg_write">
+                <img class="upload-icon" src="../assets/uploadphoto.png" alt="Upload Icon" @click="triggerFileInput" />
+                <input id="fileInput" ref="fileInput" type="file" style="display: none" @change="handleFileUpload" />
+                <input @keyup.enter="saveMessage" v-model="message" type="text" class="write_msg" placeholder="Type a message" />
+                <img class="msg_send_btn" alt="" src="../assets/send.png" @click="sendMessageOnClick" />
+              </div>
             </div>
-          </div>
+
         </div>
       </div>
       
@@ -124,6 +128,7 @@ import firebaseApp from '../firebase.js';
 import NavigationBar from '../components/NavigationBar.vue';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'vue-router';
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 
  
 
@@ -140,8 +145,52 @@ export default {
     const authUser = ref({});
     const router = useRouter();
     const auth = getAuth(firebaseApp);
-
+    const storage = getStorage(firebaseApp);
     const db = getFirestore(firebaseApp);
+
+    const triggerFileInput = () => {
+        const fileInput = document.getElementById('fileInput');
+        fileInput.click();
+     };
+
+    const handleFileUpload = async (event) => {
+          if (authUser.value && authUser.value.displayName) {
+            const file = event.target.files[0];
+            if (file) {
+              const storageChildRef = storageRef(storage, 'chat_images/' + file.name);
+              try {
+                await uploadBytes(storageChildRef, file);
+                const downloadURL = await getDownloadURL(storageChildRef);
+                const newMessage = {
+                  author: authUser.value.displayName,
+                  createdAt: new Date(),
+                  imageUrl: downloadURL,
+                };
+ 
+                addDoc(collection(db, 'chat'), newMessage)
+                  .then(docRef => {
+                    console.log('Message written with ID: ', docRef.id);
+                  })
+                  .catch(error => {
+                    console.error('Error adding message: ', error);
+                  });
+
+         
+                scrollToBottom();
+
+        
+                message.value = '';
+              } catch (error) {
+                console.error('Error uploading file:', error);
+              }
+            }
+          } else {
+            console.error('Invalid authUser data');
+          }
+        };
+
+
+
 
    
     const scrollToBottom = () => {
@@ -185,7 +234,7 @@ export default {
 
     const navigateToGroupsChat = () => {
      
-      router.push({ name: 'HomeGroups' }); //to be edited after creating chat function for groups!!!
+      router.push({ name: 'ChatGroups' }); //to be edited after creating chat function for groups!!!
 
     };
 
@@ -233,7 +282,9 @@ export default {
       saveMessage,
       authUser,
       sendMessageOnClick,
-      navigateToGroupsChat
+      navigateToGroupsChat,
+      handleFileUpload,
+      triggerFileInput,
     };
   }
 };
@@ -451,11 +502,25 @@ img{
 
 .msg_send_btn {
   cursor: pointer;
-  height: 2rem;
+  height: 1.7rem;
   position: absolute;
-  top: 11px;
-  left: 50rem;
+  top: 0.8rem;
+  left: 47.5rem;
 
+}
+
+
+.upload-icon {
+  cursor: pointer;
+  height: 1.7rem;
+  position: absolute;
+  top: 0.8rem;
+  left: 50rem;
+}
+
+.uploaded-image {
+  max-width: 15rem; 
+  max-height: 15rem; 
 }
  
 .msg_history {

@@ -14,8 +14,8 @@ import Post from '@/views/PostView.vue'
 /*import Chat from '@/views/ChatsView.vue'*/
 import ChatGroups from '@/views/ChatGroups.vue'
 import CreatePost from '@/views/CreatePost.vue'
-
 import Chat from '@/views/PrivateChat.vue'
+ 
 
 
 
