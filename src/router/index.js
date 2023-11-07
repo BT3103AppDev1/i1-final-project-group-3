@@ -31,7 +31,7 @@ const routes =[
 
   },
   {
-    path: '/profile/:name',
+    path: '/profile/:userId',
     name: 'profile',
     component: LookingAtProfile,
     props: true
