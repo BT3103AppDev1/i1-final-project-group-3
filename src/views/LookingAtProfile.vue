@@ -114,7 +114,7 @@
 <script>  
 import { ref, defineComponent, onMounted, onUnmounted, computed } from "vue";
 import NavigationBar from '@/components/NavigationBar.vue';
-import { doc, getDoc, getFirestore, setDoc, addDoc, serverTimestamp, collection} from 'firebase/firestore';
+import { doc, getDoc, getFirestore, setDoc, addDoc, serverTimestamp, collection, updateDoc, arrayUnion} from 'firebase/firestore';
 import { useRoute } from 'vue-router';
 import { getAuth } from 'firebase/auth';
 import firebaseApp from '@/firebase.js';
@@ -213,10 +213,13 @@ export default defineComponent({
                 if (firebaseUser) {
                     const senderUID = firebaseUser.uid;
                     const senderName = firebaseUser.displayName || ''; // If displayName is null, set it to an empty string or handle accordingly
-                    const messageDocumentID = senderUID + receiverUID;
+                    const messageDocRef = doc(collection(db, 'Message'));
+                    const messageDocumentID = messageDocRef.id;
 
                         await createMessageDocument(messageDocumentID, senderUID, receiverUID, senderName, receiverName);
                         await addMessageToList(messageDocumentID, senderUID, receiverUID, senderName, receiverName, messageText.value);
+                        await updateUserChatIds(senderUID, messageDocumentID );
+                        await updateUserChatIds(receiverUID, messageDocumentID );
                         closeMessageDialog();
                     // After creating the conversation document, you might want to add a message to it, using addMessageToList() method
                 } else {
@@ -226,6 +229,13 @@ export default defineComponent({
                 console.error("Error sending message: ", error);
             }
         };
+
+        const updateUserChatIds = async(userId, chatId) => {
+            const userRef = doc(db, 'Users', userId);
+            await updateDoc(userRef, {
+                chatIds: arrayUnion(chatId),
+            })
+        }
 
         const createMessageDocument = async (docID, senderUID, receiverUID, senderName, receiverName) => {
             const docRef = doc(db, 'Message', docID);
