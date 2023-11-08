@@ -11,7 +11,7 @@
                 <br>
                 <br>                
                 <label for="groupDescription" class = "groupDescription"><b>Group Description:</b></label>  <br>
-                <textarea v-model="groupDescription" id="groupDescription" placeholder="example: lets study BT3103 together!" required = ""></textarea>
+                <textarea v-model="groupDescription" id="groupDescription" type="text" placeholder="example: lets study BT3103 together!" required = ""></textarea>
                 <br> 
                 <br>  
                 <div class = "numMembers">             
@@ -27,70 +27,109 @@
         </div>
    </div>
 </template>
-
-
+ 
 <script>
+import NavigationBar from '@/components/navigationbar.vue'
+import firebase from '@/uifire.js';
+import 'firebase/compat/auth';
+import * as firebaseui from 'firebaseui';
+import 'firebaseui/dist/firebaseui.css';
 import firebaseApp from '@/firebase.js';
-import { getFirestore, collection, getDocs } from "firebase/firestore"
-import {getAuth} from "firebase/auth"; 
-import { doc, setDoc, addDoc } from "firebase/firestore";
-
-const db = getFirestore(firebaseApp);
+import { doc, collection, getFirestore, getDoc, updateDoc, addDoc, getDocs, setDoc } from "firebase/firestore";
+import { getAuth, onAuthStateChanged } from "firebase/auth"
 
 export default {
-  data() {
-    return {
-      groupTitle: "",
-      groupDescription: "",
-      membersCount: null
-    };
-  },
-
-  emits:["create-group"],
-  methods: {
-
-    closeForm() {
-       this.$emit("close-form");
+    data() {
+      return {
+        groupTitle: "",
+        groupDescription: "",
+        membersCount: null,
+        uid: "",
+        user:false,
+        username: "",
+      }
     },
 
-    async submitForm() {
-      console.log("submitted form")
+    mounted() {
+      const auth = getAuth();
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          this.user = user;      
+          this.useremail = user.email;
+          this.uid = user.uid;
+        } else {
+          this.user = null;
+          this.useremail = null;
+         }
+      })
+    },
 
-      let groupTitle = document.getElementById("groupTitle").value
-      let groupDescription = document.getElementById("groupDescription").value
-      let membersCount = parseInt(document.getElementById("membersCount").value);
+    emits:["create-group"],
 
+    methods: {
 
-      alert("Creating your new group: " + groupTitle)
+      closeForm() {
+       this.$emit("close-form");
+      },
 
-      try {
+      async submitForm() {
+        const db = getFirestore(firebaseApp);
+        let uid = this.uid;
+        let groupTitle = document.getElementById("groupTitle").value;
+        let groupDescription = document.getElementById("groupDescription").value;
+        let membersCount = parseInt(document.getElementById("membersCount").value);
 
-        const data = {
-          title: this.groupTitle,
-          description: this.groupDescription,
-          members: parseInt(this.membersCount)
-        };
+        alert("Creating your new group: " + groupTitle)
 
-        const docRef = await addDoc(collection(db, 'Groups'), data);
+        try{
+          const auth = getAuth();
+          const user = auth.currentUser;
 
+          const userDocRef = doc(db, "Users", uid);
+          const userDocument = await getDoc(userDocRef);
 
-        console.log(docRef)
-        document.getElementById('myform').reset();
-        this.$emit("create-group", {
-          title: this.groupTitle,
-          description: this.groupDescription,
-          members: this.membersCount
-      }); 
-     
-      }
-      catch(error) {
-        console.log("Error adding group: ", error);
-      }
-      }
+          const userData = userDocument.data();
+   
+          let username = (userData.firstName) + " " + (userData.lastName);
+    
+
+          if (user) {
+            const newPost = {
+              title: this.groupTitle,
+              groupDescription: this.groupDescription,
+              members: parseInt(this.membersCount),
+              username: username,
+              userid : this.uid,
+            }
+
+            const groupDocRef = await addDoc(collection(db, 'Groups'), newPost);
+ 
+
+            document.getElementById('myform').reset();
+
+              this.$emit("create-group", {
+                title: this.groupTitle,
+                groupDescription: this.groupDescription,
+                members: this.membersCount
+            }); 
+
+            console.log('Group created successfully!');
+          } else {
+            console.error('No user is logged in.');
+        }
+
+          
+        }
+        catch(error) {
+          console.error("Error adding group: ", error);
+          }
+      },
 
     }
-  }
-  </script>
+}
+
+</script> 
+ 
 
 <style scoped>
 

@@ -58,7 +58,7 @@ export default {
     const user = ref(null);
     const useremail = ref('');
     const uid = ref('');
-	const router = useRouter();
+	  const router = useRouter();
     const posts = ref([]);
     const searchQuery = ref('');
 
