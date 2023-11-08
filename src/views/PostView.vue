@@ -25,10 +25,10 @@
     <div class="post-list">
       <div v-for="post in posts" :key="post.id" class="post">
         <button class="comments">Comments: {{ post.comments }}</button>
-        <button class="likes">Likes: {{ post.likes }}</button>
+        <button class="likes" id="likes" @click="likePost(post.id, this.uid)">Likes: {{ post.likes }}</button>
         <b class="post-title">{{ post.header }}</b>
         <img class="post-user-image" :src="post.userImage" />
-        <button class="user-name" @click="navigateToProfile(post.username)">{{ post.username }}</button>
+        <button class="user-name" @click="navigateToUserProfile(post.userid)">{{ post.username }}</button>
         <div class="post-date">{{ post.date }}</div>
         <div class="post-content-container">
           <p class="post-content">{{ post.description }}</p>
@@ -45,7 +45,7 @@
 import NavigationBar from '@/components/navigationbar.vue'
 import { onMounted, ref, reactive, computed } from "vue";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, collection, query, orderBy, getDocs, getDoc, doc } from 'firebase/firestore';
+import { getFirestore, collection, query, orderBy, getDocs, getDoc, doc, updateDoc, addDoc, getCountFromServer } from 'firebase/firestore';
 import firebaseApp from '@/firebase.js';
 import { useRouter } from 'vue-router';
 
@@ -112,13 +112,84 @@ export default {
        router.push({ name: 'CreatePost' });
     };
 
+    const navigateToUserProfile = (userId) => {
+      router.push({ name: 'profile', params: { userId }});
+
+    };
+
+    const likePost = async (postId, userId) => {
+      const db = getFirestore(firebaseApp);
+      const postRef = collection(db, "Posts", postId, "Likes");   
+      const postSnap = await getDocs(postRef)
+      const likesCount = await getCountFromServer(postRef);
+
+      if (likesCount.data().count > 0 ) {
+        for (const document of postSnap.docs) {
+          const likeData = document.data();
+          console.log(likeData);
+          const userLiked = likeData.userId;
+
+          if (userLiked == userId) {
+            console.log("User has already liked the post");
+            alert("You have liked the post already.");
+            break;
+          } else {
+            const currentPostRef = doc(db, "Posts", postId);
+            const currentPostSnap = await getDoc(currentPostRef);
+            const postData = currentPostSnap.data();
+            const currentLikes = postData.likes;
+            const updates = {
+              likes: currentLikes + 1
+            };
+
+            // Update the like count for the post
+            await updateDoc(doc(db, "Posts", postId), updates);
+
+            // Add a like document to the "likes" collection to track the user's like
+            await addDoc(collection(db, "Posts", postId, "Likes"), {
+              postId: postId,
+              userId: userId,
+            });
+
+            console.log("Liked!");
+            location.reload();
+          }
+        } 
+      } else {
+        console.log("here")
+        const currentPostRef = doc(db, "Posts", postId);
+        const currentPostSnap = await getDoc(currentPostRef);
+        const postData = currentPostSnap.data();
+        const currentLikes = postData.likes;
+        const updates = {
+          likes: currentLikes + 1
+        };
+
+        // Update the like count for the post
+        await updateDoc(doc(db, "Posts", postId), updates);
+
+        // Add a like document to the "likes" collection to track the user's like
+        await addDoc(collection(db, "Posts", postId, "Likes"), {
+          postId: postId,
+          userId: userId,
+        });
+
+        console.log("Liked!");
+        location.reload();
+      }
+      
+    } 
+    
+
     return {
       user,
       useremail,
       uid,
       posts: filteredPosts,
       searchQuery,
-      navigateToCreatePost
+      navigateToCreatePost,
+      navigateToUserProfile,
+      likePost
     };
   }
 };
