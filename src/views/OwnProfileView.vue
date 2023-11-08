@@ -9,47 +9,29 @@
       <div id="fullname" class="users-name" v-if="user">name</div>
       <img :src="uploadedImage || defaultImage" class="profilepicture-icon" alt="Profile Picture"/>
       <div id="post-content" class="tabcontent" style="display: block;">
-        <div class="post-1">
-          <div class="post-rectangle-border" />
-            <div class="post-content-container">
-              <p class="post-header-tag">
-              <b style="font-weight: bold;">IS3103: DT Project - difficulties faced during research of a
-                company</b>
-              </p>
-              <p class="post-header-tag">
-              <b>&nbsp;</b>
-              </p>
-              <p class="post-header-tag">
-              <b>Description: </b>
-              <span
-                  >My group is researching on the educational sector, but we can’t
-                  find much online. Seeking advise on some websites we can use to do
-                  our research!</span>
-              </p>
-            </div>
-          <button class="edit-button"></button>
-          <button class="delete-button"></button>
-        </div>
-        <div class="post-2">
-          <div class="post-rectangle-border" />
-          <div class="post-content-container">
-            <p class="post-header-tag">
-            <b style="font-weight: bold;">BT3103: Need help for upcoming JavaScript quiz!!!!</b>
-            </p>
-            <p class="post-header-tag">
-            <b>&nbsp;</b>
-            </p>
-            <p class="post-header-tag">
-            <b>Description: </b>
-            <span
-                >I am still confused what is the purpose of the await keyword in an
-                async function?</span
-            >
-            </p>
+      
+        
+        <div class="post-list">
+          <div v-for="post in posts" :key="post.id" class="post">
+            <div class="post-rectangle-border" />
+              <div class="post-content-container">
+                <p class="post-header-tag">
+                <b class="post-title" style="font-weight: bold;">{{ post.header }}</b>
+                </p>
+                <p class="post-header-tag">
+                <b>&nbsp;</b>
+                </p>
+                <p class="post-header-tag">
+                <b>Description: </b>
+                <span>{{ post.description }}</span>
+                </p>
+              </div>
+            <button class="edit-button"></button>
+            <button class="delete-button" type="button" @click="removeUserPost(post.id), removeFromPost(post.id)"></button>
           </div>
-          <button class="edit-button" alt="" src="../assets/edit-icon.png"></button>
-          <button class="delete-button" alt="" src="../assets/delete-icon.png"></button>
         </div>
+
+        
       </div>
 
       <div class="about-description-format">
@@ -122,7 +104,7 @@
 <script>
   import NavigationBar from '@/components/NavigationBar.vue'
   import { getAuth, onAuthStateChanged } from '@firebase/auth'
-  import { doc, collection, getFirestore, getDoc } from '@firebase/firestore'
+  import { doc, collection, getFirestore, getDoc, getDocs, deleteDoc, query, orderBy } from '@firebase/firestore'
   import firebaseApp from '../firebase';
   import defaultImage from '../assets/default-profile-image.jpg';
 
@@ -141,6 +123,7 @@
           uid: '',
           uploadedImage: false,
           defaultImage: defaultImage,
+          posts: [],
        }
     },
     
@@ -152,6 +135,7 @@
            this.useremail = user.email;
            this.uid = user.uid;
            this.fetchUserData(this.useremail);
+           this.fetchUserPosts(this.useremail);
          } else {
            this.user = null;
            this.useremail = null;
@@ -195,8 +179,78 @@
 
 
       }, 
+
+      async fetchUserPosts(useremail) {
+        try {
+          const db = getFirestore(firebaseApp)
+          // const postsSnapshot = await getDocs(collection(db, 'Users', this.uid, "Posts"));
+
+          // Get a reference to the "Posts" collection
+          const postsRef = collection(db, 'Users', this.uid, "Posts");
+
+          // Create a query to order the posts by date
+          const postQuery = query(postsRef, orderBy('overallPostIndex', 'desc')); // Replace 'date' with the actual date field in your documents
+
+          const postsSnapshot = await getDocs(postQuery);
+
+          postsSnapshot.docs.map( (document) => {
+            let post = document.data();
+            post.id = document.id;
+            this.posts.push(post);
+            
+          });
+
+        } catch (error) {
+          console.error("Error fetching posts: ", error);
+        }
+      },
+
+      async removeUserPost(documentId) {
+        if (this.uid) {
+          try {
+            
+            // Delete the document
+            deleteDoc(doc(db,"Users",this.uid,"Posts",documentId)).then(() => {
+              console.log("Data deleted successfully");
+
+              // Reload the page
+              location.reload();
+            })
+            .catch((error) => {
+              console.error("Error deleting data:", error);
+            });
+
+          } catch (error) {
+            console.error('Error deleting document:', error);
+          }
+        } else {
+          console.log('User not signed in');
+        }
+    },
+
+    async removeFromPost(documentId) {
+        if (this.uid) {
+          try {
+            // Delete the document
+            deleteDoc(doc(db,"Posts", documentId)).then(() => {
+              console.log("Data deleted successfully");
+
+              // Reload the page
+              location.reload();
+            })
+            .catch((error) => {
+              console.error("Error deleting data:", error);
+            });
+
+          } catch (error) {
+            console.error('Error deleting document:', error);
+          }
+        } else {
+          console.log('User not signed in');
+        }
+    },
       
-      openSection(evt, section) {
+    openSection(evt, section) {
         // Declare all variables
         var i, tabcontent, tablinks;
 
@@ -331,24 +385,17 @@
     background-color: transparent;
 
   }
-  .post-1 {
-    position: absolute;
-    top: 545px;
+  .post {
+    position: relative;
+    top: 380px;
     left: 387px;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
     width: 950px;
     height: 154px;
     color: var(--color-black);
+    margin-bottom: 20px;
   }
-  .post-2 {
-    position: absolute;
-    top: 738px;
-    left: 387px;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
-    width: 950px;
-    height: 154px;
-    color: var(--color-black);
-  }
+
   hr {
     position: absolute;
     top: 501px;
