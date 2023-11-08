@@ -24,11 +24,11 @@
 
     <div class="post-list">
       <div v-for="post in posts" :key="post.id" class="post">
-        <div class="comments">Comments: {{ post.comments }}</div>
-        <div class="likes">Likes: {{ post.likes }}</div>
+        <button class="comments">Comments: {{ post.comments }}</button>
+        <button class="likes">Likes: {{ post.likes }}</button>
         <b class="post-title">{{ post.header }}</b>
         <img class="post-user-image" :src="post.userImage" />
-        <div class="user-name">{{ post.username }}</div>
+        <button class="user-name" @click="navigateToProfile(post.username)">{{ post.username }}</button>
         <div class="post-date">{{ post.date }}</div>
         <div class="post-content-container">
           <p class="post-content">{{ post.description }}</p>
@@ -50,6 +50,7 @@ import firebaseApp from '@/firebase.js';
 import { useRouter } from 'vue-router';
 
 export default {
+
   name: "Post",
   components: {
     NavigationBar
@@ -81,7 +82,7 @@ export default {
       try {
         const db = getFirestore(firebaseApp);
         const postsRef = collection(db, "Posts");
-        const postQuery = query(postsRef, orderBy('overallPostIndex', 'desc'));
+        const postQuery = query(postsRef, orderBy('datetime', 'desc'));
         const postsSnapshot = await getDocs(postQuery);
 
         posts.value = [];
@@ -282,12 +283,24 @@ export default {
     margin-left: 870px;
     width: 120px;
     bottom: 5px;
+    background: transparent;
+    border: 0px;
+    cursor: pointer;
+    font-size: var(--font-size-base);
+    font-family: var(--font-inter);
+    color: var(--color-dimgray);
   }
   .likes {
     position: absolute;
-    margin-left: 770px;
+    margin-left: 740px;
     width: 120px;
     bottom: 5px;
+    background: transparent;
+    border: 0px;
+    cursor: pointer;
+    font-size: var(--font-size-base);
+    font-family: var(--font-inter);
+    color: var(--color-dimgray);
   }
   .post-title {
     position: absolute;
@@ -311,6 +324,12 @@ export default {
     margin-left: 110px;
     font-weight: 500;
     font-weight: bold;
+    background: transparent;
+    border: 0px;
+    cursor: pointer;
+    font-size: var(--font-size-base);
+    font-family: var(--font-inter);
+    color: var(--color-dimgray);
   }
 
   .post-date {

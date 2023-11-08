@@ -151,6 +151,12 @@ export default {
             const docId = postDocRef.id;
             const allPostsRef = await setDoc(doc(db, "Posts", docId), newPost);
 
+            const updatePost = {
+              postId : docId
+            }
+            const updatePostDocRef = await updateDoc(doc(postCollectionRef, docId), updatePost);
+            const updateAllPostsRef = await updateDoc(doc(db, "Posts", docId), updatePost);
+
             this.closeConfirmationDialog()
             this.navigateToPost()
             console.log('Post created successfully!');

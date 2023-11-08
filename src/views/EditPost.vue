@@ -3,9 +3,9 @@
     <div class="create-post">
         <div class="new-post">Edit Post</div>
         <div class="header">Header</div>
-        <input v-model="header" class="enter-the-header" id="enter-the-header" placeholder="Enter the header here...">
+        <input v-model="header" class="enter-the-header" id="enter-the-header" :placeholder="headerPlaceholder">
         <div class="description">Description</div>
-        <textarea v-model="description" class="enter-the-description" id= "enter-the-description" placeholder="Enter the description here..."></textarea>
+        <textarea v-model="description" class="enter-the-description" id= "enter-the-description" :placeholder="descriptionPlaceholder"></textarea>
         <button class="insert-image">
           <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-photo-plus" width="30" height="30" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
             <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
@@ -17,7 +17,7 @@
             <path d="M19 16v6"></path>
           </svg>
         </button>
-        <button class="cancelCreatepost" @click="navigateToPost">Cancel</button>   
+        <button class="cancelCreatepost" @click="navigateToOwnProfile">Cancel</button>   
         <button type = "submit" id="post-button" @click="submitForm">Save</button>
             
     </div>
@@ -36,7 +36,7 @@
         <div class="popup-content">
             <h2>Confirmation</h2>
             <div class="popup-bar-line" />
-            <h3 style="font-size: 2.19rem; color: var(--color-darkgray-200); font-family: var(--font-josefin-sans); font-weight: 300;">Are you sure you want to publish this post?</h3>
+            <h3 style="font-size: 2.19rem; color: var(--color-darkgray-200); font-family: var(--font-josefin-sans); font-weight: 300;">Are you sure you want to make changes to this post?</h3>
             <div class="action-buttons">
               <button id= "confirmConfirmation" @click="confirmSubmitForm">Confirm</button>
               <button id= "cancelConfirmation" @click="closeConfirmationDialog">Cancel</button>
@@ -53,7 +53,7 @@ import 'firebase/compat/auth';
 import * as firebaseui from 'firebaseui';
 import 'firebaseui/dist/firebaseui.css';
 import firebaseApp from '@/firebase.js';
-import { doc, collection, getFirestore, getDoc, updateDoc, addDoc, getDocs, setDoc } from "firebase/firestore";
+import { doc, collection, getFirestore, getDoc, updateDoc, addDoc, getDocs, setDoc} from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth"
 
 export default {
@@ -62,12 +62,10 @@ export default {
       return {
         showErrorDialog: false,
         showConfirmationDialog:false,
-        header: "",
-        description: "",
+        newHeader: '',
+        newDescription: '',
         uid: "",
         user:false,
-        likes: "",
-        comments: "",
         date: "",
         username: "",
       }
@@ -79,6 +77,7 @@ export default {
           this.user = user;      
           this.useremail = user.email;
           this.uid = user.uid;
+          this.fetchPostData()
         } else {
           this.user = null;
           this.useremail = null;
@@ -94,6 +93,10 @@ export default {
         this.$router.push({ name: 'Post' });
       },
 
+      navigateToOwnProfile() {
+        this.$router.push({ name: 'OwnProfile' });
+      },
+
       getCurrentDate() {
         const currentDate = new Date();
         return currentDate;
@@ -107,8 +110,22 @@ export default {
         }
       },
 
+      async fetchPostData() {
+        const db = getFirestore(firebaseApp);
+        const postId = this.$route.params.postId;
+        let postDocument = await getDoc(doc(db, "Posts", postId));
+        let postData = postDocument.data();
+
+        var headerPlaceholder = (postData.header)
+        var descriptionPlaceholder = (postData.description)
+
+        document.getElementById("enter-the-header").value = headerPlaceholder
+        document.getElementById("enter-the-description").value = descriptionPlaceholder
+      },
+
       async confirmSubmitForm() {
         const db = getFirestore(firebaseApp);
+        const postId = this.$route.params.postId;
         let uid = this.uid;
         let header = document.getElementById("enter-the-header").value;
         let description = document.getElementById("enter-the-description").value;
@@ -117,37 +134,24 @@ export default {
           const auth = getAuth();
           const user = auth.currentUser;
 
-          const userDocRef = doc(db, "Users", uid);
-          const userDocument = await getDoc(userDocRef);
-          const userData = userDocument.data();
+          const userPostRef = doc(db, "Users", uid, "Posts", postId);
+          const postRef = doc(db, "Posts", postId);
 
-          const postCollectionRef = collection(userDocRef, "Posts");
-          // Get the documents in the 'Posts' subcollection
-          const querySnapshot = await getDocs(postCollectionRef);
-          const numberOfPosts = querySnapshot.size;
-          let username = (userData.firstName) + " " + (userData.lastName);
-          
-          const allPostCollectionRef = collection(db, "Posts");
-          const overallQuerySnapshot = await getDocs(allPostCollectionRef);
-          const overallNumberOfPosts = overallQuerySnapshot.size;
 
           if (user) {
             const updates = {
               header: header,
               description: description,
               date: this.getCurrentDate().toDateString(),
-              username: username,
-              userid : this.uid,
               datetime: this.getCurrentDate()
             }
 
-            const postDocRef = await addDoc(postCollectionRef, newPost);
-            const docId = postDocRef.id;
-            const allPostsRef = await setDoc(doc(db, "Posts", docId), newPost);
+            const postDocRef = await updateDoc(userPostRef, updates);
+            const allPostsRef = await updateDoc(postRef, updates);
 
             this.closeConfirmationDialog()
             this.navigateToPost()
-            console.log('Post created successfully!');
+            console.log('Post updated successfully!');
           } else {
             console.error('No user is logged in.');
         }
@@ -155,7 +159,7 @@ export default {
           
         }
         catch(error) {
-          console.error("Error adding document: ", error);
+          console.error("Error updating document: ", error);
           }
       },
 
@@ -204,47 +208,6 @@ export default {
           this.closeConfirmationDialog();
         }
       },
-
-      
-    async editPost(documentId, updates) {
-        if (this.uid) {
-          try {
-            // Delete the document
-            updateDoc(doc(db,"Posts", documentId)).then(() => {
-              console.log("Data updated successfully");
-
-              // Reload the page
-              location.reload();
-            })
-            .catch((error) => {
-              console.error("Error deleting data:", error);
-            });
-
-          } catch (error) {
-            console.error('Error deleting document:', error);
-          }
-        } else {
-          console.log('User not signed in');
-        }
-    },
-
-    async saveEdits() {
-
-      var header = document.getElementById("firstName").value
-      var description = document.getElementById("lastName").value
-
-      var updates = {
-        header: header,
-        description: description,
-
-      }
-      console.log("received updates");
-
-      updateProfile(this.uid, updates);
-      alert("Your profile has been updated!");
-      this.$router.push({ name: 'OwnProfile' });
-    },
-
       
     }
 }
