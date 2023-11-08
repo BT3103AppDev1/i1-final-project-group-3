@@ -26,7 +26,7 @@
                 <span>{{ post.description }}</span>
                 </p>
               </div>
-            <button class="edit-button"></button>
+            <button class="edit-button" @click="navigateToEditPost(post.id)"></button>
             <button class="delete-button" type="button" @click="removeUserPost(post.id), removeFromPost(post.id)"></button>
           </div>
         </div>
@@ -275,6 +275,10 @@
 
       navigateToEditProfile() {
         this.$router.push({ name: 'EditProfile' });
+      },
+
+      navigateToEditPost(postId) {
+        this.$router.push({ name: 'EditPost', params: { postId: postId } });
       }
 
 
