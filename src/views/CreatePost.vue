@@ -128,22 +128,28 @@ export default {
           const querySnapshot = await getDocs(postCollectionRef);
           const numberOfPosts = querySnapshot.size;
           let username = (userData.firstName) + " " + (userData.lastName);
+          
+          const allPostCollectionRef = collection(db, "Posts");
+          const overallQuerySnapshot = await getDocs(allPostCollectionRef);
+          const overallNumberOfPosts = overallQuerySnapshot.size;
 
           if (user) {
             const newPost = {
-              index : numberOfPosts + 1,
+              overallPostIndex : overallNumberOfPosts + 1,
+              userPostindex : numberOfPosts + 1,
               header: header,
               description: description,
               likes: likes,
               comments: comments,
               date: this.getCurrentDate().toDateString(),
               username: username,
-              userid : this.uid
+              userid : this.uid,
+              datetime: this.getCurrentDate()
             }
 
             const postDocRef = await addDoc(postCollectionRef, newPost);
-            const postRef = collection(db, 'Posts');
-            const allPostsRef = await addDoc(postRef, newPost);
+            const docId = postDocRef.id;
+            const allPostsRef = await setDoc(doc(db, "Posts", docId), newPost);
 
             this.closeConfirmationDialog()
             this.navigateToPost()

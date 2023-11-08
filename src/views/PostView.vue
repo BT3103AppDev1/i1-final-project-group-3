@@ -43,7 +43,7 @@
 <script>
 import NavigationBar from '@/components/navigationbar.vue'
 
-import { doc, getDoc, getDocs, getFirestore, collection } from 'firebase/firestore';
+import { doc, getDoc, getDocs, getFirestore, collection, query, orderBy } from 'firebase/firestore';
 import firebaseApp from '@/firebase.js';
 import { getAuth, onAuthStateChanged } from "firebase/auth"
 import firebase from '@/uifire.js';
@@ -89,9 +89,13 @@ export default {
       async fetchUserPosts(useremail) {
         try {
           const db = getFirestore(firebaseApp)
-          const postsSnapshot = await getDocs(collection(db, 'Posts'));
+          // Get a reference to the "Posts" collection
+          const postsRef = collection(db, "Posts");
 
-          postsSnapshot.docs.map( async (document) => {
+          const postQuery = query(postsRef, orderBy('overallPostIndex', 'desc')); 
+          const postsSnapshot = await getDocs(postQuery);
+          
+          for (const document of postsSnapshot.docs) {
             let post = document.data();
             let userId = post.userid;
             
@@ -100,7 +104,8 @@ export default {
             post.userImage = userData.profilePicture;
             post.id = document.id;
             this.posts.push(post);
-          });
+          };
+          
 
         } catch (error) {
           console.error("Error fetching posts: ", error);
