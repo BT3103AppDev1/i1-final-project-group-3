@@ -33,11 +33,22 @@
 
             <div class="convo-full">
                 <div v-if="selectedChat">
-                    <h2>{{ selectedChat.name }}</h2>
-                    <div v-for="message in selectedChat.messages" :key="message.id">
+                    
+                    <div v-for="message in selectedChat.messages" :key="message.id" :class="{'sent': message.senderUID === currentUserUID, 'received': message.senderUID !== currentUserUID}">
+                        <h2 class="chat-name">{{ selectedChat.name }}</h2>
                         <h6>{{ message.senderName }}: {{ message.text }}</h6>
-                        <h6>Time: {{ message.timestamp.toDate() }}</h6>
+                        <h6> {{ formatMessageDate(message.timestamp) }}</h6>
                     </div>
+
+                    <div class="type_msg">
+                        <div class="input_msg_write">
+                            <img class="upload-icon" src="../assets/uploadphoto.png" alt="Upload Icon" @click="triggerFileInput" />
+                            <input id="fileInput" ref="fileInput" type="file" style="display: none" @change="handleFileUpload" />
+                            <input @keyup.enter="saveMessage" v-model="message" type="text" class="write_msg" placeholder="Type a message" />
+                            <img class="msg_send_btn" alt="" src="../assets/send.png" @click="sendMessageOnClick" />
+                        </div>
+                    </div>
+
                 </div>
                 <div v-else="" class="noSelectedChat">
                     <svg class = "imageblank" width="168" height="187" viewBox="0 0 168 187" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -191,11 +202,14 @@ export default {
                 });
                 console.log(messages)
 
+       
+
                 // Assuming chats is a reactive property and you want to update it
                 selectedChat.value = { // 'this' needs to reference the Vue instance
                     id: chatSummary.id,
                     messages: messages,
                     name: chatSummary.name, // Make sure chatSummary has a 'name' property
+                    
                 };
             } else {
                 console.log('No messages found!');
@@ -327,7 +341,7 @@ button {
 
 h3 {
     font-family: var(--font-josefin-sans);
-    font-size: 30px;
+    font-size: 25px;
     margin-left: 20px;
     margin-top: 15px;
 }
@@ -378,6 +392,30 @@ h4 {
     color: #6a6868;
     font-size: 20px;    
     margin-top: -20px;
+}
+
+.chat-name {
+    font-size: 30px;
+}
+
+
+
+.sent, .received {
+  margin: 5px;
+  padding: 10px;
+  border-radius: 10px;
+  max-width: 80%;
+}
+
+.sent {
+  align-self: flex-end;
+  background-color: #dcf8c6; /* Light green background for sent messages */
+  font-size: 40px;
+}
+
+.received {
+  align-self: flex-start;
+  background-color: #ffffff; /* White background for received messages */
 }
 
 
