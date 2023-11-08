@@ -8,6 +8,7 @@
         <div class="discover-header">
             <h1 id = "study-buddy-header">Find your StudyBuddy today!</h1>
             <h2 id = "profiles-and-groups">Profiles and Groups for you to discover</h2>
+            
             <div id="app">
                 <input id="search-input" type="text" v-model="searchQuery" placeholder="Search using Keywords: BT3103/ Business Analytics">
                 <img class="search-icon"  @click="search" alt = "" src="../assets/search.png" />

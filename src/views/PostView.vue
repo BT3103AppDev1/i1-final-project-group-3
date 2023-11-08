@@ -40,86 +40,91 @@
     </div>
 </template>
 
+ 
 <script>
 import NavigationBar from '@/components/navigationbar.vue'
-
-import { doc, getDoc, getDocs, getFirestore, collection, query, orderBy } from 'firebase/firestore';
+import { onMounted, ref, reactive, computed } from "vue";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getFirestore, collection, query, orderBy, getDocs, getDoc, doc } from 'firebase/firestore';
 import firebaseApp from '@/firebase.js';
-import { getAuth, onAuthStateChanged } from "firebase/auth"
-import firebase from '@/uifire.js';
-import 'firebase/compat/auth';
-import * as firebaseui from 'firebaseui';
-import 'firebaseui/dist/firebaseui.css';
-
-
+import { useRouter } from 'vue-router';
 
 export default {
-    name: "Post",
-    
-    components: {
-      NavigationBar
-    },
 
-    data() {
-      return {
-        uid: "",
-        user: false,
-        useremail:'',
-        posts: [],
-      }
-    }, 
-    
-    async mounted() {
-       const auth = getAuth();
-       onAuthStateChanged(auth, (user) => {
-         if (user) {
-           this.user = user;
-           this.useremail = user.email;
-           this.uid = user.uid;
-           this.fetchUserPosts(this.useremail);
-           
-         } else {
-           this.user = null;
-           this.useremail = null;
-         }
-       })
-     },
+  name: "Post",
+  components: {
+    NavigationBar
+  },
+  setup() {
+    const user = ref(null);
+    const useremail = ref('');
+    const uid = ref('');
+	  const router = useRouter();
+    const posts = ref([]);
+    const searchQuery = ref('');
 
-    methods: {
-      async fetchUserPosts(useremail) {
-        try {
-          const db = getFirestore(firebaseApp)
-          // Get a reference to the "Posts" collection
-          const postsRef = collection(db, "Posts");
-
-          const postQuery = query(postsRef, orderBy('datetime', 'desc')); 
-          const postsSnapshot = await getDocs(postQuery);
-          
-          for (const document of postsSnapshot.docs) {
-            let post = document.data();
-            let userId = post.userid;
-            
-            let userDocument = await getDoc(doc(db, 'Users', userId));
-            let userData = userDocument.data();
-            post.userImage = userData.profilePicture;
-            post.id = document.id;
-            this.posts.push(post);
-          };
-          
-
-        } catch (error) {
-          console.error("Error fetching posts: ", error);
+    onMounted(() => {
+      const auth = getAuth();
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          user.value = user;
+          useremail.value = user.email;
+          uid.value = user.uid;
+          fetchUserPosts();
+        } else {
+          user.value = null;
+          useremail.value = null;
         }
-      },
-      navigateToCreatePost() {
-        this.$router.push({ name: 'CreatePost' });
-      },
-      navigateToProfile(profileName) {
-        this.$router.push({ name: 'profile', params: { name: profileName }});
+      });
+    });
+
+    const fetchUserPosts = async () => {
+      try {
+        const db = getFirestore(firebaseApp);
+        const postsRef = collection(db, "Posts");
+        const postQuery = query(postsRef, orderBy('datetime', 'desc'));
+        const postsSnapshot = await getDocs(postQuery);
+
+        posts.value = [];
+        for (const document of postsSnapshot.docs) {
+          let post = document.data();
+          let userId = post.userid;
+          let userDocument = await getDoc(doc(db, 'Users', userId));
+          let userData = userDocument.data();
+          post.userImage = userData.profilePicture;
+          post.id = document.id;
+          posts.value.push(post);
+        }
+
+      } catch (error) {
+        console.error("Error fetching posts: ", error);
       }
-    }
+    };
+
+    const filteredPosts = computed(() => {
+      const searchRegex = new RegExp(searchQuery.value, 'i');
+      return posts.value.filter(post => {
+        return searchRegex.test(post.header) || searchRegex.test(post.description) || searchRegex.test(post.username);
+      });
+    });
+
+    const navigateToCreatePost = () => {
+       router.push({ name: 'CreatePost' });
+    };
+
+    return {
+      user,
+      useremail,
+      uid,
+      posts: filteredPosts,
+      searchQuery,
+      navigateToCreatePost
+    };
   }
+};
 </script>
+ 
+
 
 
 
@@ -141,37 +146,33 @@ export default {
     font-size: var(--font-size-29xl);
     font-family: var(--font-yeseva-one);
   }
-
-    .post-search-bar-line {
-    position: relative;
-    height: 4.83%;
-    width: 48.96%;
-    top: 160px;
-    right: 27.29%;
-    bottom: 64.95%;
-    left: 23.75%;
-    background-color: var(--color-white);
-    border-bottom: 1px solid var(--color-black);
-    box-sizing: border-box;
-  }
-
+ 
+  
   #post-search-bar {
-    position: relative;
-    height: 5.91%;
-    width: 48.9%;
-    top: 100px;
-    left: 23.72%;
-    font-size: 1.5rem;
-    display: inline-block;
-    color: #ada6a6;
-  }
+
+    width: 50%;
+    margin-top: 7rem;
+    margin-left: 27rem; 
+    border: 0.01rem solid transparent;
+    border-bottom: 0.01rem solid #575756;
+    padding-bottom: 0.01rem;
+    border-radius: 0;
+    background-color: transparent;
+    font-size: 1.3rem;
+    line-height: 3rem;
+    color: #575756; 
+    font-style: italic;
+}
+
+ 
   .post-search-icon {
-    position: relative;
-    height: 2rem;
-    width: 2rem;
-    top: 110px;
-    left:20%;
-    cursor: pointer;
+    position: absolute;
+    margin-top: 9rem;
+    left: 75%; 
+    transform: translateY(-50%);
+    cursor: pointer; 
+    width: 1.5rem;
+    height: 1.5rem;  
   }
 
   .new-position {
@@ -242,23 +243,27 @@ export default {
     transform: rotate(-90deg);
     transform-origin: 0 0;
   }
+ 
+
   .create-button {
-    position: absolute;
-    top: 54.63rem;
-    left: 82.69rem;
-    width: 3.69rem;
-    height: 3.69rem;
-    cursor: pointer;
-    background: transparent;
-    border: transparent;
-  }
+  position: fixed;
+  bottom: 2rem; 
+  right: 2rem; 
+  width: 3.69rem;
+  height: 3.69rem;
+  cursor: pointer;
+  background: transparent;
+  border: transparent;
+  z-index: 999;  
+}
+
 
   .create-button-child:hover {
     background-color: #ffb175;
   }
 
   .post-list {
-    margin-top: 230px;
+    margin-top: 8rem;
     width: 1000px;
     margin-left: 180px;
 
