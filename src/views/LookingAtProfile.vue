@@ -84,12 +84,12 @@
     </div>
     </div>
 
-    <div class="popup" v-show="showMessageDialog" ref="messageDialog">
+    <div class="popup" v-show="showMessageDialog" ref="messageDialogRef" v-if="userProfile">
         <div class="popup-content">
             <h2>Send a Message!</h2>
             <div class="action-buttons">
                 <input type="text" placeholder="Say something nice!" v-model="messageText" />
-                <button @click="sendMessage('z25KHJk1tScjiIljnupJUSBWIDW', 'Siyi')" class="remove-photo">Send</button> 
+                <button @click="sendMessage(userProfile.uid, userProfile.firstName + ' ' + userProfile.lastName)" class="remove-photo">Send</button> 
                 <!--- currently set Siyi account as receiver--->
             </div>
 
@@ -97,7 +97,7 @@
         </div>
     </div>
 
-    <div class="popup" v-show="showBlockDialog" ref="blockDialog">
+    <div class="popup" v-show="showBlockDialog" ref="blockDialogRef" >
         <div class="popup-content">
             <h2>Are you sure you want to block user?</h2>
             <div class="action-buttons">
@@ -114,7 +114,7 @@
 <script>  
 import { ref, defineComponent, onMounted, onUnmounted, computed } from "vue";
 import NavigationBar from '@/components/NavigationBar.vue';
-import { doc, getDoc, setDoc, addDoc, getFirestore, collection } from 'firebase/firestore';
+import { doc, getDoc, getFirestore, setDoc, addDoc, serverTimestamp, collection, updateDoc, arrayUnion} from 'firebase/firestore';
 import { useRoute } from 'vue-router';
 import { getAuth } from 'firebase/auth';
 import firebaseApp from '@/firebase.js';
@@ -153,63 +153,92 @@ export default defineComponent({
         // message dialog
         const openUploadMessageDialog = () => {
             showMessageDialog.value = true;
-            console.log("true")
-            onUnmounted(() => {
-                document.removeEventListener('click', closeMessageDialogOnClickOutside);
-            });
+            console.log("openUploadMessageDialog")
+            // Add the event listener directly after opening the dialog
+            setTimeout(() => { // setTimeout ensures that the event listener is not immediately invoked by the same click that opened the dialog
+                document.addEventListener('click', closeMessageDialogOnClickOutside);
+            }, 0);
         };
 
         const closeMessageDialog = () => {
+            console.log("closeMessageDialog")
             showMessageDialog.value = false;
-            document.removeEventListener("click", closeMessageDialogOnClickOutside);
+            // Remove the event listener when the dialog is closed
+            document.removeEventListener('click', closeMessageDialogOnClickOutside);
+            console.log("done1")
         };
 
         const closeMessageDialogOnClickOutside = (event) => {
-            console.log("false")
-            // Check if the click event occurred outside of the popup
+            console.log("closeMessageDialogOnClickOutside")
             if (messageDialogRef.value && !messageDialogRef.value.contains(event.target)) {
-                showMessageDialog.value = false;
-                document.removeEventListener('click', closeMessageDialogOnClickOutside);
+                closeMessageDialog();
+                
             }
+            console.log("done2")
         };
 
         // block dialog
         const openUploadBlockDialog = () => {
             showBlockDialog.value = true;
-            console.log("true")
-            onUnmounted(() => {
-                document.removeEventListener('click', closeBlockDialogOnClickOutside);
-            });
+            setTimeout(() => {
+                document.addEventListener('click', closeBlockDialogOnClickOutside);
+            }, 0);
         };
 
         const closeBlockDialog = () => {
             showBlockDialog.value = false;
-            document.removeEventListener("click", this.closeBlockDialogOnClickOutside);
+            document.removeEventListener('click', closeBlockDialogOnClickOutside);
         };
 
         const closeBlockDialogOnClickOutside = (event) => {
-            console.log("false")
-            // Check if the click event occurred outside of the popup
             if (blockDialogRef.value && !blockDialogRef.value.contains(event.target)) {
-                showBlockDialog.value = false;
-                document.removeEventListener('click', closeBlockDialogOnClickOutside);
+                closeBlockDialog();
             }
         };
 
-        const sendMessage = async(receiverUID, receiverName) => {
+        // Use onUnmounted at the top level of setup to clean up when the component unmounts
+        onUnmounted(() => {
+            document.removeEventListener('click', closeMessageDialogOnClickOutside);
+            document.removeEventListener('click', closeBlockDialogOnClickOutside);
+        });
+
+
+        const sendMessage = async (receiverUID, receiverName) => {
             console.log(receiverUID);
             console.log(receiverName);
+
             try {
                 const firebaseUser = auth.currentUser;
-                
+
                 if (firebaseUser) {
                     const senderUID = firebaseUser.uid;
-                    const senderName = firebaseUser.displayName || ''; // If displayName is null, set it to an empty string or handle accordingly
-                    const messageDocumentID = senderUID + receiverUID;
+                    console.log(senderUID);
 
-                        this.createMessageDocument(messageDocumentID, senderUID, receiverUID, senderName, receiverName);
-                        this.addMessageToList(messageDocumentID, senderUID, receiverUID, senderName, receiverName, this.messageText);
-                    // After creating the conversation document, you might want to add a message to it, using addMessageToList() method
+                    const userProfileRef = doc(db, 'Users', senderUID);
+                    const userProfileSnap = await getDoc(userProfileRef);
+                    const userProfile = userProfileSnap.data();
+                    const senderName = (userProfile.firstName || '') + " " + (userProfile.lastName || '');
+                    console.log(senderName);
+
+                    // Check if a chat already exists between the two users
+                    // Id = uid of first person who start convo + receiver uid
+
+                    const existingChatId = await getExistingChatId(senderUID, receiverUID);
+                    console.log(existingChatId)
+                    let messageDocumentID = existingChatId
+
+                    // just creating the document in the user profiles. if no existing chats between the 2, create new one
+                    if (!existingChatId) {
+                        // If no existing chat, update the chat IDs for both users
+                        messageDocumentID = senderUID + receiverUID;
+                        await createMessageDocument(messageDocumentID, senderUID, receiverUID, senderName, receiverName);
+                        await updateUserChatIds(senderUID, messageDocumentID);
+                        await updateUserChatIds(receiverUID, messageDocumentID);
+                    }
+
+                    // adding message to the document
+                    await addMessageToList(messageDocumentID, senderUID, receiverUID, senderName, receiverName, messageText.value);
+                    closeMessageDialog();
                 } else {
                     console.error("User is not authenticated");
                 }
@@ -218,10 +247,42 @@ export default defineComponent({
             }
         };
 
+        const getExistingChatId = async(senderUID, receiverUID) => {
+            // fetch senderUID chatIds
+            const senderRef = doc(db, 'Users', senderUID);
+            const senderSnap = await getDoc(senderRef);
+            const senderData = senderSnap.data();
+            const senderChatIds = senderData.chatIds;
+            if (senderChatIds === undefined) {
+                return null;
+            } else {
+                for (const chatId of senderChatIds) {
+                if (chatId.includes(receiverUID)) {
+                    return chatId;
+                }
+            }
+
+            }
+
+            //iterating through the Chatid array to find the chatid that contains the receiverUID
+            
+
+            return null;
+
+
+        };
+
+        const updateUserChatIds = async(userId, chatId) => {
+            const userRef = doc(db, 'Users', userId);
+            await updateDoc(userRef, {
+                chatIds: arrayUnion(chatId),
+            })
+        }
+
         const createMessageDocument = async (docID, senderUID, receiverUID, senderName, receiverName) => {
             const docRef = doc(db, 'Message', docID);
             const docSnap = await getDoc(docRef);
-            
+            console.log("done")
             if (!docSnap.exists()) {
                 await setDoc(docRef, {
                     senderUID,
@@ -291,10 +352,6 @@ export default defineComponent({
 
         onMounted(fetchUserProfileFromFirebase);
 
-        onUnmounted(() => {
-            document.removeEventListener('click', closeMessageDialogOnClickOutside);
-            document.removeEventListener('click', closeBlockDialogOnClickOutside);
-        });
 
         return {
             userProfile,
