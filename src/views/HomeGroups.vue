@@ -39,7 +39,14 @@
             <h1 id = "group-name">{{ group.title }}</h1>
             <h3 id = "group-vacancy">Vacancy: {{group.count}}/{{group.members}}members</h3>
             <h3 id = "group-description">{{group.description}}</h3> 
-            <button id="join-group" @click="joingroup(group.id)">Join</button>
+            <button
+              id="join-group"
+              @click="!group.isMember && !group.isFull && joingroup(group.id)"
+              :class="{ 'joined': group.isMember, 'full': group.isFull }"
+            >
+              {{ group.isMember ? 'Joined' : group.isFull ? 'Full' : 'Join' }}
+            </button>
+
  
         </div>
   
@@ -157,6 +164,19 @@
             return;
           }
 
+          this.groups = this.groups.map(group => {
+            if (group.id === groupId) {
+              return {
+                ...group,
+                isMember: true,
+                count: group.count + 1,
+                isFull: group.count + 1 >= group.members
+              };
+            }
+            return group;
+          });
+
+
           // Update the 'groupMembers' field of the group
           await updateDoc(groupDocRef, {
             groupMembers: arrayUnion(user.uid)
@@ -172,8 +192,9 @@
         } catch (error) {
           console.error('Error joining group:', error);
         }
-      }
       },
+
+    },
 
  
 
@@ -191,19 +212,25 @@
   const fetchDataFromFirebase = async () => {
     const db = getFirestore(firebaseApp);
     const usersCollection = collection(db, "Groups");
+    const auth = getAuth();
+    const user = auth.currentUser;
+    
     try {
       const querySnapshot = await getDocs(usersCollection);
       const fetchedGroups = [];
       querySnapshot.forEach((doc) => {
         const groupData = doc.data();
         const count = groupData.groupMembers.length;
-
+        const isFull = count >= groupData.members;
+        const isMember = groupData.groupMembers.includes(user.uid); // Assuming you have the user's UID
         fetchedGroups.push({
-          id: doc.id, // Include the document ID
+          id: doc.id, // Store the document ID
           title: groupData.title,
           description: groupData.groupDescription,
           members: groupData.members,
           count: count,
+          isFull: isFull,
+          isMember: isMember,
         });
       });
 
