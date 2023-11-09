@@ -37,9 +37,9 @@
           <div class="group-card" v-for="group in groups" :key="group.title"> 
 
             <h1 id = "group-name">{{ group.title }}</h1>
-            <h3 id = "group-vacancy">Vacancy: 2/{{group.members}}members</h3>
+            <h3 id = "group-vacancy">Vacancy: {{group.count}}/{{group.members}}members</h3>
             <h3 id = "group-description">{{group.description}}</h3> 
-            <button id="join-group" @click="joingroup">Join</button>
+            <button id="join-group" @click="joingroup(group.id)">Join</button>
  
         </div>
   
@@ -55,12 +55,14 @@
 
 
 <script>
-  import { getFirestore, collection, getDocs, addDoc } from "firebase/firestore"
+  import { getFirestore, collection, getDocs, addDoc , doc, getDoc, updateDoc, arrayUnion} from "firebase/firestore"
+  import { getAuth, onAuthStateChanged } from "firebase/auth"
   import firebaseApp from '../firebase.js';
   import { defineComponent, ref, onMounted } from "vue";
   import { computed } from 'vue'; 
   import CreateGroups from "../components/CreateGroups.vue";
   import homeBanner from "../components/homeBanner.vue";
+  import { get } from "firebase/database";
  
   const db = getFirestore(firebaseApp); 
   
@@ -79,7 +81,8 @@
             groups: [],
             groupTitle: "",
             groupDescription: "",
-            membersCount: null
+            membersCount: null,
+            groupId: '' 
         };
     },
 
@@ -112,6 +115,64 @@
         alert("Test");
 
       },
+
+      async joingroup(groupId) {
+        // Check if the groupId is not undefined or empty
+        if (!groupId) {
+          console.error('No group ID provided');
+          return;
+        }
+        
+        const db = getFirestore(firebaseApp);
+        const auth = getAuth();
+        const user = auth.currentUser;
+
+        // Check if the user is logged in
+        if (!user) {
+          console.error('User not logged in!');
+          return;
+        }
+
+        // Reference to the user's document in the 'Users' collection
+        const userDocRef = doc(db, 'Users', user.uid);
+        
+        // Reference to the group's document in the 'Groups' collection
+        const groupDocRef = doc(db, 'Groups', groupId);
+
+        try {
+          // Fetch the current data of the group
+          const groupDoc = await getDoc(groupDocRef);
+          
+          if (!groupDoc.exists()) {
+            console.error('Group does not exist!');
+            return;
+          }
+
+          // checking if the group can still accept new members
+          const groupData = groupDoc.data();
+          const maxMembers = groupData.members;
+          const currentMembers = groupData.groupMembers.length;
+          if (currentMembers >= maxMembers) {
+            alert('Group is full! Please create a new group or join another group :)');
+            return;
+          }
+
+          // Update the 'groupMembers' field of the group
+          await updateDoc(groupDocRef, {
+            groupMembers: arrayUnion(user.uid)
+          });
+
+          // Optionally, also update the 'activeGroups' field of the user's document
+          await updateDoc(userDocRef, {
+            activeGroups: arrayUnion(groupId)
+          });
+
+          console.log('Joined group successfully!');
+
+        } catch (error) {
+          console.error('Error joining group:', error);
+        }
+      }
       },
 
  
@@ -135,10 +196,14 @@
       const fetchedGroups = [];
       querySnapshot.forEach((doc) => {
         const groupData = doc.data();
+        const count = groupData.groupMembers.length;
+
         fetchedGroups.push({
+          id: doc.id, // Include the document ID
           title: groupData.title,
           description: groupData.groupDescription,
           members: groupData.members,
+          count: count,
         });
       });
 
@@ -148,6 +213,10 @@
     }
   };
 
+  
+
+
+
   onMounted(() => {
     fetchDataFromFirebase();
   });
@@ -155,6 +224,7 @@
   return {
     groups: filteredGroups,
     searchQuery,
+   
   };
 },
     
