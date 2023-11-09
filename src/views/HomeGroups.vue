@@ -214,7 +214,7 @@
     const usersCollection = collection(db, "Groups");
     const auth = getAuth();
     const user = auth.currentUser;
-    
+    console.log(user.uid)
     try {
       const querySnapshot = await getDocs(usersCollection);
       const fetchedGroups = [];
