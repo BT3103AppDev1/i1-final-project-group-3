@@ -37,7 +37,7 @@
           <div class="group-card" v-for="group in groups" :key="group.title"> 
 
             <h1 id = "group-name">{{ group.title }}</h1>
-            <h3 id = "group-vacancy">Vacancy: 1/{{group.members}}members</h3>
+            <h3 id = "group-vacancy">Vacancy: 2/{{group.members}}members</h3>
             <h3 id = "group-description">{{group.description}}</h3> 
             <button id="join-group" @click="joingroup">Join</button>
  
