@@ -106,6 +106,14 @@ export default {
             const groupDocRef = await addDoc(collection(db, 'Groups'), newPost);
             const newGroupId = groupDocRef.id;
 
+            // Reference to the 'msgList' subcollection under the new group
+            const msgListRef = collection(db, 'Groups', newGroupId, 'msgList');
+
+            // Add an empty document with at least an empty object to 'msgList' subcollection
+            await addDoc(msgListRef, {});
+
+            
+
             if (userDocument.exists() && userDocument.data().hasOwnProperty('activeGroups')) {
               // The user already has an activeGroups field, update it
               console.log("new field being created")

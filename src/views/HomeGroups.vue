@@ -63,7 +63,7 @@
 
 <script>
   import { getFirestore, collection, getDocs, addDoc , doc, getDoc, updateDoc, arrayUnion} from "firebase/firestore"
-  import { getAuth, onAuthStateChanged } from "firebase/auth"
+  import { getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence } from "firebase/auth";
   import firebaseApp from '../firebase.js';
   import { defineComponent, ref, onMounted } from "vue";
   import { computed } from 'vue'; 
@@ -72,7 +72,8 @@
   import { get } from "firebase/database";
  
   const db = getFirestore(firebaseApp); 
-  
+  const auth = getAuth();
+
 
   export default defineComponent({
     name: "HomeGroups",
@@ -131,7 +132,6 @@
         }
         
         const db = getFirestore(firebaseApp);
-        const auth = getAuth();
         const user = auth.currentUser;
 
         // Check if the user is logged in
@@ -209,12 +209,17 @@
     });
   });
 
-  const fetchDataFromFirebase = async () => {
+  const fetchDataFromFirebase = async (uid) => {
     const db = getFirestore(firebaseApp);
     const usersCollection = collection(db, "Groups");
     const auth = getAuth();
-    const user = auth.currentUser;
-    console.log(user.uid)
+    const user = auth.currentUser; // This line should ensure you have the current user
+    
+    if (!user) {
+      console.error('No user is currently logged in.');
+      return; // Exit the function if no user is logged in
+    }
+    
     try {
       const querySnapshot = await getDocs(usersCollection);
       const fetchedGroups = [];
@@ -222,9 +227,9 @@
         const groupData = doc.data();
         const count = groupData.groupMembers.length;
         const isFull = count >= groupData.members;
-        const isMember = groupData.groupMembers.includes(user.uid); // Assuming you have the user's UID
+        const isMember = groupData.groupMembers.includes(user.uid);
         fetchedGroups.push({
-          id: doc.id, // Store the document ID
+          id: doc.id,
           title: groupData.title,
           description: groupData.groupDescription,
           members: groupData.members,
@@ -239,6 +244,28 @@
       console.error("Error fetching data: ", error);
     }
   };
+
+  setPersistence(auth, browserSessionPersistence)
+    .then(() => {
+      // After setting persistence, you can add the auth state observer
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          // User is signed in, now you can fetch the data
+          fetchDataFromFirebase(user.uid);
+        } else {
+          // User is signed out
+          console.log('No user is currently logged in.');
+        }
+      });
+    })
+    .catch((error) => {
+      // Handle Errors here.
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.error(`Error setting persistence: ${errorCode}`, errorMessage);
+    });
+
+
 
   
 

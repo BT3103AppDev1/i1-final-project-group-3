@@ -102,3 +102,37 @@ export default {
 }
 
 </script>
+
+<style scoped>
+/* styling buttons */
+button {
+    font-family: var(--font-yeseva-one);
+    border: 2px solid #525fe1;
+    background-color: white;
+    width: 203px;
+    height: 63px;
+    border-radius: 40px;
+    font-size: 25px;
+    
+    cursor: pointer;
+    margin-left: 20px;
+    margin-top: 40px;
+
+}
+
+.groups {
+    color:white;
+    background-color: #525fe1;
+}
+
+.profiles {
+    color: #525fe1;
+    margin-right: 30px;
+}
+
+.chat-buttons {
+    margin-bottom: 40px;
+}
+
+
+</style>
