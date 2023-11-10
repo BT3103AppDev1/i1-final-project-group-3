@@ -45,7 +45,7 @@
 import NavigationBar from '@/components/navigationbar.vue'
 import { onMounted, ref, reactive, computed } from "vue";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, collection, query, orderBy, getDocs, getDoc, doc, updateDoc, addDoc, getCountFromServer } from 'firebase/firestore';
+import { getFirestore, collection, query, orderBy, getDocs, getDoc, doc, updateDoc, addDoc, getCountFromServer, setDoc } from 'firebase/firestore';
 import firebaseApp from '@/firebase.js';
 import { useRouter } from 'vue-router';
 
@@ -135,6 +135,9 @@ export default {
             break;
           } else {
             const currentPostRef = doc(db, "Posts", postId);
+            const userPostedId = currentPostRef.userId;
+            console.log(userPostedId)
+
             const currentPostSnap = await getDoc(currentPostRef);
             const postData = currentPostSnap.data();
             const currentLikes = postData.likes;
@@ -144,35 +147,44 @@ export default {
 
             // Update the like count for the post
             await updateDoc(doc(db, "Posts", postId), updates);
+            await updateDoc(doc(db, "Users", userPostedId, "Posts", postId), updates);
 
             // Add a like document to the "likes" collection to track the user's like
-            await addDoc(collection(db, "Posts", postId, "Likes"), {
+            const likesDoc = await addDoc(collection(db, "Posts", postId, "Likes"), {
               postId: postId,
               userId: userId,
             });
 
-            console.log("Liked!");
-            location.reload();
+            const docId = likesDoc.id;
+            const allPostsRef = await setDoc(doc(db, "Users", userPostedId, "Posts", postId, "Likes", docId), updates);
+              console.log("Liked!");
+              location.reload();
           }
         } 
       } else {
-        console.log("here")
         const currentPostRef = doc(db, "Posts", postId);
+        
         const currentPostSnap = await getDoc(currentPostRef);
         const postData = currentPostSnap.data();
+        const userPostedId = postData.userid;
         const currentLikes = postData.likes;
         const updates = {
           likes: currentLikes + 1
         };
+        console.log(userPostedId)
 
         // Update the like count for the post
         await updateDoc(doc(db, "Posts", postId), updates);
+        await updateDoc(doc(db, "Users", userPostedId, "Posts", postId), updates);
 
         // Add a like document to the "likes" collection to track the user's like
-        await addDoc(collection(db, "Posts", postId, "Likes"), {
+        const likesDoc = await addDoc(collection(db, "Posts", postId, "Likes"), {
           postId: postId,
           userId: userId,
         });
+
+        const docId = likesDoc.id;
+        const allPostsRef = await setDoc(doc(db, "Users", userPostedId, "Posts", postId, "Likes", docId), updates);
 
         console.log("Liked!");
         location.reload();
