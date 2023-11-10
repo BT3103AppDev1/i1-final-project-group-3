@@ -108,6 +108,7 @@ export default {
       },
 
       async confirmSubmitForm() {
+        console.log("enter")
         const db = getFirestore(firebaseApp);
         let uid = this.uid;
         let header = document.getElementById("enter-the-header").value;

@@ -12,6 +12,7 @@ import Home from '@/views/Home.vue'
 import HomeGroups from '@/views/HomeGroups.vue'
 import Post from '@/views/PostView.vue'
 import EditPost from '@/views/EditPost.vue'
+import PostDetails from '@/views/PostDetails.vue' 
 /*import Chat from '@/views/ChatsView.vue'*/
 import ChatGroups from '@/views/ChatGroups.vue'
 import CreatePost from '@/views/CreatePost.vue'
@@ -109,6 +110,15 @@ const routes =[
     path: '/editpost/:postId',
     name: 'EditPost', 
     component: EditPost,
+
+  },
+
+
+  {
+
+    path: '/postdetails/:postId',
+    name: 'PostDetails', 
+    component: PostDetails,
 
   },
 
