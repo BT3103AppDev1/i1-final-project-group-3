@@ -438,12 +438,28 @@ export default {
 
 <style scoped>
 
+html, body {
+  height: 1000px; 
+  margin: 0;
+  padding: 0;
+}
+
+
+.messaging {
+  flex: 1;
+  /* This makes sure that your .messaging div takes up all available space */
+
+}
+
  
 
 .container{
   max-width:100%; 
-  height: 39rem;
+
   margin:auto; 
+
+
+
   }
 
 img{ 
@@ -499,7 +515,7 @@ img{
   border: 1px solid #c4c4c4;
   clear: both;
   overflow: hidden;
-  height: 40rem; 
+  height: 1115px;   
 
 }
 
@@ -576,7 +592,7 @@ img{
 }
 
 .inbox_chat { 
-  height: 40rem; 
+  height: 1280px; 
   overflow-y: scroll; 
   
 
@@ -586,6 +602,7 @@ img{
   float: left;
   padding: 30px 15px 0 25px;
   width: 60%; 
+  height: 1000px; 
  
   }
 
@@ -615,30 +632,7 @@ img{
   }
 
    
-.chat-name {
-    margin: 0;
-    padding: 1rem;
-    margin-top: 3rem;
-    margin-left:2rem;
-    font-size: 2rem;
-  
-}
 
-
-
-.line-below-chat-name {
-  box-sizing: border-box;
-  display: block;
-  width: 100%;
-  border: none;
-  margin-top: -2.4rem;
-  border-top: 1px solid #ccc;  
-}
-
-.sendMsgFrom {
-  color:black;
-  font-size: 1rem;
-}
 
 
  
@@ -652,18 +646,21 @@ img{
   border: 1px solid #ccc;
   border-radius: 0.6rem;
   margin-right: 1rem;
+  
 }
  
 .input_msg_write {
   position: absolute;
   width: 57%;
-  top: 46rem; 
+  top: 1190px;
   margin-right: 5%;
+  z-index: 1;
+
 }
 
   
 .msg_history {
-  height: 32rem; 
+  height: 100%;
   overflow-y: auto;
   padding-right: 0.6rem;
   overflow-x: hidden;
@@ -730,6 +727,10 @@ img{
   margin-bottom: 0.7rem;
 }
 
+.type_msg {
+  /* If you want the message typing area to stay at the bottom */
+ height: 115px;
+}
 
 
  
@@ -756,6 +757,8 @@ img{
   max-width: 10rem; 
   max-height: 10rem; 
 }
+
+
  
 
 </style>  
