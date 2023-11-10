@@ -3,109 +3,93 @@
        <NavigationBar class = "navigation"/> 
 
 
-    <div class ="profile-section" v-if="userProfile">
-        <div class="left-section">
-            <!-- Dynamic Image -->
-            <img class="profile-image" :alt = "userProfile.name" :src="userProfile.profilePicture || defaultProfilePicture" />
-            
-            <!-- Action buttons -->
-            <div class="buttons-container">
-                <button class="message" @click="openUploadMessageDialog">Send a Message</button>
-                <button class="block" @click="openUploadBlockDialog">Block</button>
+        <div class ="profile-section" v-if="userProfile">
+            <div class="left-section">
+                <!-- Dynamic Image -->
+                <img class="profile-image" :alt = "userProfile.name" :src="userProfile.profilePicture || defaultProfilePicture" />
+                
+                <!-- Action buttons -->
+                <div class="buttons-container">
+                    <button class="message" @click="openUploadMessageDialog">Send a Message</button>
+                    <button class="block" @click="openUploadBlockDialog">Block</button>
+                </div>
+
+                <div class="group-info" v-if="userProfile.currentGroup">
+                    <p class="header" id="current-group">Current Group:</p> 
+                    <div class="grouparray">
+                        <li v-for="group in userProfile.currentGroup" :key="group">{{ group }}</li>
+                    </div>
+                </div>
             </div>
 
-            <div class="group-info" v-if="userProfile.currentGroup">
-                <p class="header" id="current-group">Current Group:</p> 
-                <div class="grouparray">
-                    <li v-for="group in userProfile.currentGroup" :key="group">{{ group }}</li>
+            <div class="right-section">
+                <div class="name">
+                    <h2>{{ userProfile.displayName }}</h2>
+                </div>
+
+                <div class="major-profileDescription">
+                    <h3>{{ userProfile.major }}, Year {{ userProfile.yearOfStudy }}</h3>
+                    <p>{{ userProfile.description }}</p>
+                </div>
+
+                <div class="profile-details">
+                    <p class="header-profile">Email:</p>
+                    <p class="profile-info" >{{ userProfile.email }}</p>
+
+
+                    <p class="header-profile">Current Courses:</p>
+                    <ul id="course-list" class="profile-info">
+                        <li v-for="course in userProfile.currentCourses" :key="course">{{ course }}</li>
+                    </ul>
+
+                    <p class="header-profile">My Personalities:</p> 
+                    <ul id="personality-list" class ="profile-info">
+                        <li v-for="personality in userProfile.personalities" :key="personality">{{ personality }}</li>
+                    </ul>
                 </div>
             </div>
         </div>
+    
 
-        <div class="right-section">
-            <div class="name">
-                <h2>{{ userProfile.displayName }}</h2>
-            </div>
-
-            <div class="major-profileDescription">
-                <h3>{{ userProfile.major }}, Year {{ userProfile.yearOfStudy }}</h3>
-                <p>{{ userProfile.description }}</p>
-            </div>
-
-            <div class="profile-details">
-                <p class="header-profile">Email:</p>
-                <p class="profile-info" >{{ userProfile.email }}</p>
-
-
-                <p class="header-profile">Current Courses:</p>
-                <ul id="course-list" class="profile-info">
-                    <li v-for="course in userProfile.currentCourses" :key="course">{{ course }}</li>
-                </ul>
-
-                <p class="header-profile">My Personalities:</p> 
-                <ul id="personality-list" class ="profile-info">
-                    <li v-for="personality in userProfile.personalities" :key="personality">{{ personality }}</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    <div class="post-section">
         <div class="post-header">Posts</div>
-        <div class="post1">
-        <div class="comments">Comments: 1</div>
-        <div class="div2">|</div>
-        <div class="likes">Likes: 3</div>
-        <b class="post-title">DAO1704x hw1 answer</b>
-        <img class="post-user-image" alt="" src="../assets/profile_picture.jpg" />
-        <div class="user-name">Liu Siyi</div>
-        <div class="post-date">14/2/2023</div>
-        <div class="post-content-container">
-        <p class="post-content">Anyone has the hw1 answer key?</p>
-        </div>
-        <div class="post-divider-line" />
-    </div>
-
-        <div class="post2">
-        <div class="comments">Comments: 1</div>
-        <div class="div2">|</div>
-        <div class="likes">Likes: 3</div>
-        <b class="post-title">DAO1704x hw1 answer</b>
-        <img class="post-user-image" alt="" src="../assets/profile_picture.jpg" />
-        <div class="user-name">Liu Siyi</div>
-        <div class="post-date">14/2/2023</div>
-        <div class="post-content-container">
-        <p class="post-content">Anyone has the hw1 answer key?</p>
-        </div>
-        <div class="post-divider-line" />
-    </div>
-
-
-
-    </div>
-    </div>
-
-    <div class="popup" v-show="showMessageDialog" ref="messageDialogRef" v-if="userProfile">
-        <div class="popup-content">
-            <h2>Send a Message!</h2>
-            <div class="action-buttons">
-                <input type="text" placeholder="Say something nice!" v-model="messageText" />
-                <button @click="sendMessage(userProfile.uid, userProfile.firstName + ' ' + userProfile.lastName)" class="remove-photo">Send</button> 
-                <!--- currently set Siyi account as receiver--->
+        <div class="post-list">
+            <div v-for="post in posts" :key="post.id" class="post">
+                <button class="comments">Comments: {{ post.comments }}</button>
+                <button class="likes" id="likes" @click="likePost(post.id, uid)">Likes: {{ post.likes }}</button>
+                <b class="post-title">{{ post.header }}</b>
+                <img class="post-user-image" :src="post.userImage" />
+                <button class="user-name">{{ post.username }}</button>
+                <div class="post-date">{{ post.date }}</div>
+                <div class="post-content-container">
+                    <p class="post-content">{{ post.description }}</p>
+                </div>
+                <div class="post-divider-line"></div>
             </div>
-
-            
         </div>
-    </div>
 
-    <div class="popup" v-show="showBlockDialog" ref="blockDialogRef" >
-        <div class="popup-content">
-            <h2>Are you sure you want to block user?</h2>
-            <div class="action-buttons">
-                <button @click="removePhoto" class="remove-photo">Cancel</button>
-            
-                <button @click="removePhoto" class="remove-photo">Confirm</button>
+        <div class="popup" v-show="showMessageDialog" ref="messageDialogRef" v-if="userProfile">
+            <div class="popup-content">
+                <h2>Send a Message!</h2>
+                <div class="action-buttons">
+                    <input type="text" placeholder="Say something nice!" v-model="messageText" />
+                    <button @click="sendMessage(userProfile.uid, userProfile.firstName + ' ' + userProfile.lastName)" class="remove-photo">Send</button> 
+                    <!--- currently set Siyi account as receiver--->
+                </div>
+
+                
             </div>
-            
+        </div>
+
+        <div class="popup" v-show="showBlockDialog" ref="blockDialogRef" >
+            <div class="popup-content">
+                <h2>Are you sure you want to block user?</h2>
+                <div class="action-buttons">
+                    <button @click="removePhoto" class="remove-photo">Cancel</button>
+                
+                    <button @click="removePhoto" class="remove-photo">Confirm</button>
+                </div>
+                
+            </div>
         </div>
     </div>
 </template>
@@ -114,9 +98,9 @@
 <script>  
 import { ref, defineComponent, onMounted, onUnmounted, computed } from "vue";
 import NavigationBar from '@/components/NavigationBar.vue';
-import { doc, getDoc, getFirestore, setDoc, addDoc, serverTimestamp, collection, updateDoc, arrayUnion} from 'firebase/firestore';
+import { doc, getDoc, getFirestore, setDoc, addDoc, serverTimestamp, collection, updateDoc, arrayUnion, query, orderBy, getDocs, getCountFromServer} from 'firebase/firestore';
 import { useRoute } from 'vue-router';
-import { getAuth } from 'firebase/auth';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import firebaseApp from '@/firebase.js';
 
 
@@ -138,6 +122,26 @@ export default defineComponent({
         const db = getFirestore(firebaseApp);
         const auth = getAuth();
         const route = useRoute();
+        const useremail = ref('');
+        const user = ref(null);
+        const uid = ref('');
+        const posts = ref([]);
+
+        onMounted(() => {
+            const auth = getAuth();
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                user.value = user;
+                useremail.value = user.email;
+                uid.value = user.uid;
+                fetchUserPosts();
+
+                } else {
+                user.value = null;
+                useremail.value = null;
+                }
+            });
+        });
 
         const userProfile = ref({
             name: '',
@@ -149,6 +153,32 @@ export default defineComponent({
             description: '', 
             profilePicture: defaultProfilePicture // Assuming defaultProfilePicture is defined
         });
+
+        const fetchUserPosts = async () => {
+        try {
+            const uid = route.params.userId;
+            const db = getFirestore(firebaseApp);
+            const postsRef = collection(db, "Users", uid, "Posts");
+
+            const postQuery = query(postsRef, orderBy('datetime', 'desc'));
+            const postsSnapshot = await getDocs(postQuery);
+
+            posts.value = [];
+            for (const document of postsSnapshot.docs) {
+                let post = document.data();
+                let userDocument = await getDoc(doc(db, 'Users', uid));
+                let userData = userDocument.data();
+                post.userImage = userData.profilePicture;
+                post.id = document.id;
+                console.log(post);
+                posts.value.push(post);
+            }
+            console.log(posts);
+
+        } catch (error) {
+            console.error("Error fetching posts: ", error);
+        }
+        };
 
         // message dialog
         const openUploadMessageDialog = () => {
@@ -350,6 +380,81 @@ export default defineComponent({
             }
         };
 
+        const likePost = async (postId, userId) => {
+            const db = getFirestore(firebaseApp);
+            const postRef = collection(db, "Posts", postId, "Likes");   
+            const postSnap = await getDocs(postRef)
+            const likesCount = await getCountFromServer(postRef);
+
+            if (likesCount.data().count > 0 ) {
+                for (const document of postSnap.docs) {
+                const likeData = document.data();
+                console.log(likeData);
+                const userLiked = likeData.userId;
+                console.log("userLiked: "+ userLiked)
+                console.log("userId: " + userId)
+                if (userLiked == userId) {
+                    console.log("User has already liked the post");
+                    alert("You have liked the post already.");
+                    break;
+                } else {
+                    const currentPostRef = doc(db, "Posts", postId);
+                    const userPostedId = currentPostRef.userId;
+
+                    const currentPostSnap = await getDoc(currentPostRef);
+                    const postData = currentPostSnap.data();
+                    const currentLikes = postData.likes;
+                    const updates = {
+                    likes: currentLikes + 1
+                    };
+
+                    // Update the like count for the post
+                    await updateDoc(doc(db, "Posts", postId), updates);
+                    await updateDoc(doc(db, "Users", userPostedId, "Posts", postId), updates);
+
+                    // Add a like document to the "likes" collection to track the user's like
+                    const likesDoc = await addDoc(collection(db, "Posts", postId, "Likes"), {
+                    postId: postId,
+                    userId: userId,
+                    });
+
+                    const docId = likesDoc.id;
+                    const allPostsRef = await setDoc(doc(db, "Users", userPostedId, "Posts", postId, "Likes", docId), updates);
+                    console.log("Liked!");
+                    location.reload();
+                }
+                } 
+            } else {
+                const currentPostRef = doc(db, "Posts", postId);
+                
+                const currentPostSnap = await getDoc(currentPostRef);
+                const postData = currentPostSnap.data();
+                const userPostedId = postData.userid;
+                const currentLikes = postData.likes;
+                const updates = {
+                likes: currentLikes + 1
+                };
+                console.log(userPostedId)
+
+                // Update the like count for the post
+                await updateDoc(doc(db, "Posts", postId), updates);
+                await updateDoc(doc(db, "Users", userPostedId, "Posts", postId), updates);
+
+                // Add a like document to the "likes" collection to track the user's like
+                const likesDoc = await addDoc(collection(db, "Posts", postId, "Likes"), {
+                postId: postId,
+                userId: userId,
+                });
+
+                const docId = likesDoc.id;
+                const allPostsRef = await setDoc(doc(db, "Users", userPostedId, "Posts", postId, "Likes", docId), updates);
+
+                console.log("Liked!");
+                location.reload();
+            }
+        
+        };
+
         onMounted(fetchUserProfileFromFirebase);
 
 
@@ -366,7 +471,11 @@ export default defineComponent({
             closeBlockDialog,
             sendMessage,
             createMessageDocument,
-            addMessageToList
+            addMessageToList,
+            fetchUserPosts,
+            posts,
+            uid,
+            likePost
         };
     },
 });
@@ -378,7 +487,6 @@ export default defineComponent({
     height: 100%;
     top: 0;
     left: 0;
-    text-align: center;
     overflow-y: auto;
     font-size: var(--font-size-lg);
     color: var(--color-black);
@@ -573,92 +681,115 @@ h3 {
     line-height: 1.5;
 }
 
-.post-section {
-    width: 100%;
-    text-align: left;
-    font-size: var(--font-size-xl);
-    color: var(--color-black);
-    font-family: var(--font-josefin-sans);
-    margin-top: 3rem; 
-}
-
 .post-header {
     font-size: var(--font-size-29xl);
     font-family: var(--font-yeseva-one);
     margin-bottom: 2rem;
+    color: #525fe1;
+    margin-left: 100px;
+    position: relative;
 
 }
 
-.post1, .post2 {
-    width: 23.69rem;
-    height: 8.69rem;
-    margin-bottom: 2rem;
-  }
+.post-list {
+    margin-bottom: 8rem;
+    width: 1000px;
+    height: 300px;
+    margin-left: 100px;
 
-  .comments {
+  }
+  .post {
+    position: relative;
+    margin-bottom: 20px;
     font-size: var(--font-size-base);
     font-family: var(--font-inter);
     color: var(--color-dimgray);
-    width: 100%;
+    height: 10rem;
+    
   }
-  .div2 {
+
+  .comments {
+    position: absolute;
+    margin-left: 850px;
+    width: 120px;
+    bottom: 5px;
+    background: transparent;
+    border: 0px;
+    cursor: pointer;
     font-size: var(--font-size-base);
     font-family: var(--font-inter);
     color: var(--color-dimgray);
   }
   .likes {
+    position: absolute;
+    margin-left: 720px;
+    width: 120px;
+    bottom: 5px;
+    background: transparent;
+    border: 0px;
+    cursor: pointer;
     font-size: var(--font-size-base);
     font-family: var(--font-inter);
     color: var(--color-dimgray);
-    width: 100%;
   }
   .post-title {
-    top: 43.88%;
-    left: 0%;
+    position: absolute;
     font-weight: bold;
+    top: 70px;
+    margin-left: 40px;
   }
   .post-user-image {
-    height: 30.94%;
-    width: 11.35%;
-    top: 0%;
-    right: 88.65%;
-    bottom: 69.06%;
-    left: 0%;
+    position: absolute;
     border-radius: 50%;
-    max-width: 100%;
-    overflow: hidden;
-    max-height: 100%;
+    width: 50px;
+    height: 50px;
+    margin-left: 40px;
+    top: 5px;
     object-fit: cover;
+    
   }
   .user-name {
-    top: 5.04%;
-    left: 14.78%;
+    position: absolute;
+    top: 5px;
+    margin-left: 100px;
     font-weight: 500;
+    font-weight: bold;
+    background: transparent;
+    border: 0px;
+    cursor: pointer;
+    font-size: var(--font-size-base);
+    font-family: var(--font-inter);
+    color: var(--color-dimgray);
   }
 
   .post-date {
-    top: 5.04%;
-    left: 59.63%;
+    position: absolute;
+    top: 20px;
+    margin-left: 250px;
     font-weight: 500;
   }
-  .post-content {
-    margin: 0;
-  }
   .post-content-container {
-    top: 71.22%;
-    left: 0%;
+    position: absolute;
     font-weight: 300;
+    top: 100px;
+    margin-left: 40px;
+  }
+
+  .post-content {
+    font-family: var(--font-inter);
+    font-size: var(--font-size-base);
   }
 
   .post-divider-line {
+    position: absolute;
     height: 4.83%;
-    width: 280%;
-    bottom: -30%;
-    right: 27.29%;
-    left: -1%;
+    top: 160px;
+    right: 0%;
+    left: 0%;
     border-bottom: 1px solid var(--color-black);
     box-sizing: border-box;
-  }
+  } 
+
 
 
 </style>
