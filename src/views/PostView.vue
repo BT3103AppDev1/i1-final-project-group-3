@@ -24,8 +24,15 @@
 
     <div class="post-list">
       <div v-for="post in posts" :key="post.id" class="post">
-        <button class="comments">Comments: {{ post.comments }}</button>
-        <button class="likes" id="likes" @click="likePost(post.id, this.uid)">Likes: {{ post.likes }}</button>
+        <button class="comments" @click="navigateToPostDetails(post.id)">Comments: {{ post.comments }}</button>
+        <button class="likeButton" @click="likePost(post.id, this.uid)">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-thumb-up" width="30" height="30" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" id ="thumbs-up"></path>
+            <path d="M7 11v8a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1v-7a1 1 0 0 1 1 -1h3a4 4 0 0 0 4 -4v-1a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1 -2 2h-7a3 3 0 0 1 -3 -3"></path>
+          </svg>
+        </button>
+        
+        <div class="likes" id="likes">Likes: {{ post.likes }}</div>
         <b class="post-title">{{ post.header }}</b>
         <img class="post-user-image" :src="post.userImage" />
         <button class="user-name" @click="navigateToUserProfile(post.userid)">{{ post.username }}</button>
@@ -45,7 +52,7 @@
 import NavigationBar from '@/components/navigationbar.vue'
 import { onMounted, ref, reactive, computed } from "vue";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, collection, query, orderBy, getDocs, getDoc, doc, updateDoc, addDoc, getCountFromServer, setDoc } from 'firebase/firestore';
+import { getFirestore, collection, query, orderBy, getDocs, getDoc, doc, updateDoc, addDoc, getCountFromServer, setDoc, deleteDoc } from 'firebase/firestore';
 import firebaseApp from '@/firebase.js';
 import { useRouter } from 'vue-router';
 
@@ -117,6 +124,11 @@ export default {
 
     };
 
+    const navigateToPostDetails = (postId) => {
+      router.push({ name: 'PostDetails', params: { postId: postId }});
+
+    };
+
     const likePost = async (postId, userId) => {
       const db = getFirestore(firebaseApp);
       const postRef = collection(db, "Posts", postId, "Likes");   
@@ -130,35 +142,41 @@ export default {
           const userLiked = likeData.userId;
 
           if (userLiked == userId) {
-            console.log("User has already liked the post");
-            alert("You have liked the post already.");
+            unlikePost(postId, userId)
             break;
           } else {
             const currentPostRef = doc(db, "Posts", postId);
-            const userPostedId = currentPostRef.userId;
-            console.log(userPostedId)
 
             const currentPostSnap = await getDoc(currentPostRef);
             const postData = currentPostSnap.data();
+            const userPostedId = postData.userid;
+            console.log(userPostedId)
             const currentLikes = postData.likes;
             const updates = {
-              likes: currentLikes + 1
+              likes: currentLikes + 1,
             };
 
             // Update the like count for the post
             await updateDoc(doc(db, "Posts", postId), updates);
+            console.log("userPostedId: " + userPostedId)
+            console.log("postId: " + postId)
             await updateDoc(doc(db, "Users", userPostedId, "Posts", postId), updates);
 
             // Add a like document to the "likes" collection to track the user's like
             const likesDoc = await addDoc(collection(db, "Posts", postId, "Likes"), {
               postId: postId,
               userId: userId,
+              isLiked: true,
             });
 
             const docId = likesDoc.id;
-            const allPostsRef = await setDoc(doc(db, "Users", userPostedId, "Posts", postId, "Likes", docId), updates);
+            const allPostsRef = await setDoc(doc(db, "Users", userPostedId, "Posts", postId, "Likes", docId), {
+              postId: postId,
+              userId: userId,
+              isLiked: true,
+            });
               console.log("Liked!");
-              location.reload();
+              location.reload()
           }
         } 
       } else {
@@ -181,16 +199,60 @@ export default {
         const likesDoc = await addDoc(collection(db, "Posts", postId, "Likes"), {
           postId: postId,
           userId: userId,
+          isLiked: true,
         });
 
         const docId = likesDoc.id;
-        const allPostsRef = await setDoc(doc(db, "Users", userPostedId, "Posts", postId, "Likes", docId), updates);
+        const allPostsRef = await setDoc(doc(db, "Users", userPostedId, "Posts", postId, "Likes", docId), {
+          postId: postId,
+          userId: userId,
+          isLiked: true,
+        });
 
         console.log("Liked!");
-        location.reload();
+        location.reload()
       }
       
-    } 
+    };
+
+    const unlikePost = async (postId, userId) => {
+      const db = getFirestore(firebaseApp);
+      const currentPostRef = doc(db, "Posts", postId);
+      const currentPostSnap = await getDoc(currentPostRef);
+      const postData = currentPostSnap.data();
+      const userPostedId = postData.userid;
+
+      const postRef = collection(db, "Posts", postId, "Likes");   
+      const postSnap = await getDocs(postRef)
+      const likesCount = await getCountFromServer(postRef);
+
+      if (likesCount.data().count > 0 ) {
+        for (const document of postSnap.docs) {
+          const likeData = document.data();
+          console.log(likeData);
+          const userLiked = likeData.userId;
+
+          if (userLiked == userId) {
+            deleteDoc(doc(db,"Users", userPostedId ,"Posts" , postId, "Likes", document.id))
+            deleteDoc(doc(db,"Posts", postId, "Likes", document.id))
+            console.log("User has unlike the post");
+            const currentLikes = postData.likes;
+            const updates = {
+              likes: currentLikes - 1
+            };
+            // Update the like count for the post
+            await updateDoc(doc(db, "Posts", postId), updates);
+            await updateDoc(doc(db, "Users", userPostedId, "Posts", postId), updates);
+            location.reload()
+            break;
+
+          } else {
+            console.log("You did not like this post.")
+          }
+        } 
+      } 
+      
+    };
     
 
     return {
@@ -201,7 +263,9 @@ export default {
       searchQuery,
       navigateToCreatePost,
       navigateToUserProfile,
-      likePost
+      navigateToPostDetails,
+      likePost,
+      unlikePost,
     };
   }
 };
@@ -373,14 +437,23 @@ export default {
     font-family: var(--font-inter);
     color: var(--color-dimgray);
   }
-  .likes {
+
+  .likeButton {
     position: absolute;
     margin-left: 740px;
+    top: 128px;
+    background: transparent;
+    cursor: pointer;
+    border: 0px;
+  }
+
+  .likes {
+    position: absolute;
+    margin-left: 785px;
     width: 120px;
     bottom: 5px;
     background: transparent;
     border: 0px;
-    cursor: pointer;
     font-size: var(--font-size-base);
     font-family: var(--font-inter);
     color: var(--color-dimgray);
