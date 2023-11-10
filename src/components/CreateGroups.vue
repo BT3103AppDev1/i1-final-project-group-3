@@ -35,7 +35,7 @@ import 'firebase/compat/auth';
 import * as firebaseui from 'firebaseui';
 import 'firebaseui/dist/firebaseui.css';
 import firebaseApp from '@/firebase.js';
-import { doc, collection, getFirestore, getDoc, updateDoc, addDoc, getDocs, setDoc } from "firebase/firestore";
+import { doc, collection, getFirestore, getDoc, updateDoc, addDoc, getDocs, setDoc, arrayUnion } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth"
 
 export default {
@@ -79,7 +79,7 @@ export default {
         let groupDescription = document.getElementById("groupDescription").value;
         let membersCount = parseInt(document.getElementById("membersCount").value);
 
-        alert("Creating your new group: " + groupTitle)
+        //alert("Creating your new group: " + groupTitle)
 
         try{
           const auth = getAuth();
@@ -100,9 +100,36 @@ export default {
               members: parseInt(this.membersCount),
               username: username,
               userid : this.uid,
+              groupMembers: [this.uid],
             }
 
             const groupDocRef = await addDoc(collection(db, 'Groups'), newPost);
+            const newGroupId = groupDocRef.id;
+
+            // Reference to the 'msgList' subcollection under the new group
+            const msgListRef = collection(db, 'Groups', newGroupId, 'msgList');
+
+            // Add an empty document with at least an empty object to 'msgList' subcollection
+            await addDoc(msgListRef, {});
+
+            
+
+            if (userDocument.exists() && userDocument.data().hasOwnProperty('activeGroups')) {
+              // The user already has an activeGroups field, update it
+              console.log("new field being created")
+              await updateDoc(userDocRef, {
+                activeGroups: arrayUnion(newGroupId)
+               
+              });
+            } else {
+              // The user does not have an activeGroups field, set it
+              console.log("adding into field")
+              await setDoc(userDocRef, {
+                activeGroups: [newGroupId]
+                
+              }, { merge: true }); // Merge to ensure we don't overwrite existing fields
+            }
+
  
 
             document.getElementById('myform').reset();

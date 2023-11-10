@@ -37,9 +37,16 @@
           <div class="group-card" v-for="group in groups" :key="group.title"> 
 
             <h1 id = "group-name">{{ group.title }}</h1>
-            <h3 id = "group-vacancy">Vacancy: 1/{{group.members}}members</h3>
+            <h3 id = "group-vacancy">Vacancy: {{group.count}}/{{group.members}}members</h3>
             <h3 id = "group-description">{{group.description}}</h3> 
-            <button id="join-group" @click="joingroup">Join</button>
+            <button
+              id="join-group"
+              @click="!group.isMember && !group.isFull && joingroup(group.id)"
+              :class="{ 'joined': group.isMember, 'full': group.isFull }"
+            >
+              {{ group.isMember ? 'Joined' : group.isFull ? 'Full' : 'Join' }}
+            </button>
+
  
         </div>
   
@@ -55,15 +62,18 @@
 
 
 <script>
-  import { getFirestore, collection, getDocs, addDoc } from "firebase/firestore"
+  import { getFirestore, collection, getDocs, addDoc , doc, getDoc, updateDoc, arrayUnion} from "firebase/firestore"
+  import { getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence } from "firebase/auth";
   import firebaseApp from '../firebase.js';
   import { defineComponent, ref, onMounted } from "vue";
   import { computed } from 'vue'; 
   import CreateGroups from "../components/CreateGroups.vue";
   import homeBanner from "../components/homeBanner.vue";
+  import { get } from "firebase/database";
  
   const db = getFirestore(firebaseApp); 
-  
+  const auth = getAuth();
+
 
   export default defineComponent({
     name: "HomeGroups",
@@ -79,7 +89,8 @@
             groups: [],
             groupTitle: "",
             groupDescription: "",
-            membersCount: null
+            membersCount: null,
+            groupId: '' 
         };
     },
 
@@ -112,7 +123,78 @@
         alert("Test");
 
       },
+
+      async joingroup(groupId) {
+        // Check if the groupId is not undefined or empty
+        if (!groupId) {
+          console.error('No group ID provided');
+          return;
+        }
+        
+        const db = getFirestore(firebaseApp);
+        const user = auth.currentUser;
+
+        // Check if the user is logged in
+        if (!user) {
+          console.error('User not logged in!');
+          return;
+        }
+
+        // Reference to the user's document in the 'Users' collection
+        const userDocRef = doc(db, 'Users', user.uid);
+        
+        // Reference to the group's document in the 'Groups' collection
+        const groupDocRef = doc(db, 'Groups', groupId);
+
+        try {
+          // Fetch the current data of the group
+          const groupDoc = await getDoc(groupDocRef);
+          
+          if (!groupDoc.exists()) {
+            console.error('Group does not exist!');
+            return;
+          }
+
+          // checking if the group can still accept new members
+          const groupData = groupDoc.data();
+          const maxMembers = groupData.members;
+          const currentMembers = groupData.groupMembers.length;
+          if (currentMembers >= maxMembers) {
+            alert('Group is full! Please create a new group or join another group :)');
+            return;
+          }
+
+          this.groups = this.groups.map(group => {
+            if (group.id === groupId) {
+              return {
+                ...group,
+                isMember: true,
+                count: group.count + 1,
+                isFull: group.count + 1 >= group.members
+              };
+            }
+            return group;
+          });
+
+
+          // Update the 'groupMembers' field of the group
+          await updateDoc(groupDocRef, {
+            groupMembers: arrayUnion(user.uid)
+          });
+
+          // Optionally, also update the 'activeGroups' field of the user's document
+          await updateDoc(userDocRef, {
+            activeGroups: arrayUnion(groupId)
+          });
+
+          console.log('Joined group successfully!');
+
+        } catch (error) {
+          console.error('Error joining group:', error);
+        }
       },
+
+    },
 
  
 
@@ -127,18 +209,33 @@
     });
   });
 
-  const fetchDataFromFirebase = async () => {
+  const fetchDataFromFirebase = async (uid) => {
     const db = getFirestore(firebaseApp);
     const usersCollection = collection(db, "Groups");
+    const auth = getAuth();
+    const user = auth.currentUser; // This line should ensure you have the current user
+    
+    if (!user) {
+      console.error('No user is currently logged in.');
+      return; // Exit the function if no user is logged in
+    }
+    
     try {
       const querySnapshot = await getDocs(usersCollection);
       const fetchedGroups = [];
       querySnapshot.forEach((doc) => {
         const groupData = doc.data();
+        const count = groupData.groupMembers.length;
+        const isFull = count >= groupData.members;
+        const isMember = groupData.groupMembers.includes(user.uid);
         fetchedGroups.push({
+          id: doc.id,
           title: groupData.title,
           description: groupData.groupDescription,
           members: groupData.members,
+          count: count,
+          isFull: isFull,
+          isMember: isMember,
         });
       });
 
@@ -148,6 +245,32 @@
     }
   };
 
+  setPersistence(auth, browserSessionPersistence)
+    .then(() => {
+      // After setting persistence, you can add the auth state observer
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          // User is signed in, now you can fetch the data
+          fetchDataFromFirebase(user.uid);
+        } else {
+          // User is signed out
+          console.log('No user is currently logged in.');
+        }
+      });
+    })
+    .catch((error) => {
+      // Handle Errors here.
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.error(`Error setting persistence: ${errorCode}`, errorMessage);
+    });
+
+
+
+  
+
+
+
   onMounted(() => {
     fetchDataFromFirebase();
   });
@@ -155,6 +278,7 @@
   return {
     groups: filteredGroups,
     searchQuery,
+   
   };
 },
     
