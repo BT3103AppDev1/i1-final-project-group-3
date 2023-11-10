@@ -223,8 +223,17 @@
     padding-top: 5px;
     text-align: center;
     background-color: var(--color-darkorange);
-    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    
     border: 1px solid var(--color-darkorange);
+  }
+
+  .get-started:hover {
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    background-color: #525fe1;
+    border: none;
+    transition: 0.5s ease-in-out;
+    
+
   }
 
   .rectangle-parent-benefit {
@@ -236,13 +245,18 @@
     color: var(--color-black);
     border-radius: var(--br-21xl);
     background: linear-gradient(180deg, #fff, rgba(255, 255, 255, 0));
-    box-shadow: 15px 30px 30px 5px rgba(0, 0, 0, 0.25);
-    border: 1px solid var(--color-white);
+    border: 1px solid #7b7b7b;
     box-sizing: border-box;
     width: 410px;
     height: 171px;
     margin-bottom: 40px;
     
+  }
+
+  .rectangle-parent-benefit:hover {
+    box-shadow: 15px 30px 30px 5px rgba(0, 0, 0, 0.25);
+    transition: 0.5s ease-in-out;
+
   }
 
   #benefit1 {

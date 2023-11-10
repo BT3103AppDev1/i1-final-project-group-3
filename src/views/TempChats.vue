@@ -4,8 +4,8 @@
         <div class="chat">
             <div class="convo-list">
                 <div class="chat-buttons">
-                    <button class="profiles">Profiles</button>
-                    <button class="groups">Groups</button>
+                    <button class="profiles" >Profiles</button>
+                    <button class="groups" @click="navigateToGroups">Groups</button>
                 </div>
                 
 
@@ -22,10 +22,6 @@
                         
 
                     </div>
-                        
-
-                  
-                    
                         
                 </div>
 
@@ -87,8 +83,17 @@ const db = getFirestore(firebaseApp);
 const auth = getAuth(firebaseApp);
     
 export default {
+    name: 'TempChats',
     components: {
         NavigationBar
+    },
+
+    methods: {
+
+      navigateToGroups() {
+        this.$router.push({name: 'TempChatsGroups'});
+
+      },
     },
         
     setup() {
