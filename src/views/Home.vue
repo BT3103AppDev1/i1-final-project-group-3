@@ -75,22 +75,16 @@ export default defineComponent({
     const profiles = ref([]);
 
     const filteredProfiles = computed(() => {
-      return profiles.value.filter(profile => {
+      const filtered = profiles.value.filter(profile => {
         const searchRegex = new RegExp(searchQuery.value, 'i');
-        return searchRegex.test(profile.name) || searchRegex.test(profile.major) ||  searchRegex.test(profile.description) ||  searchRegex.test(profile.yearOfStudy);
+        const isCurrentUser = user.value && profile.uid === user.value.uid;
+
+        return (!isCurrentUser) && (searchRegex.test(profile.name) || searchRegex.test(profile.major) || searchRegex.test(profile.description) || searchRegex.test(profile.yearOfStudy));
       });
+
+      return filtered;
     });
-
  
-
-
-/*
-    const filteredProfiles = computed(() => {
-      return profiles.value.filter(profile => {
-        const searchRegex = new RegExp(searchQuery.value, 'i'); // Case-insensitive search
-        return searchRegex.test(profile.name) || searchRegex.test(profile.major) || searchRegex.test(profile.description) || searchRegex.test(profile.yearOfStudy);
-      });
-    }); */
   
 
     onMounted(() => {
