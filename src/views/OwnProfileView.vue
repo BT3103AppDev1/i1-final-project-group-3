@@ -22,7 +22,6 @@
                 <b>&nbsp;</b>
                 </p>
                 <p class="post-header-tag">
-                <b>Description: </b>
                 <span>{{ post.description }}</span>
                 </p>
               </div>
