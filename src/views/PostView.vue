@@ -317,11 +317,11 @@ export default {
  
 
   .create-button {
-  position: fixed;
-  bottom: 2rem; 
-  right: 2rem; 
+  position: relative;
   width: 3.69rem;
   height: 3.69rem;
+  top: 35px;
+  left: 1100px;
   cursor: pointer;
   background: transparent;
   border: transparent;
