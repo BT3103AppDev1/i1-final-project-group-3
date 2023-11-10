@@ -22,12 +22,12 @@
                 </div>
                 <div class="type_msg">
                     <div class="input_msg_write">
-                        <img class="upload-icon" src="../assets/uploadphoto.png" alt="Upload Icon" @click="triggerFileInput" />
-                        <input id="fileInput" ref="fileInput" type="file" style="display: none" @change="handleFileUpload" />
-                        <input @keyup.enter="saveMessage" v-model="message" type="text" class="write_msg" placeholder="Type a message" />
-                        <img class="msg_send_btn" alt="" src="../assets/send.png" @click="sendMessageOnClick" />
+                    <img class="upload-icon" src="../assets/uploadphoto.png" alt="Upload Icon" @click="triggerFileInput" />
+                    <input id="fileInput" ref="fileInput" type="file" style="display: none" @change="handleFileUpload" />
+                    <input @keyup.enter="saveMessage" v-model="newMessage" type="text" class="write_msg" placeholder="Type a message" />
+                    <img class="msg_send_btn" alt="" src="../assets/send.png" @click="sendMessageOnClick" />
                     </div>
-                </div>
+              </div>
             </div>
 
         </div>
@@ -53,13 +53,14 @@
 <script>
 
 import { ref, onMounted } from 'vue';
-import { getFirestore, doc, getDocs, getDoc, collection, query, orderBy, limit } from "firebase/firestore";
+import { getFirestore, doc, getDocs, getDoc, collection, query, orderBy, limit, addDoc, serverTimestamp, onSnapshot  } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import firebaseApp from '@/firebase.js';
 import NavigationBar from '../components/NavigationBar.vue';
-
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
     
 
+const auth = getAuth(firebaseApp);
     
 export default {
     name: 'TempChatsGroups',
@@ -81,16 +82,27 @@ export default {
         const selectedGroupMessages = ref([]);
         const user = ref(null);
         const db = getFirestore(firebaseApp);
-        const auth = getAuth(firebaseApp);
+        const authUser = ref(null);
+        const storage = getStorage(firebaseApp);
+        const message = ref(''); 
+        const newMessage = ref('');
 
 
-        onMounted(async () => {
-            onAuthStateChanged(auth, async (firebaseUser) => {
-                if (firebaseUser) {
-                await fetchGroups(firebaseUser.uid); // Fetch the chats using UID
-                
+
+        onMounted(() => {
+            const unsubscribe = onAuthStateChanged(auth, (user) => {
+                authUser.value = user;
+                if (user) {
+                fetchGroups(user.uid);
+        
+                } else {
+                // User is not authenticated
                 }
             });
+
+           
+            
+            return unsubscribe;
         });
 
         const fetchGroups = async (uid) => {
@@ -148,6 +160,104 @@ export default {
             fetchMessages(group.id);
         };
 
+   
+
+
+
+
+        const triggerFileInput = () => {
+            console.log('triggerFileInput called');
+            const fileInput = document.getElementById('fileInput');
+            fileInput.click();
+        };
+
+
+
+        const handleFileUpload = async (event) => {
+            console.log('handleFileUpload called');
+            if (authUser.value && authUser.value.displayName && selectedChat.value) {
+                const file = event.target.files[0];
+                if (file) {
+                    const storageChildRef = storageRef(storage, 'chat_images/' + file.name);
+                    try {
+                        await uploadBytes(storageChildRef, file);
+                        const downloadURL = await getDownloadURL(storageChildRef);
+                        const newMessage = {
+                            senderUID: authUser.value.uid,
+                            senderName: authUser.value.displayName,
+                            timestamp: serverTimestamp(),
+                            imageUrl: downloadURL,
+                        };
+
+                        const msgListRef = collection(db, 'Message', selectedChat.value.id, 'msglist');
+
+                        await addDoc(msgListRef, newMessage);
+
+                        // Clear the input field after saving the message
+                        message.value = '';
+                        scrollToBottom();
+
+                        console.log('Message uploaded successfully.');
+                    } catch (error) {
+                        console.error('Error uploading file:', error);
+                        
+                    }
+                } else {
+                    console.error('No file selected.');
+        
+                }
+            } else {
+                console.error('Invalid authUser data or selected chat.');
+        
+            }
+        };
+        
+        const sendMessage = async (text) => {
+            console.log("hi")
+            console.log(selectedGroup.value)
+            console.log(text)
+
+                try {
+                // Reference to the 'msgList' subcollection in the selected group
+                const msgListRef = collection(db, 'Groups', selectedGroup.value.id, 'msgList');
+                console.log(msgListRef);
+
+                // Add a new message document to Firestore
+                const messageToSend = {
+                    text: text,
+                    senderUID: authUser.value.uid,
+                    senderName: authUser.value.displayName,
+                    timestamp: serverTimestamp()
+                };
+                await addDoc(msgListRef, messageToSend);
+
+                // Clear the input field after sending the message
+                newMessage.value = '';
+                // If you have a method to scroll to the bottom, call it here
+                // scrollToBottom();
+                } catch (error) {
+                console.error("Error sending message:", error);
+                }
+
+        };
+
+
+        const sendMessageOnClick = () => {
+            sendMessage(newMessage.value);
+            console.log('sendMessageOnClick called');
+        };
+
+        const updateChat = (chatId, lastMessage) => {
+        const index = chats.value.findIndex((chat) => chat.id === chatId);
+        if (index !== -1) {
+            chats.value[index].lastMessage = lastMessage;
+            // Sort the chats based on the latest message timestamp
+            chats.value.sort((a, b) => b.lastMessage.timestamp - a.lastMessage.timestamp);
+        }
+        };
+    
+
+
 
 
 
@@ -163,6 +273,12 @@ export default {
             fetchMessages,
             selectGroup,
             selectedGroupMessages,
+            triggerFileInput,
+            handleFileUpload,
+            sendMessageOnClick,
+            updateChat,
+            newMessage,
+            message,
         };
     },
 
