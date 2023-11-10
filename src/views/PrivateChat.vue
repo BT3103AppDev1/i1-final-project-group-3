@@ -34,25 +34,40 @@
         <div class="mesgs">
           <div class="msg_history">
             <div v-if="selectedChat">
-              <div v-for="message in selectedChat.messages" :key="message.id" :class="{'sent_msg': message.senderUID === currentUserUID, 'received_msg': message.senderUID !== currentUserUID}">
-              
-                  <img v-if="message.imageUrl" :src="message.imageUrl" alt="Uploaded Image" class="uploaded-image">
+                <div v-for="message in selectedChat.messages" :key="message.id">
+                  <!-- For sent messages -->
+                  <div v-if="message.senderUID === authUser.uid" class="sent_msg">
+                    <div v-if="message.imageUrl"> 
+                       <img :src="message.imageUrl" alt="Uploaded Image" class="uploaded-image">
+                    </div>
+                    <div v-else>
+                      <p>{{ message.text }}</p>
+                      <!--<span class="name-of-sender">{{ message.senderName }}</span>-->
+                    </div> 
+                  </div>
+
+                  <!-- For received messages -->
+                  <div v-else class="received_msg">
+                    <div v-if="message.imageUrl">
+                      <img :src="message.imageUrl" alt="Uploaded Image" class="uploaded-image">
+                    </div>
                   <div v-else class="received_withd_msg">
-                        <p>{{ message.text }}</p>
-                        <span class="name-of-sender">{{ message.senderName }}</span>
+                    <p>{{ message.text }}</p>
+                    <!--<span class="name-of-sender">{{ message.senderName }}</span>-->
+                  </div>
                   </div>
                 </div>
-             
+ 
 
               <div class="type_msg">
                 <div class="input_msg_write">
                   <img class="upload-icon" src="../assets/uploadphoto.png" alt="Upload Icon" @click="triggerFileInput" />
                   <input id="fileInput" ref="fileInput" type="file" style="display: none" @change="handleFileUpload" />
-                  <input @keyup.enter="saveMessage" v-model="message" type="text" class="write_msg" placeholder="Type a message" />
+                  <input @keyup.enter="saveMessage" v-model="newMessage" type="text" class="write_msg" placeholder="Type a message" />
                   <img class="msg_send_btn" alt="" src="../assets/send.png" @click="sendMessageOnClick" />
                 </div>
               </div>
-              </div>
+            </div>
             
             <div v-else="" class="noSelectedChat">
               <img class="send-message-icon" src="../assets/message.png"  />
@@ -84,12 +99,13 @@ export default {
     components: {
         NavigationBar
     },
-        
-    setup() {
+ 
+     setup() {
       const router = useRouter();
       const chats = ref([]);
       const selectedChat = ref(null);
       const message = ref(''); 
+      const newMessage = ref('');
       const currentUserUID = ref(null);
       const authUser = ref(null);
       const storage = getStorage(firebaseApp);
@@ -116,7 +132,9 @@ export default {
        
       return unsubscribe;
     });
+
  
+    
 
     const fetchChats = async (uid) => {
         const userDocRef = doc(db, 'Users', uid);
@@ -207,7 +225,7 @@ export default {
     const saveMessage = async () => {
       if (authUser.value && authUser.value.displayName && selectedChat.value) {
         const messageData = {
-          message: message.value,
+          message: newMessage.value,
           senderUID: authUser.value.uid,
           senderName: authUser.value.displayName,
           receiverUID: selectedChat.value.id, // Receiver's UID is the chat ID
@@ -220,7 +238,7 @@ export default {
           await addDoc(msgListRef, messageData);
 
           // Clear the input field after saving the message
-          message.value = '';
+          newMessage.value = '';
           // Msg history is updated in real-time, will auto scroll down when sending a new message
           scrollToBottom();
         } catch (error) {
@@ -303,6 +321,13 @@ export default {
         const messagesRef = collection(db, 'Message', chatSummary.id, 'msglist');
         const q = query(messagesRef, orderBy('timestamp', 'asc'));
 
+         selectedChat.value = {
+            id: chatSummary.id,
+            messages: [],
+            name: chatSummary.name,
+            unsubscribe: null,
+          };
+
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
           const messages = [];
           querySnapshot.forEach((doc) => {
@@ -346,7 +371,7 @@ export default {
       
     const navigateToGroupsChat = () => {
      
-      router.push({ name: 'ChatGroups' }); //to be edited after creating chat function for groups!!!
+      router.push({ name: 'ChatGroups' });  
 
     };
 
@@ -362,6 +387,11 @@ export default {
     };
 
     const formatMessageDate = (timestamp) => {
+
+        if (!timestamp) {
+          return '';  
+        }
+
       // Convert Firestore Timestamp to JavaScript Date object
       const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
 
@@ -396,6 +426,7 @@ export default {
       triggerFileInput,
       scrollToBottom,
       navigateToGroupsChat,
+      newMessage,
     };        
     }
 };
@@ -411,8 +442,8 @@ export default {
 
 .container{
   max-width:100%; 
-  min-height: 100%;
-  margin:auto;
+  height: 39rem;
+  margin:auto; 
   }
 
 img{ 
@@ -468,6 +499,7 @@ img{
   border: 1px solid #c4c4c4;
   clear: both;
   overflow: hidden;
+  height: 40rem; 
 
 }
 
@@ -544,8 +576,10 @@ img{
 }
 
 .inbox_chat { 
-  height: 26rem; 
-  overflow-y: scroll;
+  height: 40rem; 
+  overflow-y: scroll; 
+  
+
   }
 
   .mesgs {
@@ -619,106 +653,55 @@ img{
   border-radius: 0.6rem;
   margin-right: 1rem;
 }
-
-.type_msg { 
-  position: fixed; 
+ 
+.input_msg_write {
+  position: absolute;
   width: 57%;
-  bottom: 10px;  
-  right: 20px;
-  }
+  top: 46rem; 
+  margin-right: 5%;
+}
 
   
 .msg_history {
-  height: 26.5rem; 
+  height: 32rem; 
   overflow-y: auto;
   padding-right: 0.6rem;
   overflow-x: hidden;
 }
 
 .msg_history::-webkit-scrollbar {
-  width: 0.6rem; /* Set the width of the scrollbar */
+  width: 0.6rem;  
 }
 
 .msg_history::-webkit-scrollbar-thumb {
-  background-color: #888; /* Set the color of the scrollbar thumb */
-  border-radius: 0.2rem; /* Optional: Round the corners of the thumb */
+  background-color: #888;  
+  border-radius: 0.2rem; 
 }
 
 .msg_history::-webkit-scrollbar-track {
-  background-color: #f1f1f1; /* Set the color of the scrollbar track */
+  background-color: #f1f1f1;  
 }
 
-.sent {
-  text-align: left;
-}
-
-.received {
-  text-align: right;
-}
-
-.sent-msg {
-  background-color: #65a4b6;
-  color: #fff;
-  border-radius: 0.4rem;
-  padding: 1rem;
-  margin: 0.5rem;
-}
-
-.received-msg {
-  background-color: #ebebeb;
-  border-radius: 0.4rem;
-  padding: 1rem;
-  margin: 0.5rem;
-}
-
-
-
-
-
-
-
-
+  
  
+.sent_msg {
+  float: right;
+  width: 60%;
+  clear: both; 
+  margin-bottom: 1rem;
+  
+}
 
-
-
-
-
-
-
- 
 .received_msg {
   display: inline-block;
   padding: 0 0 0 10px;
   vertical-align: top;
   width: 92%;
+   margin-bottom: 1rem;
  }
- .received_withd_msg p {
-  background: #ebebeb none repeat scroll 0 0;
-  border-radius: 0.4rem;
-  color: #646464;
-  font-size: 1rem;
-  margin: 0;
-  padding: 1rem 2rem 1rem 0.5rem;
-  width: 100%;
-  word-wrap: break-word;
-}
-.name-of-sender {
-  color: #747474;
-  display: block;
-  font-size: 0.8rem;
-  margin-bottom: 0.7rem;
- 
-}
 
-.received_withd_msg {
-   width: 100%; 
-   }
-
-
-
- .sent_msg p {
-  background: #65a4b6 none repeat scroll 0 0;
+  .sent_msg p {
+  background: #9bcbd7 none repeat scroll 0 0;
   border-radius: 0.4rem;
   font-size: 1rem;
   margin: 0; 
@@ -728,22 +711,35 @@ img{
   word-wrap: break-word;
 }
  
-.sent_msg {
-  float: right;
-  width: 50%;
-  clear: both; 
-  
+
+ .received_withd_msg p {
+  background: rgb(238, 236, 236) none repeat scroll 0 0;
+  border-radius: 0.4rem;
+  color: #646464;
+  font-size: 1rem;
+  margin: 0;
+  padding: 1rem 2rem 1rem 0.5rem;
+  width: 100%;
+  word-wrap: break-word;
+} 
+
+.name-of-sender {
+  color: #747474;
+  display: block;
+  font-size: 0.8rem;
+  margin-bottom: 0.7rem;
 }
 
 
 
+ 
 
 .msg_send_btn {
   cursor: pointer;
   height: 1.7rem;
   position: absolute;
   top: 0.8rem;
-  left: 47.5rem;
+  right: 6rem;
 
 }
 
@@ -753,12 +749,12 @@ img{
   height: 1.7rem;
   position: absolute;
   top: 0.8rem;
-  left: 50rem;
+  right: 3rem;
 }
 
 .uploaded-image {
-  max-width: 15rem; 
-  max-height: 15rem; 
+  max-width: 10rem; 
+  max-height: 10rem; 
 }
  
 
