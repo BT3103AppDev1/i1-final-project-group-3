@@ -65,7 +65,7 @@
   import { getFirestore, collection, getDocs, addDoc , doc, getDoc, updateDoc, arrayUnion} from "firebase/firestore"
   import { getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence } from "firebase/auth";
   import firebaseApp from '../firebase.js';
-  import { defineComponent, ref, onMounted } from "vue";
+  import { defineComponent, ref, onMounted, reactive } from "vue";
   import { computed } from 'vue'; 
   import CreateGroups from "../components/CreateGroups.vue";
   import homeBanner from "../components/homeBanner.vue";
@@ -86,7 +86,7 @@
     data() {
         return {
             isCreateGroupFormVisible: false,
-            groups: [],
+            groups: reactive([]),
             groupTitle: "",
             groupDescription: "",
             membersCount: null,
@@ -123,6 +123,7 @@
         alert("Test");
 
       },
+      
 
       async joingroup(groupId) {
         // Check if the groupId is not undefined or empty
@@ -191,6 +192,8 @@
           });
 
           console.log('Joined group successfully!');
+
+          window.location.reload();
 
         } catch (error) {
           console.error('Error joining group:', error);
