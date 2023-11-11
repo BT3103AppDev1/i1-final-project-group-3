@@ -602,12 +602,18 @@ export default {
           // Assuming you have a field in the user's document that keeps track of group memberships
           const userDocRef = doc(db, 'Users', memberToRemove.value);
           await updateDoc(userDocRef, {
-            groups: arrayRemove(selectedGroup.value.id)
+            activeGroups: arrayRemove(selectedGroup.value.id)
           });
+
+
+          if (groupMemberNames.value[memberToRemove.value]) {
+            delete groupMemberNames.value[memberToRemove.value];
+          }
 
 
           // Close the confirmation popup
           showConfirmationPopup.value = false;
+          isOptionsPopupOpen.value = true;
 
 
         } catch (error) {
@@ -1138,6 +1144,10 @@ h6 {
   font-style: italic;
   align-content: left;
   
+}
+
+.confirmation-popup {
+  z-index: 10;
 }
 
 
