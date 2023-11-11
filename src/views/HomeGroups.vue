@@ -191,6 +191,7 @@
           });
 
           console.log('Joined group successfully!');
+          location.reload();
 
         } catch (error) {
           console.error('Error joining group:', error);
