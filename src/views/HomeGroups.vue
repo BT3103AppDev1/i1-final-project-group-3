@@ -192,6 +192,7 @@
           });
 
           console.log('Joined group successfully!');
+          location.reload();
 
           window.location.reload();
 

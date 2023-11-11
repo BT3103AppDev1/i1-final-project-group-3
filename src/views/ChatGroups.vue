@@ -158,7 +158,7 @@
 <script>
 
 import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue';
-import { getFirestore, doc, getDocs, getDoc, collection, query, orderBy, limit, addDoc, serverTimestamp, onSnapshot  } from "firebase/firestore";
+import { getFirestore, doc, getDocs, getDoc, collection, query, orderBy, limit, addDoc, serverTimestamp, onSnapshot, arrayRemove, updateDoc  } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import firebaseApp from '@/firebase.js';
 import NavigationBar from '../components/NavigationBar.vue';
@@ -587,14 +587,42 @@ export default {
       };
 
       const removeMember = async () => {
-        if (!memberToRemove.value) return;
+        if (!memberToRemove.value || !selectedGroup.value) return;
 
-        // Logic to remove member from Firestore 'users' and 'groups' collections
-        // Make sure to handle this part securely and robustly
+        try {
+          // Step 1: Update the 'Groups' collection
+          // Assuming 'selectedGroup.value.id' contains the ID of the current group
+          const groupDocRef = doc(db, 'Groups', selectedGroup.value.id);
+          console.log(groupDocRef)
+          await updateDoc(groupDocRef, {
+            groupMembers: arrayRemove(memberToRemove.value)
+          });
 
-        // Close both popups after removal
-        showConfirmationPopup.value = false;
-        
+          // Step 2: Update the 'Users' collection
+          // Assuming you have a field in the user's document that keeps track of group memberships
+          const userDocRef = doc(db, 'Users', memberToRemove.value);
+          await updateDoc(userDocRef, {
+            activeGroups: arrayRemove(selectedGroup.value.id)
+          });
+
+
+          if (groupMemberNames.value[memberToRemove.value]) {
+            delete groupMemberNames.value[memberToRemove.value];
+          }
+
+
+          // Close the confirmation popup
+          showConfirmationPopup.value = false;
+          isOptionsPopupOpen.value = true;
+
+
+        } catch (error) {
+          console.error("Error removing member:", error);
+          // Handle the error appropriately
+        }
+
+        // Reset the memberToRemove
+        memberToRemove.value = null;
       };
 
     const cancelRemoval = () => {
@@ -1116,6 +1144,10 @@ h6 {
   font-style: italic;
   align-content: left;
   
+}
+
+.confirmation-popup {
+  z-index: 10;
 }
 
 
