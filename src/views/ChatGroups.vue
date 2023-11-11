@@ -53,7 +53,8 @@
                       <div v-for="message in selectedGroupMessages" :key="message.id">
                           <!-- For sent messages -->
                           <div v-if="message.senderUID === authUser?.uid" class="sent_msg">
-                            <img :src="getProfileImageUrl(message.senderUID)" alt="Profile Image" class="profile-image">
+                            <img :src="getProfileImageUrl(message.senderUID)" alt="Profile Image" class="profile-image-self">
+                            <span class="self-name">{{ groupMemberNames[message.senderUID] }}</span>
                               <div v-if="message.imageUrl"> 
                               <img :src="message.imageUrl" alt="Uploaded Image" class="uploaded-image">
                               </div>
@@ -65,7 +66,8 @@
 
                           <!-- For received messages -->
                           <div v-else class="received_msg">
-                            <img :src="getProfileImageUrl(message.senderUID)" alt="Profile Image" class="profile-image">
+                            <img :src="getProfileImageUrl(message.senderUID)" alt="Profile Image" class="profile-image-members">
+                            <span class="members-name">{{ groupMemberNames[message.senderUID] }}</span>
                               <div v-if="message.imageUrl">
                                   <img :src="message.imageUrl" alt="Uploaded Image" class="uploaded-image">
                               </div>
@@ -158,6 +160,7 @@ export default {
       const unsubscribeFetchMessages = ref(null);
       const selectedGroupName = ref('');
       const groupMemberProfiles = ref({});  
+      const groupMemberNames = ref({}); 
 
 
 
@@ -268,6 +271,7 @@ export default {
 
       const fetchGroupMemberProfiles = async (groupMembers) => {
         const profiles = {};
+        const names = {};
 
 
         for (const memberId of groupMembers) {
@@ -277,18 +281,22 @@ export default {
             if (userDocSnap.exists()) {
               const userData = userDocSnap.data();
               profiles[memberId] = userData.profilePicture || defaultProfileImage; // Assume 'profileImage' is the field
+              names[memberId] = userData.firstName + " " + userData.lastName;
               console.log(`Fetched profile image for user ${memberId}:`, userData.profilePicture);
             } else {
               console.log(`User document for ${memberId} does not exist.`);
               profiles[memberId] = defaultProfileImage;  // Fallback image URL
+              names[memberId] = 'Unknown';
             }
           } catch (error) {
             console.error('Error fetching user profile:', error);
             profiles[memberId] = defaultProfileImage;  // Fallback image URL
+            names[memberId] = 'Unknown';
           }
         }
 
         groupMemberProfiles.value = profiles;
+        groupMemberNames.value = names;
         console.log('Group member profiles:', groupMemberProfiles.value);
       };
       const getProfileImageUrl = (userId) => {
@@ -471,6 +479,7 @@ export default {
           unsubscribeFetchMessages,
           fetchGroupMemberProfiles,
           getProfileImageUrl,
+          groupMemberNames,
       };
   },
 
@@ -655,6 +664,37 @@ width: 100%;
   margin-top: 15px;
   
  }
+
+ .profile-image-members {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-left: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+
+ }
+
+ .profile-image-self {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-left: 400px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+
+ }
+
+ .self-name, 
+ .members-name {
+  color: #464646;
+  margin-bottom: 30px;
+  
+
+ }
+
 
 
 
