@@ -583,6 +583,7 @@ export default {
       const confirmMemberRemoval = (userId) => {
         memberToRemove.value = userId;
         showConfirmationPopup.value = true;
+        isOptionsPopupOpen.value = false;
       };
 
       const removeMember = async () => {
@@ -593,13 +594,14 @@ export default {
 
         // Close both popups after removal
         showConfirmationPopup.value = false;
-        isOptionsPopupOpen.value = false;
+        
       };
 
     const cancelRemoval = () => {
       // Reset removal state and close confirmation popup
       memberToRemove.value = null;
       showConfirmationPopup.value = false;
+      isOptionsPopupOpen.value = true;
     };
 
 
