@@ -36,10 +36,6 @@
 
                   </div>
 
-                  
-                      
-
-
               </div>
 
           </div>
@@ -257,6 +253,12 @@ export default {
                   });
                   }
               }
+
+                // Sort the fetched chats based on the latest message timestamp in descending order
+                const sortedChats =  groups.value.sort((a, b) => b.lastMessage.timestamp - a.lastMessage.timestamp);
+
+                // Update the chats array with the sorted chats
+                groups.value = sortedChats;
               } else {
               console.error(`User document with UID ${uid} does not exist.`);
               }
@@ -277,6 +279,7 @@ export default {
 
           // Setting up real-time listener
           unsubscribeFetchMessages.value = onSnapshot(q, (querySnapshot) => {
+              console.log('Snapshot received:', querySnapshot.docs);
               selectedGroupMessages.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           }, (error) => {
               console.error('Error fetching real-time messages:', error);
@@ -339,87 +342,119 @@ export default {
 
 
 
-
  
-
-
-
-
       const triggerFileInput = () => {
           console.log('triggerFileInput called');
           const fileInput = document.getElementById('fileInput');
           fileInput.click();
       };
 
-
+ 
 
       const handleFileUpload = async (event) => {
-          console.log('handleFileUpload called');
-          if (authUser.value && authUser.value.displayName && selectedGroup.value) {
-              const file = event.target.files[0];
-              if (file) {
-                  const storageChildRef = storageRef(storage, 'chat_images/' + file.name);
-                  try {
-                      await uploadBytes(storageChildRef, file);
-                      const downloadURL = await getDownloadURL(storageChildRef);
-                      const newMessage = {
-                          senderUID: authUser.value.uid,
-                          senderName: authUser.value.displayName,
-                          timestamp: serverTimestamp(),
-                          imageUrl: downloadURL,
-                      };
+            console.log('handleFileUpload called');
+            if (authUser.value && authUser.value.displayName && selectedGroup.value) {
+                const file = event.target.files[0];
+                if (file) {
+                    const storageChildRef = storageRef(storage, 'chat_images/' + file.name);
+                    try {
+                        await uploadBytes(storageChildRef, file);
+                        const downloadURL = await getDownloadURL(storageChildRef);
+                        const newMessage = {
+                            senderUID: authUser.value.uid,
+                            senderName: authUser.value.displayName,
+                            timestamp: serverTimestamp(),
+                            imageUrl: downloadURL,
+                        };
 
-                      const msgListRef = collection(db, 'Message', selectedGroup.value.id, 'msglist');
+                        const msgListRef = collection(db, 'Groups', selectedGroup.value.id, 'msgList');
 
-                      await addDoc(msgListRef, newMessage);
+                        // Add a new message document to Firestore
+                        await addDoc(msgListRef, newMessage);
 
-                      // Clear the input field after saving the message
-                      message.value = '';
-                      scrollToBottom();
+                        // Fetch the last message to get the correct timestamp
+                        const lastMessageQuery = query(msgListRef, orderBy('timestamp', 'desc'), limit(1));
+                        const lastMessageSnap = await getDocs(lastMessageQuery);
 
-                      console.log('Message uploaded successfully.');
-                  } catch (error) {
-                      console.error('Error uploading file:', error);
-                      
-                  }
-              } else {
-                  console.error('No file selected.');
-      
-              }
-          } else {
-              console.error('Invalid authUser data or selected chat.');
-      
-          }
-      };
-      
-      const sendMessage = async (text) => {
-          console.log("hi")
-          console.log(selectedGroup.value)
-          console.log(text)
+                        if (!lastMessageSnap.empty) {
+                            const lastMessageDoc = lastMessageSnap.docs[0].data();
+                            selectedGroup.value.lastMessage = {
+                                text: lastMessageDoc.text || '',
+                                senderName: lastMessageDoc.senderName || '',
+                                senderUID: lastMessageDoc.senderUID || '',
+                                timestamp: lastMessageDoc.timestamp || '',
+                            };
+                        }
 
-              try {
-              // Reference to the 'msgList' subcollection in the selected group
-              const msgListRef = collection(db, 'Groups', selectedGroup.value.id, 'msgList');
-              console.log(msgListRef);
+                        // Move the selected group to the top of the list
+                        const updatedGroups = groups.value.filter(group => group.id !== selectedGroup.value.id);
+                        updatedGroups.unshift(selectedGroup.value);
+                        groups.value = updatedGroups;
 
-              // Add a new message document to Firestore
-              const messageToSend = {
-                  text: text,
-                  senderUID: authUser.value.uid,
-                  senderName: authUser.value.displayName,
-                  timestamp: serverTimestamp()
-              };
-              await addDoc(msgListRef, messageToSend);
+                        // Clear the input field after saving the message
+                        message.value = '';
+                        scrollToBottom();
 
-              // Clear the input field after sending the message
-              newMessage.value = '';
-              // If you have a method to scroll to the bottom, call it here
-              // scrollToBottom();
-              } catch (error) {
-              console.error("Error sending message:", error);
-              }
+                        console.log('Message uploaded successfully.');
+                    } catch (error) {
+                        console.error('Error uploading file:', error);
+                    }
+                } else {
+                    console.error('No file selected.');
+                }
+            } else {
+                console.error('Invalid authUser data or selected chat.');
+            }
+        };
 
-      };
+            
+
+       
+
+        const sendMessage = async (text) => {
+            try {
+                // Reference to the 'msgList' subcollection in the selected group
+                const msgListRef = collection(db, 'Groups', selectedGroup.value.id, 'msgList');
+
+                // Add a new message document to Firestore
+                const messageToSend = {
+                    text: text,
+                    senderUID: authUser.value.uid,
+                    senderName: authUser.value.displayName,
+                    timestamp: serverTimestamp(),
+                };
+                await addDoc(msgListRef, messageToSend);
+
+                // Fetch the last message to get the correct timestamp
+                const lastMessageQuery = query(msgListRef, orderBy('timestamp', 'desc'), limit(1));
+                const lastMessageSnap = await getDocs(lastMessageQuery);
+
+                if (!lastMessageSnap.empty) {
+                    const lastMessageDoc = lastMessageSnap.docs[0].data();
+                    selectedGroup.value.lastMessage = {
+                        text: lastMessageDoc.text || '',
+                        senderName: lastMessageDoc.senderName || '',
+                        senderUID: lastMessageDoc.senderUID || '',
+                        timestamp: lastMessageDoc.timestamp || '',
+                    };
+                }
+
+                // Move the selected group to the top of the list
+                const updatedGroups = groups.value.filter(group => group.id !== selectedGroup.value.id);
+                updatedGroups.unshift(selectedGroup.value);
+                groups.value = updatedGroups;
+
+                // Clear the input field after sending the message
+                newMessage.value = '';
+ 
+                // scrollToBottom();
+            } catch (error) {
+                console.error("Error sending message:", error);
+            }
+        };
+
+
+
 
 
       const sendMessageOnClick = () => {
