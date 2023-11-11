@@ -53,6 +53,7 @@
                       <div v-for="message in selectedGroupMessages" :key="message.id">
                           <!-- For sent messages -->
                           <div v-if="message.senderUID === authUser?.uid" class="sent_msg">
+                            <img :src="getProfileImageUrl(message.senderUID)" alt="Profile Image" class="profile-image">
                               <div v-if="message.imageUrl"> 
                               <img :src="message.imageUrl" alt="Uploaded Image" class="uploaded-image">
                               </div>
@@ -64,15 +65,16 @@
 
                           <!-- For received messages -->
                           <div v-else class="received_msg">
+                            <img :src="getProfileImageUrl(message.senderUID)" alt="Profile Image" class="profile-image">
                               <div v-if="message.imageUrl">
                                   <img :src="message.imageUrl" alt="Uploaded Image" class="uploaded-image">
                               </div>
-                  <div v-else class="received_withd_msg">
+                              <div v-else class="received_withd_msg">
                           <p>{{ message.text }}</p>
                           <!--<span class="name-of-sender">{{ message.senderName }}</span>-->
                           </div>
                           </div>
-                  </div>
+                      </div>
 
 
                   <div class="type_msg">
@@ -124,6 +126,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import firebaseApp from '@/firebase.js';
 import NavigationBar from '../components/NavigationBar.vue';
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import defaultProfileImage from '@/assets/default-profile-image.jpg';
   
 
 const auth = getAuth(firebaseApp);
@@ -154,6 +157,7 @@ export default {
       const newMessage = ref('');
       const unsubscribeFetchMessages = ref(null);
       const selectedGroupName = ref('');
+      const groupMemberProfiles = ref({});  
 
 
 
@@ -257,7 +261,42 @@ export default {
           console.log(group.id)
           // Fetch new messages for the selected group
           fetchMessages(group.id);
+          console.log(groupData.groupMembers)
+
+          await fetchGroupMemberProfiles(groupData.groupMembers);
       };
+
+      const fetchGroupMemberProfiles = async (groupMembers) => {
+        const profiles = {};
+
+
+        for (const memberId of groupMembers) {
+          const userDocRef = doc(db, 'Users', memberId);
+          try {
+            const userDocSnap = await getDoc(userDocRef);
+            if (userDocSnap.exists()) {
+              const userData = userDocSnap.data();
+              profiles[memberId] = userData.profilePicture || defaultProfileImage; // Assume 'profileImage' is the field
+              console.log(`Fetched profile image for user ${memberId}:`, userData.profilePicture);
+            } else {
+              console.log(`User document for ${memberId} does not exist.`);
+              profiles[memberId] = defaultProfileImage;  // Fallback image URL
+            }
+          } catch (error) {
+            console.error('Error fetching user profile:', error);
+            profiles[memberId] = defaultProfileImage;  // Fallback image URL
+          }
+        }
+
+        groupMemberProfiles.value = profiles;
+        console.log('Group member profiles:', groupMemberProfiles.value);
+      };
+      const getProfileImageUrl = (userId) => {
+        return groupMemberProfiles.value[userId] || '@/assets/default-profile-image.png';
+      };
+
+
+
 
 
  
@@ -430,6 +469,8 @@ export default {
           scrollToBottom,
           formatMessageDate,
           unsubscribeFetchMessages,
+          fetchGroupMemberProfiles,
+          getProfileImageUrl,
       };
   },
 
