@@ -807,6 +807,7 @@ word-wrap: break-word;
 .type_msg {
 /* If you want the message typing area to stay at the bottom */
 height: 115px;
+padding-left: 25px;
 }
 
 
