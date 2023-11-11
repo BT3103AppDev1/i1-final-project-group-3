@@ -48,7 +48,11 @@
               <div class="msg_history">
                   <div class="message-list">
                   <div v-if="selectedGroup" class="group-chat-header">
+                    <div class="group-name-header">
                       <h1>{{ selectedGroupName }}</h1>
+
+                    </div>
+                      
 
                       <div v-for="message in selectedGroupMessages" :key="message.id">
                           <!-- For sent messages -->
@@ -549,6 +553,7 @@ max-width:100%;
 
 .bold-text {
 font-weight: bold;
+
 }
 
 .inbox_people {
@@ -563,7 +568,7 @@ height:1115px;
 
 .mesgs {
 float: left;
-padding: 30px 15px 0 25px;
+padding: 30px 15px 0 2px;
 width: 60%; 
 height: 1000px; 
 }
@@ -703,6 +708,21 @@ width: 100%;
   font-weight: bolder;
 }
 
+.group-name-header {
+  position: sticky;
+  top: 0;
+  left: 0px;
+  margin-left:-20px;
+  background: white;
+  height: 100px;
+  width: 864px;
+  z-index: 1;
+  border-bottom: 1px solid #c4c4c4;
+  text-align: left;
+  
+
+}
+
 
 
 
@@ -736,7 +756,7 @@ position: absolute;
 width: 57%;
 top: 1190px;
 margin-right: 5%;
-z-index: 1;
+
 
 }
 
@@ -754,7 +774,7 @@ margin-bottom: 1rem;
 
 .received_msg {
 display: inline-block;
-padding: 0 0 0 10px;
+padding: 0 0 0 25px;
 vertical-align: top;
 width: 92%;
  margin-bottom: 1rem;
