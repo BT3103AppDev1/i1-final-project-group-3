@@ -47,7 +47,9 @@
           <div class="mesgs">
               <div class="msg_history">
                   <div class="message-list">
-                  <div v-if="selectedGroup">
+                  <div v-if="selectedGroup" class="group-chat-header">
+                      <h1>{{ selectedGroupName }}</h1>
+
                       <div v-for="message in selectedGroupMessages" :key="message.id">
                           <!-- For sent messages -->
                           <div v-if="message.senderUID === authUser?.uid" class="sent_msg">
@@ -151,6 +153,7 @@ export default {
       const message = ref(''); 
       const newMessage = ref('');
       const unsubscribeFetchMessages = ref(null);
+      const selectedGroupName = ref('');
 
 
 
@@ -240,9 +243,18 @@ export default {
           });
       };
 
-      const selectGroup = (group) => {
+      const selectGroup = async (group) => {
           // Clear previous messages
           selectedGroup.value = group;
+
+          const groupDocRef = doc(db, 'Groups', group.id);
+          const groupDocSnap = await getDoc(groupDocRef);
+          const groupData = groupDocSnap.data();
+          console.log(groupData.title)
+          
+          console.log(group)
+          selectedGroupName.value = groupData.title;
+          console.log(group.id)
           // Fetch new messages for the selected group
           fetchMessages(group.id);
       };
@@ -407,7 +419,7 @@ export default {
           user,
           fetchMessages,
           selectGroup,
-
+          selectedGroupName,
           selectedGroupMessages,
           triggerFileInput,
           handleFileUpload,
