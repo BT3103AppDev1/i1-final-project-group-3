@@ -149,9 +149,8 @@ export default {
             });
 
             console.log('Group created successfully!');
-          } else {
-            console.error('No user is logged in.');
-          }
+            window.location.reload(); //reload the page to show the new group
+          }  
         } catch (error) {
           console.error("Error adding group:", error);
         }
