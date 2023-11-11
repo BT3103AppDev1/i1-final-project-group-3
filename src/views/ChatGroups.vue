@@ -43,10 +43,40 @@
           <div class="mesgs">
               <div class="msg_history">
                   <div class="message-list">
-                  <div v-if="selectedGroup">
+                  <div v-if="selectedGroup" class="group-chat-header">
+                    <div class="group-name-header">
+                      <h1>{{ selectedGroupName }}</h1>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="more-options" @click="openOptions">
+                      <circle cx="12" cy="12" r="9" stroke="#33363F" stroke-width="2"/>
+                      <circle cx="12" cy="18" r="0.5" fill="#33363F" stroke="#33363F"/>
+                      <path d="M12 16V14.5811C12 13.6369 12.6042 12.7986 13.5 12.5V12.5C14.3958 12.2014 15 11.3631 15 10.4189V9.90569C15 8.30092 13.6991 7 12.0943 7H12C10.3431 7 9 8.34315 9 10V10" stroke="#33363F" stroke-width="2"/>
+                      </svg>
+                    </div>
+                    <!---Options pop up--->
+                    <div class="popup" v-if="isOptionsPopupOpen">
+                      <h2 class="option-title">Members</h2>
+                      <div class="group-member-container">
+                        <div class="group-member" v-for="(name, userId) in groupMemberNames" :key="userId">
+                          <img :src="getProfileImageUrl(userId)" class="option-image">
+                          <div class="name-and-title">
+                            <h6>{{ name }}</h6>
+                            <span class="member-title">{{ isGroupAdmin(userId) ? 'Admin' : 'Member' }}</span>
+                          </div>
+
+                          
+                        </div>
+                      </div>
+                    </div>
+
+
+
+                      
+
                       <div v-for="message in selectedGroupMessages" :key="message.id">
                           <!-- For sent messages -->
                           <div v-if="message.senderUID === authUser?.uid" class="sent_msg">
+                            <img :src="getProfileImageUrl(message.senderUID)" alt="Profile Image" class="profile-image-self">
+                            
                               <div v-if="message.imageUrl"> 
                               <img :src="message.imageUrl" alt="Uploaded Image" class="uploaded-image">
                               </div>
@@ -58,15 +88,17 @@
 
                           <!-- For received messages -->
                           <div v-else class="received_msg">
+                            <img :src="getProfileImageUrl(message.senderUID)" alt="Profile Image" class="profile-image-members">
+                            <span class="members-name">{{ groupMemberNames[message.senderUID] }}</span>
                               <div v-if="message.imageUrl">
                                   <img :src="message.imageUrl" alt="Uploaded Image" class="uploaded-image">
                               </div>
-                  <div v-else class="received_withd_msg">
+                              <div v-else class="received_withd_msg">
                           <p>{{ message.text }}</p>
                           <!--<span class="name-of-sender">{{ message.senderName }}</span>-->
                           </div>
                           </div>
-                  </div>
+                      </div>
 
 
                   <div class="type_msg">
@@ -112,12 +144,13 @@
 
 <script>
 
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import { getFirestore, doc, getDocs, getDoc, collection, query, orderBy, limit, addDoc, serverTimestamp, onSnapshot  } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import firebaseApp from '@/firebase.js';
 import NavigationBar from '../components/NavigationBar.vue';
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import defaultProfileImage from '@/assets/default-profile-image.jpg';
   
 
 const auth = getAuth(firebaseApp);
@@ -147,6 +180,11 @@ export default {
       const message = ref(''); 
       const newMessage = ref('');
       const unsubscribeFetchMessages = ref(null);
+      const selectedGroupName = ref('');
+      const groupMemberProfiles = ref({});  
+      const groupMemberNames = ref({}); 
+      const isOptionsPopupOpen = ref(false);
+      const groupCreatorId = ref('');
 
 
 
@@ -165,11 +203,15 @@ export default {
               if (unsubscribeFetchMessages.value) {
                   unsubscribeFetchMessages.value();
               }
+              document.removeEventListener('click', handleClickOutside);
           });
 
          
           
           return unsubscribe;
+      });
+      nextTick(() => {
+        document.addEventListener('click', handleClickOutside);
       });
      
 
@@ -188,6 +230,7 @@ export default {
 
                   if (groupDocSnap.exists()) {
                   const groupData = groupDocSnap.data();
+                  groupCreatorId.value = groupData.uid;
                   const lastMessageQuery = query(groupMessageRef, orderBy('timestamp', 'desc'), limit(1));
                   const lastMessageSnap = await getDocs(lastMessageQuery);
 
@@ -243,12 +286,61 @@ export default {
           });
       };
 
-      const selectGroup = (group) => {
+      const selectGroup = async (group) => {
           // Clear previous messages
           selectedGroup.value = group;
+
+          const groupDocRef = doc(db, 'Groups', group.id);
+          const groupDocSnap = await getDoc(groupDocRef);
+          const groupData = groupDocSnap.data();
+          console.log(groupData.title)
+          
+          console.log(group)
+          selectedGroupName.value = groupData.title;
+          console.log(group.id)
           // Fetch new messages for the selected group
           fetchMessages(group.id);
+          console.log(groupData.groupMembers)
+
+          await fetchGroupMemberProfiles(groupData.groupMembers);
       };
+
+      const fetchGroupMemberProfiles = async (groupMembers) => {
+        const profiles = {};
+        const names = {};
+
+
+        for (const memberId of groupMembers) {
+          const userDocRef = doc(db, 'Users', memberId);
+          try {
+            const userDocSnap = await getDoc(userDocRef);
+            if (userDocSnap.exists()) {
+              const userData = userDocSnap.data();
+              profiles[memberId] = userData.profilePicture || defaultProfileImage; // Assume 'profileImage' is the field
+              names[memberId] = userData.firstName + " " + userData.lastName;
+              console.log(`Fetched profile image for user ${memberId}:`, userData.profilePicture);
+            } else {
+              console.log(`User document for ${memberId} does not exist.`);
+              profiles[memberId] = defaultProfileImage;  // Fallback image URL
+              names[memberId] = 'Unknown';
+            }
+          } catch (error) {
+            console.error('Error fetching user profile:', error);
+            profiles[memberId] = defaultProfileImage;  // Fallback image URL
+            names[memberId] = 'Unknown';
+          }
+        }
+
+        groupMemberProfiles.value = profiles;
+        groupMemberNames.value = names;
+        console.log('Group member profiles:', groupMemberProfiles.value);
+      };
+      const getProfileImageUrl = (userId) => {
+        return groupMemberProfiles.value[userId] || '@/assets/default-profile-image.png';
+      };
+
+
+
 
  
       const triggerFileInput = () => {
@@ -423,6 +515,49 @@ export default {
           }
       };
 
+      /* popup functions */
+      const openOptions = () => {
+        isOptionsPopupOpen.value = !isOptionsPopupOpen.value;
+        if (!isOptionsPopupOpen.value) {
+          // Use Vue.nextTick to wait for the next DOM update cycle
+          console.log("open")
+          nextTick(() => {
+            document.addEventListener('click', handleClickOutside);
+          });
+        } 
+
+        
+      };
+
+      const closeOptions = () => {
+        isOptionsPopupOpen.value = false;
+        document.removeEventListener('click', handleClickOutside);
+        console.log('closeOptions called');
+      };
+
+      const handleClickOutside = (event) => {
+        console.log("clickoutside")
+        const popupElement = document.querySelector('.popup'); // Use the correct selector for your popup
+        const moreOptionsElement = document.querySelector('.more-options'); // Selector for the button that triggers the popup
+
+        if (popupElement && !popupElement.contains(event.target) && !moreOptionsElement.contains(event.target)) {
+          closeOptions();
+          console.log("close")
+        }
+      };
+
+      const isGroupAdmin = (userId) => {
+        // Ensure both userId and groupCreatorId are defined and are strings
+        if (typeof userId === 'string' && typeof groupCreatorId.value === 'string') {
+          return userId.trim().toLowerCase() === groupCreatorId.value.trim().toLowerCase();
+        }
+        return false; // Default to false if userId or groupCreatorId.value is not a string
+      };
+
+
+
+      
+
       
 
 
@@ -442,7 +577,7 @@ export default {
           user,
           fetchMessages,
           selectGroup,
-
+          selectedGroupName,
           selectedGroupMessages,
           triggerFileInput,
           handleFileUpload,
@@ -453,6 +588,14 @@ export default {
           scrollToBottom,
           formatMessageDate,
           unsubscribeFetchMessages,
+          fetchGroupMemberProfiles,
+          getProfileImageUrl,
+          groupMemberNames,
+
+          openOptions,
+          isOptionsPopupOpen,
+          groupCreatorId,
+          isGroupAdmin,
       };
   },
 
@@ -522,6 +665,7 @@ max-width:100%;
 
 .bold-text {
 font-weight: bold;
+
 }
 
 .inbox_people {
@@ -536,7 +680,7 @@ height:1115px;
 
 .mesgs {
 float: left;
-padding: 30px 15px 0 25px;
+padding: 30px 15px 0 2px;
 width: 60%; 
 height: 1000px; 
 }
@@ -638,6 +782,72 @@ width: 100%;
   
  }
 
+ .profile-image-members {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-left: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+
+ }
+
+ .profile-image-self {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-left: 400px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+
+ }
+
+
+ .received_msg {
+  display: flex;
+  align-items: center; /* This aligns children (the image and name) vertically */
+  /* other styles... */
+}
+
+.members-name {
+  margin-left: 20px;
+  position: relative;
+  top: -20px; 
+  font-size: 18px;
+  color: #767676;
+  font-weight: bolder;
+}
+
+.group-name-header {
+  position: sticky;
+  top: 0;
+  left: 0px;
+  margin-left:-20px;
+  background: white;
+  height: 100px;
+  width: 864px;
+  z-index: 1;
+  border-bottom: 1px solid #c4c4c4;
+  text-align: left;
+  display: flex;
+  flex-direction: row;
+  
+
+}
+
+.more-options {
+  position: absolute;
+  left: 800px;
+  top: 50px;
+}
+
+
+
+
+
+
 
 
 
@@ -666,7 +876,7 @@ position: absolute;
 width: 57%;
 top: 1190px;
 margin-right: 5%;
-z-index: 1;
+
 
 }
 
@@ -684,14 +894,14 @@ margin-bottom: 1rem;
 
 .received_msg {
 display: inline-block;
-padding: 0 0 0 10px;
+padding: 0 0 0 25px;
 vertical-align: top;
 width: 92%;
  margin-bottom: 1rem;
 }
 
 .sent_msg p {
-background: #9bcbd7 none repeat scroll 0 0;
+background: #525fe1 none repeat scroll 0 0;
 border-radius: 0.4rem;
 font-size: 1rem;
 margin: 0; 
@@ -717,6 +927,7 @@ word-wrap: break-word;
 .type_msg {
 /* If you want the message typing area to stay at the bottom */
 height: 115px;
+padding-left: 25px;
 }
 
 
@@ -789,6 +1000,61 @@ h4 {
   color: #6a6868;
   font-size: 20px;    
   margin-top: -20px;
+}
+
+/* styling popup */
+.popup {
+  height: 700px;
+  display: flex;
+  flex-direction: column;
+
+  z-index: 10;
+}
+
+.group-member {
+  break-inside: avoid; /* Prevents breaking the content across columns */
+  page-break-inside: avoid; /* For older browsers */
+  -webkit-column-break-inside: avoid; /* For Safari */
+  margin-bottom: 30px; 
+  display: flex;
+  flex-direction: row;
+  
+
+}
+.group-member-container { /* New container for members to apply columns */
+  column-count: 2; /* Creates two columns */
+  column-gap: 50px;
+   /* Adjust the gap between columns */
+  justify-content: center;
+  
+}
+
+.option-image {
+  width: 10rem;
+  height: 10rem;
+  border-radius: 50%;
+  object-fit: cover;
+
+  border-radius: 50%;
+  margin-right: 20px;
+  margin-top: 10px;
+
+}
+
+h6 {
+  color: black;
+  font-size: 22px;
+  font-weight: bold;
+  margin-top: 40px;
+  margin-left: 20px;
+}
+
+.member-title {
+  color: #767575;
+  margin-top: 40px;
+  font-style: italic;
+  align-content: left;
+  
 }
 
 
