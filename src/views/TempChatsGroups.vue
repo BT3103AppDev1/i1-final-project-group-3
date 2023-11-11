@@ -78,7 +78,7 @@
 
 <script>
 
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { getFirestore, doc, getDocs, getDoc, collection, query, orderBy, limit, addDoc, serverTimestamp, onSnapshot  } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import firebaseApp from '@/firebase.js';
@@ -112,6 +112,7 @@ export default {
         const storage = getStorage(firebaseApp);
         const message = ref(''); 
         const newMessage = ref('');
+        const unsubscribeFetchMessages = ref(null);
 
 
 
@@ -126,10 +127,17 @@ export default {
                 }
             });
 
+            onUnmounted(() => {
+                if (unsubscribeFetchMessages.value) {
+                    unsubscribeFetchMessages.value();
+                }
+            });
+
            
             
             return unsubscribe;
         });
+       
 
         const fetchGroups = async (uid) => {
             const userDocRef = doc(db, 'Users', uid);
@@ -177,14 +185,21 @@ export default {
         };
 
 
-        const fetchMessages = async (groupId) => {
+        const fetchMessages = (groupId) => {
             const messagesRef = collection(db, 'Groups', groupId, 'msgList');
-            try {
-                const querySnapshot = await getDocs(messagesRef);
-                selectedGroupMessages.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            } catch (error) {
-                console.error('Error fetching messages:', error);
+            const q = query(messagesRef, orderBy('timestamp'));
+
+            // Detach any previous listener
+            if (unsubscribeFetchMessages.value) {
+                unsubscribeFetchMessages.value();
             }
+
+            // Setting up real-time listener
+            unsubscribeFetchMessages.value = onSnapshot(q, (querySnapshot) => {
+                selectedGroupMessages.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            }, (error) => {
+                console.error('Error fetching real-time messages:', error);
+            });
         };
 
         const selectGroup = (group) => {
@@ -317,21 +332,21 @@ export default {
         // Convert Firestore Timestamp to JavaScript Date object
         const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
 
-        if (isToday(date)) {
-            // Format as time if the date is today
-            return date.toLocaleTimeString('en-SG', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true // 24-hour format
-            });
-        } else {
-            // Format as date if the date is not today
-            return date.toLocaleDateString('en-SG', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit'
-            });
-        }
+            if (isToday(date)) {
+                // Format as time if the date is today
+                return date.toLocaleTimeString('en-SG', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true // 24-hour format
+                });
+            } else {
+                // Format as date if the date is not today
+                return date.toLocaleDateString('en-SG', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+                });
+            }
         };
     
 
@@ -344,6 +359,7 @@ export default {
 
 
         return {
+            authUser,
             groups,
             selectedGroup,
             selectGroup,
@@ -360,6 +376,7 @@ export default {
             message,
             scrollToBottom,
             formatMessageDate,
+            unsubscribeFetchMessages,
         };
     },
 
