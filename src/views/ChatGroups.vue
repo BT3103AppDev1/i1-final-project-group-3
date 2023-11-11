@@ -75,8 +75,12 @@
                       <div v-for="message in selectedGroupMessages" :key="message.id">
                           <!-- For sent messages -->
                           <div v-if="message.senderUID === authUser?.uid" class="sent_msg">
-                            <img :src="getProfileImageUrl(message.senderUID)" alt="Profile Image" class="profile-image-self">
-                            <span class="members-name">{{ groupMemberNames[message.senderUID] }}</span>
+                            <div class="name-and-image">
+                              <img :src="getProfileImageUrl(message.senderUID)" alt="Profile Image" class="profile-image-self">
+                              <span class="members-name">{{ groupMemberNames[message.senderUID] }}</span>
+
+                            </div>
+                            
                               <div v-if="message.imageUrl"> 
                               <img :src="message.imageUrl" alt="Uploaded Image" class="uploaded-image">
                               </div>
@@ -793,12 +797,16 @@ width: 100%;
 
  }
 
+ .name-and-image {
+  margin-left: 300px;
+ }
+
  .profile-image-self {
   width: 70px;
   height: 70px;
   border-radius: 50%;
   object-fit: cover;
-  margin-left: 400px;
+  
   margin-top: 10px;
   margin-bottom: 10px;
 
@@ -1004,7 +1012,7 @@ h4 {
 
 /* styling popup */
 .popup {
-  height: 700px;
+  height: 790px;
   display: flex;
   flex-direction: column;
 
