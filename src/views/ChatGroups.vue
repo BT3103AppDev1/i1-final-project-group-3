@@ -61,11 +61,20 @@
                           <div class="name-and-title">
                             <h6>{{ name }}</h6>
                             <span class="member-title">{{ isGroupAdmin(userId) ? 'Admin' : 'Member' }}</span>
+                            <button v-if="isCurrentUserAdmin && !isGroupAdmin(userId)" @click="confirmMemberRemoval(userId)">Remove</button>
                           </div>
 
                           
                         </div>
                       </div>
+                    </div>
+
+                    <!--- Confirmation Popup -->
+                    <div class="confirmation-popup" v-if="showConfirmationPopup">
+                      <p>Are you sure you want to remove this member?</p>
+                      <button @click="removeMember">Confirm</button>
+                      <button @click="cancelRemoval">Cancel</button>
+
                     </div>
 
 
@@ -148,7 +157,7 @@
 
 <script>
 
-import { ref, onMounted, onUnmounted, nextTick } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue';
 import { getFirestore, doc, getDocs, getDoc, collection, query, orderBy, limit, addDoc, serverTimestamp, onSnapshot  } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import firebaseApp from '@/firebase.js';
@@ -181,14 +190,19 @@ export default {
       const user = ref(null);
       const db = getFirestore(firebaseApp);
       const storage = getStorage(firebaseApp);
+
       const message = ref(''); 
       const newMessage = ref('');
       const unsubscribeFetchMessages = ref(null);
       const selectedGroupName = ref('');
       const groupMemberProfiles = ref({});  
       const groupMemberNames = ref({}); 
-      const isOptionsPopupOpen = ref(false);
       const groupCreatorId = ref('');
+
+      const isOptionsPopupOpen = ref(false);
+      const showConfirmationPopup = ref(false);
+      const memberToRemove = ref(null);
+      
 
 
 
@@ -234,7 +248,7 @@ export default {
 
                   if (groupDocSnap.exists()) {
                   const groupData = groupDocSnap.data();
-                  groupCreatorId.value = groupData.userid;
+                  
              
                   const lastMessageQuery = query(groupMessageRef, orderBy('timestamp', 'desc'), limit(1));
                   const lastMessageSnap = await getDocs(lastMessageQuery);
@@ -298,6 +312,9 @@ export default {
           const groupDocRef = doc(db, 'Groups', group.id);
           const groupDocSnap = await getDoc(groupDocRef);
           const groupData = groupDocSnap.data();
+
+          groupCreatorId.value = groupData.userid;
+          console.log(groupCreatorId.value)
           console.log(groupData.title)
           
           console.log(group)
@@ -553,9 +570,37 @@ export default {
 
       const isGroupAdmin = (userId) => {
         // Ensure both userId and groupCreatorId are defined and are strings
-
         return userId === groupCreatorId.value;
       };
+
+
+      /* Confirmation Popup*/
+      const isCurrentUserAdmin = computed(() => {
+        console.log("you are admin")
+        return isGroupAdmin(authUser.value.uid);
+      });
+
+      const confirmMemberRemoval = (userId) => {
+        memberToRemove.value = userId;
+        showConfirmationPopup.value = true;
+      };
+
+      const removeMember = async () => {
+        if (!memberToRemove.value) return;
+
+        // Logic to remove member from Firestore 'users' and 'groups' collections
+        // Make sure to handle this part securely and robustly
+
+        // Close both popups after removal
+        showConfirmationPopup.value = false;
+        isOptionsPopupOpen.value = false;
+      };
+
+    const cancelRemoval = () => {
+      // Reset removal state and close confirmation popup
+      memberToRemove.value = null;
+      showConfirmationPopup.value = false;
+    };
 
 
 
@@ -599,6 +644,12 @@ export default {
           isOptionsPopupOpen,
           groupCreatorId,
           isGroupAdmin,
+          showConfirmationPopup,
+          confirmMemberRemoval,
+          removeMember,
+          cancelRemoval,
+          isCurrentUserAdmin,
+
       };
   },
 
