@@ -62,7 +62,12 @@
                       <div class="group-member-container">
                         <div class="group-member" v-for="(name, userId) in groupMemberNames" :key="userId">
                           <img :src="getProfileImageUrl(userId)" class="option-image">
-                          <h6>{{ name }}</h6>
+                          <div class="name-and-title">
+                            <h6>{{ name }}</h6>
+                            <span class="member-title">{{ isGroupAdmin(userId) ? 'Admin' : 'Member' }}</span>
+                          </div>
+
+                          
                         </div>
                       </div>
                     </div>
@@ -183,6 +188,7 @@ export default {
       const groupMemberProfiles = ref({});  
       const groupMemberNames = ref({}); 
       const isOptionsPopupOpen = ref(false);
+      const groupCreatorId = ref('');
 
 
 
@@ -228,6 +234,7 @@ export default {
 
                   if (groupDocSnap.exists()) {
                   const groupData = groupDocSnap.data();
+                  groupCreatorId.value = groupData.uid;
                   const lastMessageQuery = query(groupMessageRef, orderBy('timestamp', 'desc'), limit(1));
                   const lastMessageSnap = await getDocs(lastMessageQuery);
 
@@ -504,6 +511,15 @@ export default {
         }
       };
 
+      const isGroupAdmin = (userId) => {
+        // Ensure both userId and groupCreatorId are defined and are strings
+        if (typeof userId === 'string' && typeof groupCreatorId.value === 'string') {
+          return userId.trim().toLowerCase() === groupCreatorId.value.trim().toLowerCase();
+        }
+        return false; // Default to false if userId or groupCreatorId.value is not a string
+      };
+
+
 
       
 
@@ -543,6 +559,8 @@ export default {
 
           openOptions,
           isOptionsPopupOpen,
+          groupCreatorId,
+          isGroupAdmin,
       };
   },
 
@@ -977,8 +995,11 @@ h4 {
 }
 
 .option-image {
-  width: 120px;
-  height: 120px;
+  width: 10rem;
+  height: 10rem;
+  border-radius: 50%;
+  object-fit: cover;
+
   border-radius: 50%;
   margin-right: 20px;
   margin-top: 10px;
@@ -991,6 +1012,14 @@ h6 {
   font-weight: bold;
   margin-top: 40px;
   margin-left: 20px;
+}
+
+.member-title {
+  color: #767575;
+  margin-top: 40px;
+  font-style: italic;
+  align-content: left;
+  
 }
 
 
