@@ -52,7 +52,7 @@
                 <div class="input_msg_write">
                   <img class="upload-icon" src="../assets/uploadphoto.png" alt="Upload Icon" @click="triggerFileInput" />
                   <input id="fileInput" ref="fileInput" type="file" style="display: none" @change="handleFileUpload" />
-                  <input @keyup.enter="saveMessage" v-model="newMessage" type="text" class="write_msg" placeholder="Type a message" />
+                  <input @keyup.enter="sendMessageOnClick" v-model="newMessage" type="text" class="write_msg" placeholder="Type a message" />
                   <img class="msg_send_btn" alt="" src="../assets/send.png" @click="sendMessageOnClick" />
                 </div>
               </div>
@@ -293,6 +293,7 @@ export default {
 
 
         const sendMessageOnClick = () => {
+            
             sendMessage(newMessage.value);
             console.log('sendMessageOnClick called');
         };
@@ -348,7 +349,8 @@ export default {
                 });
             }
         };
-    
+
+        
 
 
 
@@ -367,6 +369,7 @@ export default {
             user,
             fetchMessages,
             selectGroup,
+
             selectedGroupMessages,
             triggerFileInput,
             handleFileUpload,
@@ -386,6 +389,330 @@ export default {
 </script>
 
 <style scoped>
+
+html, body {
+  height: 1000px; 
+  margin: 0;
+  padding: 0;
+}
+
+
+.messaging {
+  flex: 1;
+  /* This makes sure that your .messaging div takes up all available space */
+
+}
+
+ 
+
+.container{
+  max-width:100%; 
+
+  margin:auto; 
+
+
+
+  }
+
+img{ 
+  max-width:100%;
+  }
+
+  
+  .profiles {
+    font-weight: 600;
+    font-size: 1.3rem; 
+    width: 10rem;
+    height: 3.6rem;
+    background-color: white;
+    border: 2px solid #525fe1;
+
+    
+    cursor: pointer;
+    margin-right: 3rem;
+    margin-left: 7rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+ 
+ 
+  }
+
+ 
+
+  .groups {
+    font-weight: 600;
+    font-size: 1.3rem; 
+    width: 10rem;
+    height: 3.6rem;
+    border: 2px solid #525fe1;
+    background-color: #525fe1;
+    color: white;
+    border-radius: 2rem;
+    cursor: pointer;
+ 
+ 
+  
+  } 
+
+.inbox_people {
+  background: #f8f8f8 none repeat scroll 0 0;
+  float: left;
+  overflow: hidden;
+  width: 40%; 
+  border-right:1px solid #c4c4c4;
+  
+}
+
+.inbox_msg {
+  border: 1px solid #c4c4c4;
+  clear: both;
+  overflow: hidden;
+  height: 1115px;   
+
+}
+
+.bold-text {
+  font-weight: bold;
+}
+
+
+ 
+
+.group-parent { 
+  width: 100%; 
+}
+
+.headind_srch{ 
+  padding: 1rem 1rem 1rem 1rem;
+  overflow:hidden; 
+  border-bottom:1px solid #c4c4c4;
+ 
+  }
+
+ 
+.chat_ib h5{ 
+  font-size:1.4rem; 
+  color:#464646; 
+  margin:0 0 8px 0;
+  }
+
+.chat_ib h5 span{ 
+  font-size: 1rem; 
+  margin-right: -1.1rem;
+  float:right;
+  
+  }
+
+.chat_ib p{ 
+  font-size:1.1rem; 
+  color:#989898;
+  margin:auto;
+ 
+   }
+
+.chat_img {
+  float: left;  
+  width: 5rem;
+  margin-right: 1.5rem;  
+}
+
+.individualProfile {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.chat_ib {
+  padding: 0;
+  width: calc(100% - 9rem); 
+}
+
+.chat_people {
+  overflow: hidden;
+  clear: both;
+  display: flex;  
+  align-items: center;  
+  height: 6rem;
+}
+
+.chat_list {
+  border-bottom: 1px solid #c4c4c4;
+  margin: 0;
+  padding: 1rem 1rem 1rem;
+  
+}
+
+.inbox_chat { 
+  height: 1280px; 
+  overflow-y: scroll; 
+  
+
+  }
+
+  .mesgs {
+  float: left;
+  padding: 30px 15px 0 25px;
+  width: 60%; 
+  height: 1000px; 
+ 
+  }
+
+  .noSelectedChat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+}
+
+.send-message-icon {
+  width: 6rem;  
+  height: 6rem;  
+  margin-top: 11rem;
+}
+
+.noChatSelectedHeader1 { 
+    margin-top: 3rem;
+  }
+
+.noChatSelectedHeader2 {
+    margin-top: -1rem;
+    font-size: 1.1rem;
+    color:darkgrey;
+  }
+
+   
+
+
+
+ 
+
+.input_msg_write input {
+  background: rgba(0, 0, 0, 0) none repeat scroll 0 0;
+  color: #4c4c4c;
+  font-size: 1rem;
+  min-height: 2rem;
+  width: 98%;
+  border: 1px solid #ccc;
+  border-radius: 0.6rem;
+  margin-right: 1rem;
+  
+}
+ 
+.input_msg_write {
+  position: absolute;
+  width: 57%;
+  top: 1190px;
+  margin-right: 5%;
+  z-index: 1;
+
+}
+
+  
+.msg_history {
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 0.6rem;
+  overflow-x: hidden;
+}
+
+.msg_history::-webkit-scrollbar {
+  width: 0.6rem;  
+}
+
+.msg_history::-webkit-scrollbar-thumb {
+  background-color: #888;  
+  border-radius: 0.2rem; 
+}
+
+.msg_history::-webkit-scrollbar-track {
+  background-color: #f1f1f1;  
+}
+
+  
+ 
+.sent_msg {
+  float: right;
+  width: 60%;
+  clear: both; 
+  margin-bottom: 1rem;
+  
+}
+
+.received_msg {
+  display: inline-block;
+  padding: 0 0 0 10px;
+  vertical-align: top;
+  width: 92%;
+   margin-bottom: 1rem;
+ }
+
+  .sent_msg p {
+  background: #9bcbd7 none repeat scroll 0 0;
+  border-radius: 0.4rem;
+  font-size: 1rem;
+  margin: 0; 
+  color:#fff;
+  padding: 1rem 2rem 1rem 0.5rem;
+  width:100%;
+  word-wrap: break-word;
+}
+ 
+
+ .received_withd_msg p {
+  background: rgb(238, 236, 236) none repeat scroll 0 0;
+  border-radius: 0.4rem;
+  color: #646464;
+  font-size: 1rem;
+  margin: 0;
+  padding: 1rem 2rem 1rem 0.5rem;
+  width: 100%;
+  word-wrap: break-word;
+} 
+
+.name-of-sender {
+  color: #747474;
+  display: block;
+  font-size: 0.8rem;
+  margin-bottom: 0.7rem;
+}
+
+.type_msg {
+  /* If you want the message typing area to stay at the bottom */
+ height: 115px;
+}
+
+
+ 
+
+.msg_send_btn {
+  cursor: pointer;
+  height: 1.7rem;
+  position: absolute;
+  top: 0.8rem;
+  right: 6rem;
+
+}
+
+
+.upload-icon {
+  cursor: pointer;
+  height: 1.7rem;
+  position: absolute;
+  top: 0.8rem;
+  right: 3rem;
+}
+
+.uploaded-image {
+  max-width: 10rem; 
+  max-height: 10rem; 
+}
+
+
+
+
 h5, p {
     color: black;
 }
