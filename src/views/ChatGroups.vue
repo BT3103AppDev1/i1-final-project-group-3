@@ -54,7 +54,7 @@
                           <!-- For sent messages -->
                           <div v-if="message.senderUID === authUser?.uid" class="sent_msg">
                             <img :src="getProfileImageUrl(message.senderUID)" alt="Profile Image" class="profile-image-self">
-                            <span class="self-name">{{ groupMemberNames[message.senderUID] }}</span>
+                            
                               <div v-if="message.imageUrl"> 
                               <img :src="message.imageUrl" alt="Uploaded Image" class="uploaded-image">
                               </div>
@@ -687,13 +687,25 @@ width: 100%;
 
  }
 
- .self-name, 
- .members-name {
-  color: #464646;
-  margin-bottom: 30px;
-  
 
- }
+ .received_msg {
+  display: flex;
+  align-items: center; /* This aligns children (the image and name) vertically */
+  /* other styles... */
+}
+
+.members-name {
+  margin-left: 20px;
+  position: relative;
+  top: -20px; 
+  font-size: 18px;
+  color: #767676;
+  font-weight: bolder;
+}
+
+
+
+
 
 
 
