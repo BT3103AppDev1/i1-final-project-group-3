@@ -7,7 +7,7 @@
                <br>
                <br>
                 <label for="groupTitle" class = "groupTitle"><b>Group Title:</b></label> 
-                <input v-model="groupTitle" id="groupTitle" type="text" name="groupTitle" placeholder="example: GPA 6.0" required = ""> 
+                <input v-model="groupTitle"  :class="{ 'highlight-error': isDuplicateGroup }" id="groupTitle" type="text" name="groupTitle" placeholder="example: GPA 6.0" required = "" > 
                 <br>
                 <br>                
                 <label for="groupDescription" class = "groupDescription"><b>Group Description:</b></label>  <br>
@@ -47,6 +47,7 @@ export default {
         uid: "",
         user:false,
         username: "",
+        isDuplicateGroup: false,
       }
     },
 
@@ -72,36 +73,47 @@ export default {
        this.$emit("close-form");
       },
 
+ 
+
       async submitForm() {
-        const db = getFirestore(firebaseApp);
-        let uid = this.uid;
-        let groupTitle = document.getElementById("groupTitle").value;
-        let groupDescription = document.getElementById("groupDescription").value;
-        let membersCount = parseInt(document.getElementById("membersCount").value);
+        try {
+          const db = getFirestore(firebaseApp);
 
-        //alert("Creating your new group: " + groupTitle)
+          // Retrieve input values using v-model instead of direct DOM access
+          let groupTitle = this.groupTitle;
+          let groupDescription = this.groupDescription;
+          let membersCount = parseInt(this.membersCount);
 
-        try{
+          // Check if a group with the same title already exists
+          const querySnapshot = await getDocs(collection(db, 'Groups'));
+          const duplicateGroup = querySnapshot.docs.some(doc => doc.data().title === groupTitle);
+
+          if (duplicateGroup) {
+            this.isDuplicateGroup = true;
+            // Display an error or handle the case where a group with the same title already exists
+            window.alert("Error: Group with the same title already exists! Please change your group title");
+            this.isDuplicateGroup = false;
+            
+            return;
+          }
+
           const auth = getAuth();
           const user = auth.currentUser;
 
-          const userDocRef = doc(db, "Users", uid);
-          const userDocument = await getDoc(userDocRef);
-
-          const userData = userDocument.data();
-   
-          let username = (userData.firstName) + " " + (userData.lastName);
-    
-
           if (user) {
+            const userDocRef = doc(db, "Users", this.uid);
+            const userDocument = await getDoc(userDocRef);
+            const userData = userDocument.data();
+            let username = userData.firstName + " " + userData.lastName;
+
             const newPost = {
-              title: this.groupTitle,
-              groupDescription: this.groupDescription,
-              members: parseInt(this.membersCount),
+              title: groupTitle,
+              groupDescription: groupDescription,
+              members: membersCount,
               username: username,
-              userid : this.uid,
+              userid: this.uid,
               groupMembers: [this.uid],
-            }
+            };
 
             const groupDocRef = await addDoc(collection(db, 'Groups'), newPost);
             const newGroupId = groupDocRef.id;
@@ -112,45 +124,43 @@ export default {
             // Add an empty document with at least an empty object to 'msgList' subcollection
             await addDoc(msgListRef, {});
 
-            
-
             if (userDocument.exists() && userDocument.data().hasOwnProperty('activeGroups')) {
               // The user already has an activeGroups field, update it
-              console.log("new field being created")
               await updateDoc(userDocRef, {
-                activeGroups: arrayUnion(newGroupId)
-               
+                activeGroups: arrayUnion(newGroupId),
               });
             } else {
               // The user does not have an activeGroups field, set it
-              console.log("adding into field")
               await setDoc(userDocRef, {
-                activeGroups: [newGroupId]
-                
+                activeGroups: [newGroupId],
               }, { merge: true }); // Merge to ensure we don't overwrite existing fields
             }
 
- 
+            // Clear the form
+            this.groupTitle = "";
+            this.groupDescription = "";
+            this.membersCount = null;
 
-            document.getElementById('myform').reset();
-
-              this.$emit("create-group", {
-                title: this.groupTitle,
-                groupDescription: this.groupDescription,
-                members: this.membersCount
-            }); 
+            // Emit an event or perform other actions as needed
+            this.$emit("create-group", {
+              title: groupTitle,
+              groupDescription: groupDescription,
+              members: membersCount,
+            });
 
             console.log('Group created successfully!');
           } else {
             console.error('No user is logged in.');
-        }
-
-          
-        }
-        catch(error) {
-          console.error("Error adding group: ", error);
           }
+        } catch (error) {
+          console.error("Error adding group:", error);
+        }
       },
+
+
+
+
+    
 
     }
 }
@@ -353,10 +363,7 @@ input, textarea {
   width: 80%;
   z-index: 1000; 
 }
-
-
-
-
+ 
  
 .close {
   color: #aaa;
