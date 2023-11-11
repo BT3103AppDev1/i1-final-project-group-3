@@ -76,7 +76,7 @@
                           <!-- For sent messages -->
                           <div v-if="message.senderUID === authUser?.uid" class="sent_msg">
                             <img :src="getProfileImageUrl(message.senderUID)" alt="Profile Image" class="profile-image-self">
-                            
+                            <span class="members-name">{{ groupMemberNames[message.senderUID] }}</span>
                               <div v-if="message.imageUrl"> 
                               <img :src="message.imageUrl" alt="Uploaded Image" class="uploaded-image">
                               </div>
