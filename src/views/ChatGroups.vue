@@ -234,7 +234,8 @@ export default {
 
                   if (groupDocSnap.exists()) {
                   const groupData = groupDocSnap.data();
-                  groupCreatorId.value = groupData.uid;
+                  groupCreatorId.value = groupData.userid;
+             
                   const lastMessageQuery = query(groupMessageRef, orderBy('timestamp', 'desc'), limit(1));
                   const lastMessageSnap = await getDocs(lastMessageQuery);
 
@@ -304,7 +305,7 @@ export default {
           console.log(group.id)
           // Fetch new messages for the selected group
           fetchMessages(group.id);
-          console.log(groupData.groupMembers)
+          
 
           await fetchGroupMemberProfiles(groupData.groupMembers);
       };
@@ -552,10 +553,8 @@ export default {
 
       const isGroupAdmin = (userId) => {
         // Ensure both userId and groupCreatorId are defined and are strings
-        if (typeof userId === 'string' && typeof groupCreatorId.value === 'string') {
-          return userId.trim().toLowerCase() === groupCreatorId.value.trim().toLowerCase();
-        }
-        return false; // Default to false if userId or groupCreatorId.value is not a string
+
+        return userId === groupCreatorId.value;
       };
 
 
@@ -914,7 +913,7 @@ border-radius: 0.4rem;
 font-size: 1rem;
 margin: 0; 
 color:#fff;
-padding: 1rem 2rem 1rem 0.5rem;
+padding: 1rem 2rem 1rem 2rem;
 width:100%;
 word-wrap: break-word;
 }
@@ -926,7 +925,7 @@ border-radius: 0.4rem;
 color: #646464;
 font-size: 1rem;
 margin: 0;
-padding: 1rem 2rem 1rem 0.5rem;
+padding: 1rem 2rem 1rem 2rem;
 width: 100%;
 word-wrap: break-word;
 } 
@@ -1038,8 +1037,8 @@ h4 {
 }
 
 .option-image {
-  width: 10rem;
-  height: 10rem;
+  width: 9rem;
+  height: 9rem;
   border-radius: 50%;
   object-fit: cover;
 
@@ -1051,15 +1050,16 @@ h4 {
 
 h6 {
   color: black;
-  font-size: 22px;
+  font-size: 30px;
   font-weight: bold;
   margin-top: 40px;
   margin-left: 20px;
+  margin-bottom: 25px;
 }
 
 .member-title {
   color: #767575;
-  margin-top: 40px;
+  font-size: 20px;
   font-style: italic;
   align-content: left;
   
