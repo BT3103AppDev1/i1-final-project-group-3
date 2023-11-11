@@ -124,11 +124,7 @@ export default {
         }
       });
 
-      onUnmounted(() => {
-        if (selectedChat.value.unsubscribe) {
-            selectedChat.value.unsubscribe();
-        }
-      });
+
        
       return unsubscribe;
     });
