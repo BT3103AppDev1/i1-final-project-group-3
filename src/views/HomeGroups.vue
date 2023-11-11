@@ -163,6 +163,9 @@
             alert('Group is full! Please create a new group or join another group :)');
             return;
           }
+          alert('Successfully joined group!');
+
+
 
           this.groups = this.groups.map(group => {
             if (group.id === groupId) {
