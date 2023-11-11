@@ -17,8 +17,7 @@ import PostDetails from '@/views/PostDetails.vue'
 import ChatGroups from '@/views/ChatGroups.vue'
 import CreatePost from '@/views/CreatePost.vue'
 import Chat from '@/views/PrivateChat.vue'
-import tempChats from '@/views/tempChats.vue'
-import tempChatsGroups from '@/views/tempChatsGroups.vue'
+
 
  
 
@@ -135,18 +134,6 @@ const routes =[
     component: Chat,
 
   },
-
-  {
-    path: '/tempChats',
-    name: 'TempChats',
-    component: tempChats,
-  }, 
-
-  {
-    path: '/tempChatsGroups',
-    name: 'TempChatsGroups',
-    component: tempChatsGroups,
-  }
 
 
 
