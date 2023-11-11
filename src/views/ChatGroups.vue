@@ -50,8 +50,25 @@
                   <div v-if="selectedGroup" class="group-chat-header">
                     <div class="group-name-header">
                       <h1>{{ selectedGroupName }}</h1>
-
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="more-options" @click="openOptions">
+                      <circle cx="12" cy="12" r="9" stroke="#33363F" stroke-width="2"/>
+                      <circle cx="12" cy="18" r="0.5" fill="#33363F" stroke="#33363F"/>
+                      <path d="M12 16V14.5811C12 13.6369 12.6042 12.7986 13.5 12.5V12.5C14.3958 12.2014 15 11.3631 15 10.4189V9.90569C15 8.30092 13.6991 7 12.0943 7H12C10.3431 7 9 8.34315 9 10V10" stroke="#33363F" stroke-width="2"/>
+                      </svg>
                     </div>
+                    <!---Options pop up--->
+                    <div class="popup" v-if="isOptionsPopupOpen">
+                      <h2 class="option-title">Members</h2>
+                      <div class="group-member-container">
+                        <div class="group-member" v-for="(name, userId) in groupMemberNames" :key="userId">
+                          <img :src="getProfileImageUrl(userId)" class="option-image">
+                          <h6>{{ name }}</h6>
+                        </div>
+                      </div>
+                    </div>
+
+
+
                       
 
                       <div v-for="message in selectedGroupMessages" :key="message.id">
@@ -126,7 +143,7 @@
 
 <script>
 
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import { getFirestore, doc, getDocs, getDoc, collection, query, orderBy, limit, addDoc, serverTimestamp, onSnapshot  } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import firebaseApp from '@/firebase.js';
@@ -165,6 +182,7 @@ export default {
       const selectedGroupName = ref('');
       const groupMemberProfiles = ref({});  
       const groupMemberNames = ref({}); 
+      const isOptionsPopupOpen = ref(false);
 
 
 
@@ -183,11 +201,15 @@ export default {
               if (unsubscribeFetchMessages.value) {
                   unsubscribeFetchMessages.value();
               }
+              document.removeEventListener('click', handleClickOutside);
           });
 
          
           
           return unsubscribe;
+      });
+      nextTick(() => {
+        document.addEventListener('click', handleClickOutside);
       });
      
 
@@ -451,6 +473,40 @@ export default {
           }
       };
 
+      /* popup functions */
+      const openOptions = () => {
+        isOptionsPopupOpen.value = !isOptionsPopupOpen.value;
+        if (!isOptionsPopupOpen.value) {
+          // Use Vue.nextTick to wait for the next DOM update cycle
+          console.log("open")
+          nextTick(() => {
+            document.addEventListener('click', handleClickOutside);
+          });
+        } 
+
+        
+      };
+
+      const closeOptions = () => {
+        isOptionsPopupOpen.value = false;
+        document.removeEventListener('click', handleClickOutside);
+        console.log('closeOptions called');
+      };
+
+      const handleClickOutside = (event) => {
+        console.log("clickoutside")
+        const popupElement = document.querySelector('.popup'); // Use the correct selector for your popup
+        const moreOptionsElement = document.querySelector('.more-options'); // Selector for the button that triggers the popup
+
+        if (popupElement && !popupElement.contains(event.target) && !moreOptionsElement.contains(event.target)) {
+          closeOptions();
+          console.log("close")
+        }
+      };
+
+
+      
+
       
 
 
@@ -484,6 +540,9 @@ export default {
           fetchGroupMemberProfiles,
           getProfileImageUrl,
           groupMemberNames,
+
+          openOptions,
+          isOptionsPopupOpen,
       };
   },
 
@@ -719,8 +778,16 @@ width: 100%;
   z-index: 1;
   border-bottom: 1px solid #c4c4c4;
   text-align: left;
+  display: flex;
+  flex-direction: row;
   
 
+}
+
+.more-options {
+  position: absolute;
+  left: 800px;
+  top: 50px;
 }
 
 
@@ -781,7 +848,7 @@ width: 92%;
 }
 
 .sent_msg p {
-background: #9bcbd7 none repeat scroll 0 0;
+background: #525fe1 none repeat scroll 0 0;
 border-radius: 0.4rem;
 font-size: 1rem;
 margin: 0; 
@@ -880,6 +947,50 @@ h4 {
   color: #6a6868;
   font-size: 20px;    
   margin-top: -20px;
+}
+
+/* styling popup */
+.popup {
+  height: 700px;
+  display: flex;
+  flex-direction: column;
+
+  z-index: 10;
+}
+
+.group-member {
+  break-inside: avoid; /* Prevents breaking the content across columns */
+  page-break-inside: avoid; /* For older browsers */
+  -webkit-column-break-inside: avoid; /* For Safari */
+  margin-bottom: 30px; 
+  display: flex;
+  flex-direction: row;
+  
+
+}
+.group-member-container { /* New container for members to apply columns */
+  column-count: 2; /* Creates two columns */
+  column-gap: 50px;
+   /* Adjust the gap between columns */
+  justify-content: center;
+  
+}
+
+.option-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  margin-right: 20px;
+  margin-top: 10px;
+
+}
+
+h6 {
+  color: black;
+  font-size: 22px;
+  font-weight: bold;
+  margin-top: 40px;
+  margin-left: 20px;
 }
 
 
