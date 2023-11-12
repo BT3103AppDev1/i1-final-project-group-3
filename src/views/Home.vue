@@ -79,7 +79,9 @@ export default defineComponent({
         const searchRegex = new RegExp(searchQuery.value, 'i');
         const isCurrentUser = user.value && profile.uid === user.value.uid;
 
-        return (!isCurrentUser) && (searchRegex.test(profile.name) || searchRegex.test(profile.major) || searchRegex.test(profile.description) || searchRegex.test(profile.yearOfStudy));
+        return (!isCurrentUser) && (searchRegex.test(profile.name) || searchRegex.test(profile.major) || 
+          searchRegex.test(profile.description) || searchRegex.test(profile.currentCourses.join(', ')) || 
+          searchRegex.test(profile.yearOfStudy));
       });
 
       return filtered;
@@ -175,6 +177,7 @@ export default defineComponent({
             yearOfStudy: yearOfStudy,
             description: profileData.description,
             profilePicture: profileData.profilePicture || defaultProfilePicture,
+            currentCourses: profileData.currentCourses || [],
           });
         });
 
