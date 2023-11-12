@@ -93,6 +93,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import firebaseApp from '@/firebase.js';
 import NavigationBar from '../components/NavigationBar.vue';
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import defaultProfileImage from '../assets/default-profile-image.jpg';
 
     
 const db = getFirestore(firebaseApp);
@@ -170,9 +171,9 @@ export default {
               const contactDocSnap = await getDoc(contactDocRef);
 
               if (contactDocSnap.exists()) {
-                profilePicUrl = contactDocSnap.data().profilePicture || '../assets/default-profile-image.jpg';
+                profilePicUrl = contactDocSnap.data().profilePicture || defaultProfileImage;
               } else {
-                profilePicUrl = '../assets/default-profile-image.jpg';
+                profilePicUrl = defaultProfileImage;
               }
 
               const lastMessageQuery = query(messagesRef, orderBy('timestamp', 'desc'), limit(1));

@@ -109,6 +109,7 @@ import { useRoute } from 'vue-router';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import firebaseApp from '@/firebase.js';
 import { useRouter } from 'vue-router';
+import defaultProfilePicture from '../assets/default-profile-image.jpg';
 
 
 export default defineComponent({
