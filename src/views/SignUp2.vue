@@ -48,10 +48,10 @@
       />
       <div class="gender-radio">
           <label class="radio-option">
-              <input type="radio" value="male" v-model="gender" class="radio-input" required=""/>Males
+              <input type="radio" value="male" v-model="gender" class="radio-input" required=""/>Male
           </label>
           <label class="radio-option">
-              <input type="radio" value="female" v-model="gender" class="radio-input"/>Females
+              <input type="radio" value="female" v-model="gender" class="radio-input"/>Female
           </label>
           <label class="radio-option">
               <input type="radio" value="others" v-model="gender" class="radio-input"/>Others
