@@ -1,38 +1,44 @@
 <template>
-    <NavigationBar/>
-    <div class="create-post">
-        <div class="new-post">New Post</div>
-        <div class="header">Header</div>
-        <input v-model="header" class="enter-the-header" id="enter-the-header" placeholder="Enter the header here...">
-        <div class="description">Description</div>
-        <textarea v-model="description" class="enter-the-description" id= "enter-the-description" placeholder="Enter the description here..."></textarea>
-        <button class="cancelCreatepost" @click="navigateToPost">Cancel</button>   
-        <button type = "submit" id="post-button" @click="submitForm">Post</button>
-            
-    </div>
+  <NavigationBar/>
 
-    <div class="popup" v-show="showErrorDialog" ref="errorDialog">
-        <div class="popup-content">
-            <h2>Error: Missing Header / Description </h2>
-            <div class="error-popup-bar-line" />
-            <div class="action-buttons">
-              <button style="width: 10.75rem; height: 2.75rem;" @click="closeErrorDialog">Cancel</button>
-            </div>
-        </div>
-    </div>
+  <!-- Create post fields -->
+  <div class="create-post">
+    <div class="new-post">New Post</div>
+    <div class="header">Header</div>
+    <input v-model="header" class="enter-the-header" id="enter-the-header" placeholder="Enter the header here...">
+    
+    <!-- Description textarea -->
+    <div class="description">Description</div>
+    <textarea v-model="description" class="enter-the-description" id= "enter-the-description" placeholder="Enter the description here..."></textarea>
+    
+    <!-- Cancel and Post buttons -->
+    <button class="cancelCreatepost" @click="navigateToPost">Cancel</button>   
+    <button type = "submit" id="post-button" @click="submitForm">Post</button>           
+  </div>
 
-    <div class="popup" v-show="showConfirmationDialog" ref="confirmationDialog">
-        <div class="popup-content">
-            <h2>Confirmation</h2>
-            <div class="popup-bar-line" />
-            <h3 style="font-size: 2.19rem; color: var(--color-darkgray-200); font-family: var(--font-josefin-sans); font-weight: 300;">Are you sure you want to publish this post?</h3>
-            <div class="action-buttons">
-              <button id= "confirmConfirmation" @click="confirmSubmitForm">Confirm</button>
-              <button id= "cancelConfirmation" @click="closeConfirmationDialog">Cancel</button>
-            </div>
-        </div>
+  <!-- Error dialog -->
+  <div class="popup" v-show="showErrorDialog" ref="errorDialog">
+    <div class="popup-content">
+      <h2>Error: Missing Header / Description </h2>
+      <div class="error-popup-bar-line" />
+      <div class="action-buttons">
+        <button style="width: 10.75rem; height: 2.75rem;" @click="closeErrorDialog">Cancel</button>
+      </div>
     </div>
+  </div>
 
+  <!-- Confirmation dialog -->
+  <div class="popup" v-show="showConfirmationDialog" ref="confirmationDialog">
+    <div class="popup-content">
+      <h2>Confirmation</h2>
+      <div class="popup-bar-line" />
+      <h3 style="font-size: 2.19rem; color: var(--color-darkgray-200); font-family: var(--font-josefin-sans); font-weight: 300;">Are you sure you want to publish this post?</h3>
+      <div class="action-buttons">
+        <button id= "confirmConfirmation" @click="confirmSubmitForm">Confirm</button>
+        <button id= "cancelConfirmation" @click="closeConfirmationDialog">Cancel</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -79,29 +85,36 @@ export default {
     },
 
     methods: {
+      // Function to navigate to post page
       navigateToPost() {
         this.$router.push({ name: 'Post' });
       },
 
+      // Function to get the current date
       getCurrentDate() {
         const currentDate = new Date();
         return currentDate;
       },
 
+      // Function to submit form.
       submitForm() {
+        // If header or description is empty, error dialog will be shown
         if (!this.header || !this.description) {
           this.showErrorDialog = true;
-        } else {
+        } else { // confirmation dialog will be shown
           this.showConfirmationDialog = true;
         }
       },
 
       async confirmSubmitForm() {
-        console.log("enter")
         const db = getFirestore(firebaseApp);
         let uid = this.uid;
+
+        // Get the header and description values from the input fields
         let header = document.getElementById("enter-the-header").value;
         let description = document.getElementById("enter-the-description").value;
+
+        // Initialize variables for post data
         let index = 0;
         let likes = 0;
         let comments = 0;
@@ -114,7 +127,8 @@ export default {
           const userData = userDocument.data();
 
           const postCollectionRef = collection(userDocRef, "Posts");
-          // Get the documents in the 'Posts' subcollection
+
+          // Get the documents in the 'Posts' subcollection to determine the user's post index
           const querySnapshot = await getDocs(postCollectionRef);
           const numberOfPosts = querySnapshot.size;
           let username = (userData.firstName) + " " + (userData.lastName);
@@ -124,6 +138,7 @@ export default {
           const overallNumberOfPosts = overallQuerySnapshot.size;
 
           if (user) {
+            // Create a new post object with relevant data that will be stored in the firebase
             const newPost = {
               overallPostIndex : overallNumberOfPosts + 1,
               userPostindex : numberOfPosts + 1,
@@ -137,8 +152,12 @@ export default {
               datetime: this.getCurrentDate()
             }
 
+            // Add the new post to the user's 'Posts' subcollection
             const postDocRef = await addDoc(postCollectionRef, newPost);
+
+            // Retrieve the document ID of the newly created post to ensure consistent document id for the "Post" collection 
             const docId = postDocRef.id;
+            // Set the new post in the 'Posts' collection for all users
             const allPostsRef = await setDoc(doc(db, "Posts", docId), newPost);
 
             const updatePost = {
@@ -146,29 +165,31 @@ export default {
             }
             const updatePostDocRef = await updateDoc(doc(postCollectionRef, docId), updatePost);
             const updateAllPostsRef = await updateDoc(doc(db, "Posts", docId), updatePost);
-
+            
+            // Close the confirmation dialog
             this.closeConfirmationDialog()
+
+            // Navigate to the newly created post
             this.navigateToPost()
             console.log('Post created successfully!');
           } else {
             console.error('No user is logged in.');
         }
 
-          
         }
         catch(error) {
           console.error("Error adding document: ", error);
-          }
+        }
       },
 
       openErrorDialog() {
-      this.showErrorDialog = true;
+        this.showErrorDialog = true;
 
-      // Add a click event listener to the entire document when the popup is open
-      document.addEventListener("click", this.closeErrorDialogOnClickOutside);
+        // Add a click event listener to the entire document when the popup is open
+        document.addEventListener("click", this.closeErrorDialogOnClickOutside);
 
-      // Prevent the click event on the button from propagating and immediately closing the popup
-      event.stopPropagation();
+        // Prevent the click event on the button from propagating and immediately closing the popup
+        event.stopPropagation();
       },
 
       closeErrorDialog() {
@@ -185,13 +206,13 @@ export default {
       },
 
       openConfirmationDialog() {
-      this.showConfirmationDialog = true;
+        this.showConfirmationDialog = true;
 
-      // Add a click event listener to the entire document when the popup is open
-      document.addEventListener("click", this.closeConfirmationDialogOnClickOutside);
+        // Add a click event listener to the entire document when the popup is open
+        document.addEventListener("click", this.closeConfirmationDialogOnClickOutside);
 
-      // Prevent the click event on the button from propagating and immediately closing the popup
-      event.stopPropagation();
+        // Prevent the click event on the button from propagating and immediately closing the popup
+        event.stopPropagation();
       },
 
       closeConfirmationDialog() {

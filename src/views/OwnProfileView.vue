@@ -2,47 +2,53 @@
   <NavigationBar/>
   <div class="posts-format">
 
-    
+    <!-- Edit Profile button with click event -->
     <button class="editprofilebutton" @click="navigateToEditProfile">Edit Profile</button>
 
     <div class="own-profile-page-body">
+      <!-- User information section -->
       <div id="fullname" class="users-name" v-if="user">name</div>
       <img :src="uploadedImage || defaultImage" class="profilepicture-icon" alt="Profile Picture"/>
       <div id="post-content" class="tabcontent" style="display: block;">
       
-        
+        <!-- Post list section -->
         <div class="post-list">
           <div v-for="post in posts" :key="post.id" class="post">
             <div class="post-rectangle-border" />
-              <div class="post-content-container">
-                <p class="post-header-tag">
-                <b class="post-title" style="font-weight: bold;">{{ post.header }}</b>
-                </p>
-                <p class="post-header-tag">
-                <b>&nbsp;</b>
-                </p>
-                <p class="post-header-tag">
-                <span>{{ post.description }}</span>
-                </p>
-              </div>
+            <div class="post-content-container">
+              <p class="post-header-tag">
+              <b class="post-title" style="font-weight: bold;">{{ post.header }}</b>
+              </p>
+              <p class="post-header-tag">
+              <b>&nbsp;</b>
+              </p>
+              <p class="post-header-tag">
+              <span>{{ post.description }}</span>
+              </p>
+            </div>
+
+            <!-- Edit and delete buttons for each post -->
             <button class="edit-button" @click="navigateToEditPost(post.id)"></button>
             <button class="delete-button" type="button" @click="removeUserPost(post.id), removeFromPost(post.id)"></button>
           </div>
         </div>
-
         
       </div>
 
+      <!-- About section with user information -->
       <div class="about-description-format">
         <div id="about-content" class="tabcontent">
           <div class="basic-information-header">BASIC INFORMATION</div>
           <div class="academic-information-header">ACADEMIC INFORMATION</div>
           
+          <!-- About section with user information -->
           <div class="basic-information-container">
             <p class="basic-information" id="gender">Gender: Female</p>
             <p class="basic-information" id="email">Email: test@gmail.com</p>
             <p class="basic-information" id="phoneNumber">Phone number: +65 8123 4567</p>
           </div>
+
+          <!-- Display academic information -->
           <div class="academic-container">
             <p class="basic-information" id="major">Major: Business Analytics</p>
             <p class="basic-information" id="year">Year: 2</p>
@@ -56,16 +62,18 @@
           </div>
         </div>
       </div>
+
+      <!-- Group section with user's active groups -->
       <div id="group-content" class="tabcontent">
         <div v-for="group in activeGroups" :key="group.id" class="group-format">
           <b class="group-name">{{ group.name }}</b>
           <div class="group-description">{{ group.description }}</div>
-
         </div>
       </div>
   
     <hr>
-
+    
+    <!-- Tab navigation buttons -->
     <div class="tabs">
       <button id="posts-tab" class= "tablinks" v-on:click="openSection(event, 'post-content')"> Posts
           <img class="post-icon" alt="" src="../assets/post-icon.png" />
@@ -140,11 +148,13 @@
 
     methods: {
       async fetchUserData(useremail) {
+        // Fetch user data from Firestore based on the user's UID
         let userDocument = await getDoc(doc(db, "Users",this.uid));
         let userData = userDocument.data();
+
+        // Extract user details from the retrieved data
         let firstName = (userData.firstName)
         let lastName = (userData.lastName)
-
         let gender = (userData.gender)
         let major = (userData.major)
         let email = (userData.email)
@@ -152,15 +162,18 @@
         let phoneNumber = (userData.phoneNumber)
         let yearOfStudy = (userData.yearOfStudy)
         let currentCourse = (userData.currentCourses)
-        //modifying picture
+        
+        // Retrieve the user's profile picture URL
         let profilePicture = (userData.photoURL)
 
+        // Check if a custom profile picture is available
         if (userData.profilePicture) {
             this.uploadedImage = userData.profilePicture;
           } else {
             console.log('Profile picture not found in user data');
         }
-      
+
+        // Update HTML elements with user information
         document.getElementById("fullname").innerHTML = (String(firstName) + " " + String(lastName));
         document.getElementById("email").innerHTML = ("Email: " + String(email))
         document.getElementById("gender").innerHTML = ("Gender: " + String(gender))
@@ -207,8 +220,8 @@
 
       async fetchUserPosts(useremail) {
         try {
+          // Get Firestore instance
           const db = getFirestore(firebaseApp)
-          // const postsSnapshot = await getDocs(collection(db, 'Users', this.uid, "Posts"));
 
           // Get a reference to the "Posts" collection
           const postsRef = collection(db, 'Users', this.uid, "Posts");
@@ -216,8 +229,8 @@
           // Create a query to order the posts by date
           const postQuery = query(postsRef, orderBy('overallPostIndex', 'desc')); // Replace 'date' with the actual date field in your documents
 
+          // Fetch user's posts and add them to the 'posts' array
           const postsSnapshot = await getDocs(postQuery);
-
           postsSnapshot.docs.map( (document) => {
             let post = document.data();
             post.id = document.id;
@@ -234,7 +247,7 @@
         if (this.uid) {
           try {
             
-            // Delete the document
+            // Delete the user's post document
             deleteDoc(doc(db,"Users",this.uid,"Posts",documentId)).then(() => {
               console.log("Data deleted successfully");
 
@@ -256,7 +269,7 @@
     async removeFromPost(documentId) {
         if (this.uid) {
           try {
-            // Delete the document
+            // Delete the post document
             deleteDoc(doc(db,"Posts", documentId)).then(() => {
               console.log("Data deleted successfully");
 
@@ -276,7 +289,7 @@
     },
       
     openSection(evt, section) {
-        // Declare all variables
+        // Function to toggle between tab sections
         var i, tabcontent, tablinks;
 
         // Get all elements with class="tabcontent" and hide them
@@ -299,10 +312,12 @@
       },
 
       navigateToEditProfile() {
+        // Function to navigate to the EditProfile route
         this.$router.push({ name: 'EditProfile' });
       },
 
       navigateToEditPost(postId) {
+        // Function to navigate to the EditPost route with postId as a parameter
         this.$router.push({ name: 'EditPost', params: { postId: postId } });
       }
 

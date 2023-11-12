@@ -1,68 +1,99 @@
 <template>
-    <NavigationBar/>
+  <NavigationBar/>
+  <!-- Post header -->
+  <div class="header">Post: {{ this.header }}</div>
+  
+  <!-- Comments header -->
+  <div class="comments-header">Comments</div>
 
-    <div class="header">Post: {{ this.header }}</div>
-    <div class="comments-header">Comments</div>
+  <!-- Post list -->
+  <div class="post-list">
+      <div class="post">
+          <div class="section">
+              <!-- Display number of comments -->
+              <div class="comments">Comments: {{ this.commentsNo }}</div>
 
-    <div class="post-list">
-        <div class="post">
-            <div class="section">
-                <div class="comments">Comments: {{ this.commentsNo }}</div>
-                <button class="likeButton" @click="likePost(this.$route.params.postId, this.uid)">
+              <!-- Like button with SVG icon -->
+              <button class="likeButton" @click="likePost(this.$route.params.postId, this.uid)">
                 <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-thumb-up" width="30" height="30" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none" id ="thumbs-up"></path>
                     <path d="M7 11v8a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1v-7a1 1 0 0 1 1 -1h3a4 4 0 0 0 4 -4v-1a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1 -2 2h-7a3 3 0 0 1 -3 -3"></path>
                 </svg>
-                </button>
-                <div class="likes" id="likes">Likes: {{ this.likes }}</div>
+              </button>
 
-            </div>
-            <img class="post-user-image" :src="this.userImage" />
-            <div class="upper-section">
-                <button class="user-name" @click="navigateToUserProfile(this.postUserId)">{{ this.postUsername }}</button>
-                <div class="post-date">{{ this.date }}</div>
-            </div>
-            <div class="post-content-container">
-                <p class="post-content">{{ this.description }}</p>
-            </div>
-            <div class="post-divider-line" />
+              <!-- Display number of likes -->
+              <div class="likes" id="likes">Likes: {{ this.likes }}</div>
+          </div>
+
+          <!-- Post User information section -->
+          <img class="post-user-image" :src="this.userImage" />
+          <div class="upper-section">
+            <!-- Button to navigate to Post User's Profile Page -->
+            <button class="user-name" @click="navigateToUserProfile(this.postUserId)">{{ this.postUsername }}</button>
             
-        </div>
+            <!-- Display post date -->
+            <div class="post-date">{{ this.date }}</div>
+          </div>
 
-        <div class="comment-list">
-            <div v-for="comment in comments" :key="comment.id" class="allComments">
-                <img class="comment-user-image" :src="comment.commentUserImage" />
-                <div class="comment-upper-section">
-                    <button class="comment-user-name" @click="navigateToUserProfile(comment.commentUserId)">{{ comment.commentUserName }}</button>
-                    <div class="comment-date">{{ comment.date }}</div>
-                    <button v-if="comment.commentUserId === uid" class="delete-button" type="button" @click="removeComment(comment.id)">Delete</button>
-                </div>
-                <div class="comment-content-container">
-                    <p class="comment-content">{{ comment.comment }}</p>
-                </div>
-                <div class="comment-divider-line" />
+          <!-- Post content section -->
+          <div class="post-content-container">
+            <!-- Display post content -->
+            <p class="post-content">{{ this.description }}</p>
+          </div>
+
+          <!-- Divider line between posts -->
+          <div class="post-divider-line" />
+          
+      </div>
+
+      <!-- Comments section -->
+      <div class="comment-list">
+        <!-- Loop through comments and display each -->
+        <div v-for="comment in comments" :key="comment.id" class="allComments">
+            <img class="comment-user-image" :src="comment.commentUserImage" />
+            <div class="comment-upper-section">
+              <!-- Display comment author's username and button to navigate to their profile page-->
+              <button class="comment-user-name" @click="navigateToUserProfile(comment.commentUserId)">{{ comment.commentUserName }}</button>
+
+              <!-- Display comment date -->
+              <div class="comment-date">{{ comment.date }}</div>
+
+              <!-- Delete button for comment (visible only to the author) -->
+              <button v-if="comment.commentUserId === uid" class="delete-button" type="button" @click="removeComment(comment.id)">Delete</button>
+            </div>
+            
+
+            <div class="comment-content-container">
+              <!-- Display comment content -->
+              <p class="comment-content">{{ comment.comment }}</p>
             </div>
 
+            <!-- Divider line between comments -->
+            <div class="comment-divider-line" />
         </div>
+      </div>
 
-        <div class="comment-bar">
-            <input @keyup.enter="confirmSubmitForm" v-model="comment" id = "enter-your-comment" class="enter-your-comment" placeholder="Enter your comment here...">
-            <button class="comment-button" @click="submitForm">Comment</button>
-        </div>
+      <!-- Comment input bar -->
+      <div class="comment-bar">
+        <!-- Input field for entering comments -->
+        <input @keyup.enter="confirmSubmitForm" v-model="comment" id = "enter-your-comment" class="enter-your-comment" placeholder="Enter your comment here...">
 
-        <div class="popup" v-show="showErrorDialog" ref="errorDialog">
+        <!-- Button to submit a comment -->
+        <button class="comment-button" @click="submitForm">Comment</button>
+      </div>
+
+      <!-- Error popup for empty comment -->
+      <div class="popup" v-show="showErrorDialog" ref="errorDialog">
         <div class="popup-content">
-            <h2>Error: Please enter something. </h2>
-            <div class="error-popup-bar-line" />
-            <div class="action-buttons">
-              <button style="width: 10.75rem; height: 2.75rem;" @click="closeErrorDialog">Cancel</button>
-            </div>
+          <h2>Error: Please enter something. </h2>
+          <div class="error-popup-bar-line" />
+          <div class="action-buttons">
+             <!-- Button to close the error popup -->
+            <button style="width: 10.75rem; height: 2.75rem;" @click="closeErrorDialog">Cancel</button>
         </div>
+      </div>
     </div>
-
-    </div>
-    
-
+  </div>
 </template>
 
 <script>
@@ -116,73 +147,90 @@ export default {
     },
 
     methods: {
+      
+      // Navigation function to redirect to post details page
+      navigateToPostDetails (postId) {
+        this.$router.push({ name: 'PostDetails', params: { postId: postId }});
+      },
+
+      // Navigation function to redirect to user profile page
+      navigateToUserProfile (userId) {
+        this.$router.push({ name: 'profile', params: { userId }});
+
+      },
+
+      // Function to get the current date
+      getCurrentDate() {
+          const currentDate = new Date();
+          return currentDate;
+      },
+
+      async fetchPostData() {
+        const db = getFirestore(firebaseApp);
         
-        navigateToPostDetails (postId) {
-          this.$router.push({ name: 'PostDetails', params: { postId: postId }});
-        },
+        // Get postId from route parameters
+        const postId = this.$route.params.postId;
 
-        navigateToUserProfile (userId) {
-          this.$router.push({ name: 'profile', params: { userId }});
+        // Extract post data
+        let postDocument = await getDoc(doc(db, "Posts", postId));
+        let postData = postDocument.data();
 
-        },
+        // Retrieving userid of the post author.
+        let postUserId = (postData.userid);
 
-        getCurrentDate() {
-            const currentDate = new Date();
-            return currentDate;
-        },
+        // Get user document related to the post
+        let userDocument = await getDoc(doc(db, "Users", postUserId));
+        let userData = userDocument.data();
 
-        async fetchPostData() {
+        // Set data to component properties
+        this.header = (postData.header)
+        this.description = (postData.description)
+        this.date = (postData.date)
+        this.likes = (postData.likes)
+        this.postUsername = (postData.username)
+        this.userImage = (userData.profilePicture || defaultImage);
+        this.postUserId = postUserId;
+        this.commentsNo = (postData.comments);
+      },
+
+      async fetchComments(){
+          try {
             const db = getFirestore(firebaseApp);
+            // Get postId from route parameters
             const postId = this.$route.params.postId;
-            let postDocument = await getDoc(doc(db, "Posts", postId));
-            let postData = postDocument.data();
-            let postUserId = (postData.userid);
+            // Get reference to the "Comments" collection for the post
+            const commentsRef = collection(db, "Posts", postId, "Comments");
+            // Create a query to order comments by datetime in descending order
+            const commentsQuery = query(commentsRef, orderBy('datetime', 'desc'));
+            // Get comments snapshot
+            const commentsSnapshot = await getDocs(commentsQuery);
 
-            let userDocument = await getDoc(doc(db, "Users", postUserId));
-            let userData = userDocument.data();
-
-            this.header = (postData.header)
-            this.description = (postData.description)
-            this.date = (postData.date)
-            this.likes = (postData.likes)
-            this.postUsername = (postData.username)
-            this.userImage = (userData.profilePicture || defaultImage);
-            this.postUserId = postUserId;
-            this.commentsNo = (postData.comments);
-
-            
-
-        },
-
-        async fetchComments(){
-            try {
-                const db = getFirestore(firebaseApp);
-                const postId = this.$route.params.postId;
-                const commentsRef = collection(db, "Posts", postId, "Comments");
-                const commentsQuery = query(commentsRef, orderBy('datetime', 'desc'));
-                const commentsSnapshot = await getDocs(commentsQuery);
-
-                for (const document of commentsSnapshot.docs) {
-                    let comment = document.data();
-                    let currentUserDocument = await getDoc(doc(db, "Users", this.uid));
-                    comment.id = document.id;
-                    this.comments.push(comment);
-                }
-
-            } catch (error) {
-                console.error("Error fetching comments: ", error);
+            // Loop through comments and add them to the component's comments array
+            for (const document of commentsSnapshot.docs) {
+                let comment = document.data();
+                let currentUserDocument = await getDoc(doc(db, "Users", this.uid));
+                // Add comment id and push it to the comments array
+                comment.id = document.id;
+                this.comments.push(comment);
             }
-        },
+          } catch (error) {
+              console.error("Error fetching comments: ", error);
+          }
+      },
 
-        submitForm() {
-            if (!this.comment) {
-                this.showErrorDialog = true;
-            } else {
-                this.confirmSubmitForm()
-            }
-        },
-
-        openErrorDialog() {
+      // Function to handle form submission
+      submitForm() {
+        if (!this.comment) {
+          // Show error dialog if the comment is empty
+          this.showErrorDialog = true;
+        } else {
+          // Proceed to confirm form submission
+          this.confirmSubmitForm()
+        }
+      },
+      
+      // Function to open the error dialog
+      openErrorDialog() {
         this.showErrorDialog = true;
 
         // Add a click event listener to the entire document when the popup is open
@@ -190,252 +238,275 @@ export default {
 
         // Prevent the click event on the button from propagating and immediately closing the popup
         event.stopPropagation();
-        },
+      },
 
-        closeErrorDialog() {
-            this.showErrorDialog = false;
-            document.removeEventListener("click", this.closeErrorDialogOnClickOutside);
-        },
+      // Function to close the error dialog
+      closeErrorDialog() {
+        // Hide error dialogu
+        this.showErrorDialog = false;
+        document.removeEventListener("click", this.closeErrorDialogOnClickOutside);
+      },
 
-        closeErrorDialogOnClickOutside(event) {
-            // Check if the click event occurred outside of the popup
-            const popup = this.$refs.errorDialog;
-            if (popup && !popup.contains(event.target)) {
-            this.closeErrorDialog();
-            }
-        },
+      // Function to close the error dialog when clicked outside
+      closeErrorDialogOnClickOutside(event) {
+        // Check if the click event occurred outside of the popup
+        const popup = this.$refs.errorDialog;
+        if (popup && !popup.contains(event.target)) {
+          this.closeErrorDialog();
+        }
+      },
 
-        async confirmSubmitForm() {
-            const db = getFirestore(firebaseApp);
-            const postId = this.$route.params.postId;
-            let uid = this.uid;
-            let comment = document.getElementById("enter-your-comment").value;
+      async confirmSubmitForm() {
+          const db = getFirestore(firebaseApp);
 
-            try{
+          // Get postId from route parameters
+          const postId = this.$route.params.postId;
+          let uid = this.uid;
+
+          // Get comment from the input field
+          let comment = document.getElementById("enter-your-comment").value;
+
+          try{
             const auth = getAuth();
             const user = auth.currentUser;
 
             const userDocument = await getDoc(doc(db, "Users", uid));
             const userData = userDocument.data();
             
+            // Retrieving full name and user image of comment author
             let fullname = (userData.firstName) + " " + (userData.lastName)
             let userImage =  (userData.profilePicture || defaultImage)
 
             if (user) {
-                const updates = {
-                    comment: comment,
-                    commentUserId: this.uid,
-                    commentUserName: fullname,
-                    commentUserImage:userImage,
-                    date: this.getCurrentDate().toDateString(),
-                    datetime: this.getCurrentDate(),
 
-                }
+              // Comment details that will be stored in firebase
+              const updates = {
+                comment: comment,
+                commentUserId: this.uid,
+                commentUserName: fullname,
+                commentUserImage:userImage,
+                date: this.getCurrentDate().toDateString(),
+                datetime: this.getCurrentDate(),
 
+              }
 
-                const commentsCollectionRef = collection(db, "Posts", postId, "Comments");
+              // Add comment to the "Comments" collection for the post
+              const commentsCollectionRef = collection(db, "Posts", postId, "Comments");
+              const postDocRef = await addDoc(commentsCollectionRef, updates);
 
-                const postDocRef = await addDoc(commentsCollectionRef, updates);
+              // Get comment document id to ensure that the id is the same in "Posts" collection
+              const docId = postDocRef.id;
 
-                const docId = postDocRef.id;
-                const allPostsRef = await setDoc(
-                doc(db, "Users", this.postUserId, "Posts", postId, "Comments", docId),
-                updates
-                );
+              // Set comment data in the user's "Posts" collection
+              const allPostsRef = await setDoc(
+              doc(db, "Users", this.postUserId, "Posts", postId, "Comments", docId),
+              updates
+              );
 
-                console.log('Commented!');
+              // Update comment count for the post
+              const currentPostSnap = await getDoc(doc(db, "Posts", postId));
+              const postData = currentPostSnap.data();
+              const currentComments = postData.comments;
 
-                const currentPostSnap = await getDoc(doc(db, "Posts", postId));
-                const postData = currentPostSnap.data();
-                const currentComments = postData.comments;
+              const commentUpdates = {
+                comments: currentComments + 1
+              }
 
-                const commentUpdates = {
-                    comments: currentComments + 1
-                }
-                console.log(this.postUserId)
+              // Update documents on the comment count for the post
+              await updateDoc(doc(db, "Posts", postId), commentUpdates);
+              await updateDoc(doc(db, "Users", this.postUserId, "Posts", postId),commentUpdates);
 
-                await updateDoc(doc(db, "Posts", postId), commentUpdates);
-                await updateDoc(doc(db, "Users", this.postUserId, "Posts", postId),commentUpdates);
+              location.reload();
 
-
-                location.reload();
-
-                } else {
-                console.error('No user is logged in.');
+            } else {
+              console.error('No user is logged in.');
             }
-
-            
-            }catch(error) {
-                console.error("Error updating document: ", error);
-                }
-        },
-        
-        async likePost (postId, userId) {
+          }catch(error) {
+            console.error("Error updating document: ", error);
+          }
+      },
+      
+      async likePost (postId, userId) {
         const db = getFirestore(firebaseApp);
+
+        // Reference to the "Likes" collection for the specific post
         const postRef = collection(db, "Posts", postId, "Likes");   
-        const postSnap = await getDocs(postRef)
+        const postSnap = await getDocs(postRef);
+
+        // Get the likes count for the post
         const likesCount = await getCountFromServer(postRef);
 
+        // Check if there are existing likes
         if (likesCount.data().count > 0 ) {
-            for (const document of postSnap.docs) {
+          // Loop through the existing likes
+          for (const document of postSnap.docs) {
             const likeData = document.data();
             console.log(likeData);
             const userLiked = likeData.userId;
 
             if (userLiked == userId) {
-                const unlikePost = async (postId, userId) => {
-                    const db = getFirestore(firebaseApp);
-                    const currentPostRef = doc(db, "Posts", postId);
-                    const currentPostSnap = await getDoc(currentPostRef);
-                    const postData = currentPostSnap.data();
-                    const userPostedId = postData.userid;
+               // Function to unlike the post
+              const unlikePost = async (postId, userId) => {
+                const db = getFirestore(firebaseApp);
+                const currentPostRef = doc(db, "Posts", postId);
+                const currentPostSnap = await getDoc(currentPostRef);
+                const postData = currentPostSnap.data();
+                const userPostedId = postData.userid;
 
-                    const postRef = collection(db, "Posts", postId, "Likes");   
-                    const postSnap = await getDocs(postRef)
-                    const likesCount = await getCountFromServer(postRef);
+                const postRef = collection(db, "Posts", postId, "Likes");   
+                const postSnap = await getDocs(postRef)
+                const likesCount = await getCountFromServer(postRef);
 
-                    if (likesCount.data().count > 0 ) {
-                        for (const document of postSnap.docs) {
-                        const likeData = document.data();
-                        console.log(likeData);
-                        const userLiked = likeData.userId;
+                // Check if there are existing likes
+                if (likesCount.data().count > 0 ) {
+                  // Loop through the existing likes
+                  for (const document of postSnap.docs) {
+                    const likeData = document.data();
+                    console.log(likeData);
+                    const userLiked = likeData.userId;
 
-                        if (userLiked == userId) {
-                            deleteDoc(doc(db,"Users", userPostedId ,"Posts" , postId, "Likes", document.id))
-                            deleteDoc(doc(db,"Posts", postId, "Likes", document.id))
-                            console.log("User has unlike the post");
-                            const currentLikes = postData.likes;
-                            const updates = {
-                            likes: currentLikes - 1
-                            };
-                            // Update the like count for the post
-                            await updateDoc(doc(db, "Posts", postId), updates);
-                            await updateDoc(doc(db, "Users", userPostedId, "Posts", postId), updates);
-                            location.reload()
-                            break;
+                    // Check if the current user has already liked the post
+                    if (userLiked == userId) {
+                      // Delete the like document from the "Likes" collection
+                      deleteDoc(doc(db,"Users", userPostedId ,"Posts" , postId, "Likes", document.id))
+                      deleteDoc(doc(db,"Posts", postId, "Likes", document.id))
+                      console.log("User has unlike the post");
+            
+                      const currentLikes = postData.likes;
+                      const updates = {
+                      likes: currentLikes - 1
+                      };
 
-                        } else {
-                            console.log("You did not like this post.")
-                        }
-                        } 
-                    } 
-                
-                }
-                unlikePost(postId, userId)
-                break;
-            } else {
+                      // Update the like count for the post
+                      await updateDoc(doc(db, "Posts", postId), updates);
+                      await updateDoc(doc(db, "Users", userPostedId, "Posts", postId), updates);
+                      
+                      location.reload()
+                      break;
+
+                    } else {
+                      console.log("You did not like this post.")
+                    }
+                  } 
+                } 
+              
+              }
+              unlikePost(postId, userId)
+              break;
+            } else { // If the user hasn't liked the post, proceed to like it
                 const currentPostRef = doc(db, "Posts", postId);
 
                 const currentPostSnap = await getDoc(currentPostRef);
                 const postData = currentPostSnap.data();
                 const userPostedId = postData.userid;
-                console.log(userPostedId)
+
+                // Increment the likes count for the post
                 const currentLikes = postData.likes;
                 const updates = {
-                likes: currentLikes + 1,
+                  likes: currentLikes + 1,
                 };
 
                 // Update the like count for the post
                 await updateDoc(doc(db, "Posts", postId), updates);
-                console.log("userPostedId: " + userPostedId)
-                console.log("postId: " + postId)
                 await updateDoc(doc(db, "Users", userPostedId, "Posts", postId), updates);
 
                 // Add a like document to the "likes" collection to track the user's like
                 const likesDoc = await addDoc(collection(db, "Posts", postId, "Likes"), {
-                postId: postId,
-                userId: userId,
-                isLiked: true,
+                  postId: postId,
+                  userId: userId,
+                  isLiked: true,
                 });
 
                 const docId = likesDoc.id;
+                // Set like data in the user's "Posts" collection
                 const allPostsRef = await setDoc(doc(db, "Users", userPostedId, "Posts", postId, "Likes", docId), {
-                postId: postId,
-                userId: userId,
-                isLiked: true,
+                  postId: postId,
+                  userId: userId,
+                  isLiked: true,
                 });
                 console.log("Liked!");
                 location.reload()
             }
             } 
-        } else {
+        } else { // If there are no existing likes, proceed to like the post
             const currentPostRef = doc(db, "Posts", postId);
             
+            // Get data for the current post
             const currentPostSnap = await getDoc(currentPostRef);
             const postData = currentPostSnap.data();
+
+            // Get user id who posted the post
             const userPostedId = postData.userid;
             const currentLikes = postData.likes;
             const updates = {
-            likes: currentLikes + 1
+              likes: currentLikes + 1
             };
-            console.log(userPostedId)
-
             // Update the like count for the post
             await updateDoc(doc(db, "Posts", postId), updates);
             await updateDoc(doc(db, "Users", userPostedId, "Posts", postId), updates);
 
             // Add a like document to the "likes" collection to track the user's like
             const likesDoc = await addDoc(collection(db, "Posts", postId, "Likes"), {
-            postId: postId,
-            userId: userId,
-            isLiked: true,
+              postId: postId,
+              userId: userId,
+              isLiked: true,
             });
 
             const docId = likesDoc.id;
             const allPostsRef = await setDoc(doc(db, "Users", userPostedId, "Posts", postId, "Likes", docId), {
-            postId: postId,
-            userId: userId,
-            isLiked: true,
+              postId: postId,
+              userId: userId,
+              isLiked: true,
             });
 
             console.log("Liked!");
             location.reload()
         }
         
-        },
+      },
 
-    
-        async removeComment(documentId) {
-          const db = getFirestore(firebaseApp);
+  
+      async removeComment(documentId) {
+        const db = getFirestore(firebaseApp);
 
-          try {
-              // Get the document data to check if the user is the owner of the comment
-              const commentDoc = await getDoc(doc(db, "Posts", this.$route.params.postId, "Comments", documentId));
-              const commentData = commentDoc.data();
+        try {
+            // Get the document data to check if the user is the owner of the comment
+            const commentDoc = await getDoc(doc(db, "Posts", this.$route.params.postId, "Comments", documentId));
+            const commentData = commentDoc.data();
 
-              // Check if the current user is the owner of the comment
-              if (commentData.commentUserId === this.uid) {
-                  const currentPostSnap = await getDoc(doc(db, "Posts", this.$route.params.postId));
-                  const postData = currentPostSnap.data();
+            // Check if the current user is the owner of the comment
+            if (commentData.commentUserId === this.uid) {
+                const currentPostSnap = await getDoc(doc(db, "Posts", this.$route.params.postId));
+                const postData = currentPostSnap.data();
 
-                  const currentComments = postData.comments;
+                const currentComments = postData.comments;
 
-                  const updates = {
-                      comments: currentComments - 1
-                  };
+                const updates = {
+                  comments: currentComments - 1
+                };
 
-                  // Update the comment count for the post
-                  await updateDoc(doc(db, "Posts", this.$route.params.postId), updates);
-                  await updateDoc(doc(db, "Users", this.postUserId, "Posts", this.$route.params.postId), updates);
+                // Update the comment count for the post
+                await updateDoc(doc(db, "Posts", this.$route.params.postId), updates);
+                await updateDoc(doc(db, "Users", this.postUserId, "Posts", this.$route.params.postId), updates);
 
-                  // Delete the document
-                  await deleteDoc(doc(db, "Users", this.postUserId, "Posts", this.$route.params.postId, "Comments", documentId));
-                  await deleteDoc(doc(db, "Posts", this.$route.params.postId, "Comments", documentId));
+                // Delete the document
+                await deleteDoc(doc(db, "Users", this.postUserId, "Posts", this.$route.params.postId, "Comments", documentId));
+                await deleteDoc(doc(db, "Posts", this.$route.params.postId, "Comments", documentId));
 
-                  console.log("Comment deleted successfully");
-                  // Reload the page
-                  location.reload();
-              } else {
-                  alert("You are not allowed to delete this comment.");
-              ed
-              }
-          } catch (error) {
-              console.error('Error deleting comment:', error);
-          }
+                console.log("Comment deleted successfully");
+                
+                // Reload the page
+                location.reload();
+            } else {
+                alert("You are not allowed to delete this comment.");
+            }
+        } catch (error) {
+            console.error('Error deleting comment:', error);
+        }
       }
 
 
-    }
+  }
 
     
 

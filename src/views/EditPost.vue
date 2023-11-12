@@ -1,5 +1,6 @@
 <template>
     <NavigationBar/>
+    <!-- Create Post Section -->
     <div class="create-post">
         <div class="new-post">Edit Post</div>
         <div class="header">Header</div>
@@ -22,6 +23,7 @@
             
     </div>
 
+    <!-- Error Dialog Popup -->
     <div class="popup" v-show="showErrorDialog" ref="errorDialog">
         <div class="popup-content">
             <h2>Error: Missing Header / Description </h2>
@@ -32,6 +34,7 @@
         </div>
     </div>
 
+    <!-- Confirmation Dialog Popup -->
     <div class="popup" v-show="showConfirmationDialog" ref="confirmationDialog">
         <div class="popup-content">
             <h2>Confirmation</h2>
@@ -89,19 +92,23 @@ export default {
     },
 
     methods: {
+      // Function to navigate to post page
       navigateToPost() {
         this.$router.push({ name: 'Post' });
       },
 
+      // Function to navigate to user's profile page.
       navigateToOwnProfile() {
         this.$router.push({ name: 'OwnProfile' });
       },
 
+      // Function to get current date
       getCurrentDate() {
         const currentDate = new Date();
         return currentDate;
       },
 
+      // Function to submit form 
       submitForm() {
         if (!this.header || !this.description) {
           this.showErrorDialog = true;
@@ -116,9 +123,9 @@ export default {
         let postDocument = await getDoc(doc(db, "Posts", postId));
         let postData = postDocument.data();
 
+        // Set placeholder values for the header and description in the UI
         var headerPlaceholder = (postData.header)
         var descriptionPlaceholder = (postData.description)
-
         document.getElementById("enter-the-header").value = headerPlaceholder
         document.getElementById("enter-the-description").value = descriptionPlaceholder
 
@@ -127,6 +134,7 @@ export default {
         this.description = postData && postData.description ? postData.description : '';
       },
 
+      // Confirms the submission of a post edit form and updates the database
       async confirmSubmitForm() {
         const db = getFirestore(firebaseApp);
         const postId = this.$route.params.postId;
@@ -143,6 +151,7 @@ export default {
 
 
           if (user) {
+            // New header, description, date and datetime data will be stored in firebase
             const updates = {
               header: header,
               description: description,
@@ -168,13 +177,13 @@ export default {
       },
 
       openErrorDialog() {
-      this.showErrorDialog = true;
+        this.showErrorDialog = true;
 
-      // Add a click event listener to the entire document when the popup is open
-      document.addEventListener("click", this.closeErrorDialogOnClickOutside);
+        // Add a click event listener to the entire document when the popup is open
+        document.addEventListener("click", this.closeErrorDialogOnClickOutside);
 
-      // Prevent the click event on the button from propagating and immediately closing the popup
-      event.stopPropagation();
+        // Prevent the click event on the button from propagating and immediately closing the popup
+        event.stopPropagation();
       },
 
       closeErrorDialog() {
@@ -191,13 +200,13 @@ export default {
       },
 
       openConfirmationDialog() {
-      this.showConfirmationDialog = true;
+        this.showConfirmationDialog = true;
 
-      // Add a click event listener to the entire document when the popup is open
-      document.addEventListener("click", this.closeConfirmationDialogOnClickOutside);
+        // Add a click event listener to the entire document when the popup is open
+        document.addEventListener("click", this.closeConfirmationDialogOnClickOutside);
 
-      // Prevent the click event on the button from propagating and immediately closing the popup
-      event.stopPropagation();
+        // Prevent the click event on the button from propagating and immediately closing the popup
+        event.stopPropagation();
       },
 
       closeConfirmationDialog() {

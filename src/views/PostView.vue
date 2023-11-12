@@ -1,50 +1,60 @@
 <template>
-    <NavigationBar/>
-    <div class="posts-page">
-    <div class="post-header">Posts</div>
+  <NavigationBar/>
+  <div class="posts-page">
+  <div class="post-header">Posts</div>
+  
+  <!-- Search section with input and search icon -->
+  <div id="search-section">
+    <div class="post-search-bar-line" />
+    <input id="post-search-bar" type="text" v-model="searchQuery" placeholder="Search using Keywords: BT3103">
+    <img class="post-search-icon" alt="" src="../assets/search.png" />
+  </div>
 
-    <div id="search-section">
-      <div class="post-search-bar-line" />
-      <input id="post-search-bar" type="text" v-model="searchQuery" placeholder="Search using Keywords: BT3103">
-      <img class="post-search-icon" alt="" src="../assets/search.png" />
-    </div>
+  <!-- Button to sort posts by time (New) -->
+  <div class="new-position">
+    <button class="new" @click="sortByTime">New</button>
+  </div>
 
-    <div class="new-position">
-      <button class="new" @click="sortByTime">New</button>
-    </div>
-    <div class="popular-position">
-      <button class="popular" @click="sortByLikes">Popular</button>
-    </div>
+  <!-- Button to sort posts by likes (Popular) -->
+  <div class="popular-position">
+    <button class="popular" @click="sortByLikes">Popular</button>
+  </div>
 
-    <button class="create-button" @click="navigateToCreatePost">
-      <div class="create-button-child" />
-      <div class="create-button-item" />
-      <div class="create-button-inner" />
-    </button>
+  <!-- Button to navigate to create a new post -->
+  <button class="create-button" @click="navigateToCreatePost">
+    <div class="create-button-child" />
+    <div class="create-button-item" />
+    <div class="create-button-inner" />
+  </button>
 
-    <div class="post-list">
-      <div v-for="post in posts" :key="post.id" class="post">
-        <button class="comments" @click="navigateToPostDetails(post.id)">Comments: {{ post.comments }}</button>
-        <button class="likeButton" @click="likePost(post.id, this.uid)">
-          <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-thumb-up" width="30" height="30" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" id ="thumbs-up"></path>
-            <path d="M7 11v8a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1v-7a1 1 0 0 1 1 -1h3a4 4 0 0 0 4 -4v-1a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1 -2 2h-7a3 3 0 0 1 -3 -3"></path>
-          </svg>
-        </button>
-        
-        <div class="likes" id="likes">Likes: {{ post.likes }}</div>
-        <b class="post-title">{{ post.header }}</b>
-        <img class="post-user-image" :src="post.userImage" />
-        <button class="user-name" @click="navigateToUserProfile(post.userid)">{{ post.username }}</button>
-        <div class="post-date">{{ post.date }}</div>
-        <div class="post-content-container">
-          <p class="post-content">{{ post.description }}</p>
-        </div>
-        <div class="post-divider-line" />
-        </div>
+  <!-- Container for the list of posts -->
+  <div class="post-list">
+    <!-- Loop through each post and display its details -->
+    <div v-for="post in posts" :key="post.id" class="post">
+      <button class="comments" @click="navigateToPostDetails(post.id)">Comments: {{ post.comments }}</button>
+      <button class="likeButton" @click="likePost(post.id, this.uid)">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-thumb-up" width="30" height="30" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none" id ="thumbs-up"></path>
+          <path d="M7 11v8a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1v-7a1 1 0 0 1 1 -1h3a4 4 0 0 0 4 -4v-1a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1 -2 2h-7a3 3 0 0 1 -3 -3"></path>
+        </svg>
+      </button>
+      
+      <div class="likes" id="likes">Likes: {{ post.likes }}</div>
+      <b class="post-title">{{ post.header }}</b>
+      <img class="post-user-image" :src="post.userImage" />
+      <button class="user-name" @click="navigateToUserProfile(post.userid)">{{ post.username }}</button>
+      <div class="post-date">{{ post.date }}</div>
+      <div class="post-content-container">
+        <!-- Display the post content -->
+        <p class="post-content">{{ post.description }}</p>
       </div>
 
+      <!-- Divider line between posts -->
+      <div class="post-divider-line" />
+      </div>
     </div>
+
+  </div>
 </template>
 
  
@@ -94,11 +104,17 @@ export default {
         const postsSnapshot = await getDocs(postQuery);
 
         posts.value = [];
+
+        // Iterate through each post document
         for (const document of postsSnapshot.docs) {
           let post = document.data();
+
+          // Get user data associated with the post
           let userId = post.userid;
           let userDocument = await getDoc(doc(db, 'Users', userId));
           let userData = userDocument.data();
+
+          // Add user image, post ID, and push the post to the posts array
           post.userImage = userData.profilePicture;
           post.id = document.id;
           posts.value.push(post);
@@ -109,6 +125,7 @@ export default {
       }
     };
 
+    // Computed property to filter posts based on search query
     const filteredPosts = computed(() => {
       const searchRegex = new RegExp(searchQuery.value, 'i');
       return posts.value.filter(post => {
@@ -116,53 +133,61 @@ export default {
       });
     });
 
+    // Function to navigate to the create post page
     const navigateToCreatePost = () => {
        router.push({ name: 'CreatePost' });
     };
 
+    // Function to navigate to a user's profile based on user ID
     const navigateToUserProfile = (userId) => {
       router.push({ name: 'profile', params: { userId }});
 
     };
 
+    // Function to navigate to the details of a specific post based on post ID
     const navigateToPostDetails = (postId) => {
       router.push({ name: 'PostDetails', params: { postId: postId }});
 
     };
 
+    // Function to fetch posts sorted by time (default ordering)
     const sortByTime = () => {
       fetchUserPosts(); // Fetch posts using the default sorting order (by datetime)
     };
 
-
+    // Function to sort posts by the number of likes in descending order
     const sortByLikes = () => {
       // Sort posts by the number of likes in descending order
       posts.value.sort((a, b) => b.likes - a.likes);
     };
 
-
+    // Function to like a post
     const likePost = async (postId, userId) => {
       const db = getFirestore(firebaseApp);
       const postRef = collection(db, "Posts", postId, "Likes");   
       const postSnap = await getDocs(postRef)
+
+      // Get the count of likes from the firebase server
       const likesCount = await getCountFromServer(postRef);
 
+       // Check if there are existing likes
       if (likesCount.data().count > 0 ) {
         for (const document of postSnap.docs) {
           const likeData = document.data();
-          console.log(likeData);
           const userLiked = likeData.userId;
 
+          // If the user has already liked the post, unlike it
           if (userLiked == userId) {
             unlikePost(postId, userId)
             break;
-          } else {
+          } else { // If the user hasn't liked the post, update like count and add like document
             const currentPostRef = doc(db, "Posts", postId);
 
             const currentPostSnap = await getDoc(currentPostRef);
             const postData = currentPostSnap.data();
             const userPostedId = postData.userid;
-            console.log(userPostedId)
+
+            // Updating like count
             const currentLikes = postData.likes;
             const updates = {
               likes: currentLikes + 1,
@@ -170,8 +195,6 @@ export default {
 
             // Update the like count for the post
             await updateDoc(doc(db, "Posts", postId), updates);
-            console.log("userPostedId: " + userPostedId)
-            console.log("postId: " + postId)
             await updateDoc(doc(db, "Users", userPostedId, "Posts", postId), updates);
 
             // Add a like document to the "likes" collection to track the user's like
@@ -193,7 +216,6 @@ export default {
         } 
       } else {
         const currentPostRef = doc(db, "Posts", postId);
-        
         const currentPostSnap = await getDoc(currentPostRef);
         const postData = currentPostSnap.data();
         const userPostedId = postData.userid;
@@ -227,6 +249,7 @@ export default {
       
     };
 
+    // Function to unlike a post
     const unlikePost = async (postId, userId) => {
       const db = getFirestore(firebaseApp);
       const currentPostRef = doc(db, "Posts", postId);
@@ -237,22 +260,28 @@ export default {
       const postRef = collection(db, "Posts", postId, "Likes");   
       const postSnap = await getDocs(postRef)
       const likesCount = await getCountFromServer(postRef);
-
+      
+      // Check if there are existing likes
       if (likesCount.data().count > 0 ) {
+        // Iterate through each like document in the snapshot
         for (const document of postSnap.docs) {
           const likeData = document.data();
           console.log(likeData);
           const userLiked = likeData.userId;
-
+          
+          // If the user has liked the post, unlike it
           if (userLiked == userId) {
+            // Delete the like document from the "Likes" subcollection
             deleteDoc(doc(db,"Users", userPostedId ,"Posts" , postId, "Likes", document.id))
             deleteDoc(doc(db,"Posts", postId, "Likes", document.id))
             console.log("User has unlike the post");
+
+            // Update like count
             const currentLikes = postData.likes;
             const updates = {
               likes: currentLikes - 1
             };
-            // Update the like count for the post
+            // Update the like count for the post in firebase
             await updateDoc(doc(db, "Posts", postId), updates);
             await updateDoc(doc(db, "Users", userPostedId, "Posts", postId), updates);
             location.reload()
