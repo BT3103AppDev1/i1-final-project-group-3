@@ -58,7 +58,7 @@
       </div>
       <div id="group-content" class="tabcontent">
         <div v-for="group in activeGroups" :key="group.id" class="group-format">
-          <b class="group-name">Group: {{ group.name }}</b>
+          <b class="group-name">{{ group.name }}</b>
           <div class="group-description">{{ group.description }}</div>
 
         </div>
@@ -608,6 +608,7 @@
     font-size: 20px;
     color: var(--color-darkgray);
     margin-top: 10px;
+    margin-bottom: 50px;
     font-weight: lighter
   }
 
