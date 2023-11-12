@@ -107,7 +107,7 @@ const db = getFirestore(firebaseApp);
       },
       async addUserProfile(uid) {
         try{
-          const docRef = await updateDoc(doc(db, "Users", uid),{
+          const docRef = await setDoc(doc(db, "Users", uid),{
             
           })
           console.log("Created user profile with uid", uid);
@@ -128,7 +128,7 @@ const db = getFirestore(firebaseApp);
 
         if (firstName != "" && phoneNumber != "" && gender != "" && lastName != "") {
           try{
-            const docRef = await setDoc(doc(db, "Users", uid),{
+            const docRef = await updateDoc(doc(db, "Users", uid),{
               phoneNumber: phoneNumber,
               firstName : firstName,
               lastName : lastName,
