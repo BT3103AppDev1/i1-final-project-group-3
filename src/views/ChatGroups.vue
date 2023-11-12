@@ -72,9 +72,19 @@
                     <!--- Confirmation Popup -->
                     <div v-if="showConfirmationPopup" class="backdrop"></div>
                     <div class="confirmation-popup" v-if="showConfirmationPopup">
-                      <p>Are you sure you want to remove this member?</p>
-                      <button @click="removeMember">Confirm</button>
-                      <button @click="cancelRemoval">Cancel</button>
+                      <div class="confirmation-content">
+                        <h1 class="remove-member-name"> Remove {{ memberToRemoveName }} ?</h1>
+                          <p>Member of {{ selectedGroupName }}</p>
+                          <div class="confirmation-button">
+                            <button @click="removeMember" class="confirm-button">Confirm</button>
+                            <button @click="cancelRemoval">Cancel</button>
+
+                      </div>
+
+                      </div>
+
+                      
+                      
 
                     </div>
 
@@ -203,6 +213,9 @@ export default {
       const isOptionsPopupOpen = ref(false);
       const showConfirmationPopup = ref(false);
       const memberToRemove = ref(null);
+
+      const memberToRemoveName = ref('');
+    
       
 
 
@@ -583,8 +596,15 @@ export default {
 
       const confirmMemberRemoval = (userId) => {
         memberToRemove.value = userId;
+
+        const memberName = groupMemberNames.value[userId];
+        const groupName = selectedGroupName.value;
+        memberToRemoveName.value = memberName;
+        selectedGroupName.value = groupName;
+
         showConfirmationPopup.value = true;
         isOptionsPopupOpen.value = false;
+        
       };
 
       const removeMember = async () => {
@@ -680,6 +700,7 @@ export default {
           removeMember,
           cancelRemoval,
           isCurrentUserAdmin,
+          memberToRemoveName,
 
       };
   },
@@ -1198,12 +1219,63 @@ h6 {
   top: 50%; /* Center vertically */
   left: 50%; /* Center horizontally */
   transform: translate(-50%, -50%); /* Adjust to center perfectly */
-  width: 300px; /* Adjust as needed */
-  padding: 20px;
+  width: auto; /* Adjust as needed */
+  height: auto;
+  border-radius: 30px;
   background-color: white;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   z-index: 1000; 
 }
+.confirmation-content {
+  padding:50px 150px 50px 150px;
+}
+
+.confirmation-popup h1 {
+  font-size: 40px;
+  margin-top: 30px;
+  margin-left:0;
+  margin-right:0;
+  text-align: center;
+
+
+}
+
+.confirmation-popup p {
+  font-size: 28px;
+  text-align: center;
+  color:#ADA6A6;
+  font-style:italic;
+  font-weight: 100;
+  margin-top: 30px;
+  margin-left:0;
+  margin-right:0;
+
+}
+
+.confirmation-button {
+  display: flex;
+  justify-content: center; /* This centers the buttons horizontally in the flex container */
+  gap: 60px;
+  margin-top: 30px;
+
+
+
+
+
+}
+
+button {
+  color: #525fe1
+}
+
+button:hover {
+  color: white;
+  background-color:#525fe1;
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+
 .backdrop {
   position: fixed;
   top: 0;
