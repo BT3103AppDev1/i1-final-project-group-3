@@ -6,7 +6,8 @@
         <div class ="profile-section" v-if="userProfile">
             <div class="left-section">
                 <!-- Dynamic Image -->
-                <img class="profile-image" :alt = "userProfile.name" :src="userProfile.profilePicture || defaultProfilePicture" />
+                <img class="profile-image" :alt="userProfile.name" :src="userProfile.profilePicture || defaultProfilePicture" />
+
                 
                 <!-- Action buttons -->
                 <div class="buttons-container">
@@ -125,7 +126,7 @@ export default defineComponent({
         const messageDialogRef = ref(null);
         const blockDialogRef = ref(null);
         const messageText = ref('');
-        const defaultProfilePicture = '../assets/default-profile-image.jpg';
+
         const db = getFirestore(firebaseApp);
         const auth = getAuth();
         const route = useRoute();
@@ -176,6 +177,7 @@ export default defineComponent({
                 let post = document.data();
                 let userDocument = await getDoc(doc(db, 'Users', uid));
                 let userData = userDocument.data();
+                
                 post.userImage = userData.profilePicture;
                 post.id = document.id;
                 console.log(post);
