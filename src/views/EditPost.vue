@@ -121,6 +121,10 @@ export default {
 
         document.getElementById("enter-the-header").value = headerPlaceholder
         document.getElementById("enter-the-description").value = descriptionPlaceholder
+
+        // Assuming header and description are properties in your postData
+        this.header = postData && postData.header ? postData.header : '';
+        this.description = postData && postData.description ? postData.description : '';
       },
 
       async confirmSubmitForm() {
