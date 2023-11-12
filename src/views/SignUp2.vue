@@ -75,7 +75,7 @@ import * as firebaseui from 'firebaseui';
 import 'firebaseui/dist/firebaseui.css';
 import firebaseApp from '@/firebase.js';
 import { getFirestore } from "firebase/firestore";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, updateDoc } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth"
 
 const db = getFirestore(firebaseApp);
@@ -96,12 +96,25 @@ const db = getFirestore(firebaseApp);
           this.user = user;
           this.uid = auth.currentUser.uid;
           this.email = auth.currentUser.email;
+          this.addUserProfile(auth.currentUser.uid);
         }
       })
+
     },
     methods: {
       navigateToSignUp3() {
         this.$router.push({ name: 'SignUp3' });
+      },
+      async addUserProfile(uid) {
+        try{
+          const docRef = await updateDoc(doc(db, "Users", uid),{
+            
+          })
+          console.log("Created user profile with uid", uid);
+        }
+        catch(error) {
+          console.error("Error adding document: ", error);
+        }
       },
       async updateProfile(event) {
         event.preventDefault();
