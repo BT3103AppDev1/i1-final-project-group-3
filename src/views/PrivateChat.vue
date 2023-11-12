@@ -34,6 +34,9 @@
         <div class="mesgs">
           <div class="msg_history">
             <div v-if="selectedChat">
+              <div class="group-name-header">
+                      <h1>{{ selectedChatName }}</h1>
+              </div>
                 <div v-for="message in selectedChat.messages" :key="message.id">
                   <!-- For sent messages -->
                   <div v-if="message.senderUID === authUser.uid" class="sent_msg">
@@ -74,7 +77,7 @@
               <h2 class = "noChatSelectedHeader1">Your Messages</h2>
               <h4 class = "noChatSelectedHeader2">Send private photos and messages to a friend or group!</h4>
             </div>
-        </div> 
+          </div> 
       </div>      
     </div>
   </div>
@@ -110,6 +113,7 @@ export default {
       const authUser = ref(null);
       const storage = getStorage(firebaseApp);
       const db = getFirestore(firebaseApp);
+      const selectedChatName = ref('');
     
  
 
@@ -324,6 +328,8 @@ export default {
             unsubscribe: null,
           };
 
+          selectedChatName.value = chatSummary.name;
+
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
           const messages = [];
           querySnapshot.forEach((doc) => {
@@ -412,6 +418,7 @@ export default {
       chats,
       selectChat,
       selectedChat,
+      selectedChatName,
       formatMessageDate,
       saveMessage,
       currentUserUID,
@@ -423,6 +430,8 @@ export default {
       scrollToBottom,
       navigateToGroupsChat,
       newMessage,
+
+
     };        
     }
 };
@@ -643,6 +652,24 @@ button {
   justify-content: center;
   height: 100%;
   text-align: center;
+}
+
+.group-name-header {
+  position: sticky;
+  top: 0;
+  left: 0px;
+  margin-left:-20px;
+  background: white;
+  width: 870px;
+  height: 100px;
+  z-index: 10;
+  border-bottom: 1px solid #c4c4c4;
+  text-align: left;
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 30px;
+  
+
 }
 
 .send-message-icon {

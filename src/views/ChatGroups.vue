@@ -997,7 +997,7 @@ width: 100%;
   margin-left:-20px;
   background: white;
   height: 100px;
-  width: 864px;
+  width: 904px;
   z-index: 1;
   border-bottom: 1px solid #c4c4c4;
   text-align: left;
@@ -1009,8 +1009,8 @@ width: 100%;
 
 .more-options {
   position: absolute;
-  left: 800px;
-  top: 50px;
+  left: 850px;
+  top: 60px;
 }
 
 
