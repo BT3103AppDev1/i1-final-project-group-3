@@ -291,6 +291,10 @@ input[type="file"]::file-selector-button {
     top: 30px;
 }
 
+.profile-image {
+  object-fit: cover;
+}
+
 
 
 </style>
