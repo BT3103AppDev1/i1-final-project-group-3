@@ -10,10 +10,10 @@
     </div>
 
     <div class="new-position">
-      <button class="new">New</button>
+      <button class="new" @click="sortByTime">New</button>
     </div>
     <div class="popular-position">
-      <button class="new">Popular</button>
+      <button class="popular" @click="sortByLikes">Popular</button>
     </div>
 
     <button class="create-button" @click="navigateToCreatePost">
@@ -84,6 +84,7 @@ export default {
         }
       });
     });
+ 
 
     const fetchUserPosts = async () => {
       try {
@@ -128,6 +129,17 @@ export default {
       router.push({ name: 'PostDetails', params: { postId: postId }});
 
     };
+
+    const sortByTime = () => {
+      fetchUserPosts(); // Fetch posts using the default sorting order (by datetime)
+    };
+
+
+    const sortByLikes = () => {
+      // Sort posts by the number of likes in descending order
+      posts.value.sort((a, b) => b.likes - a.likes);
+    };
+
 
     const likePost = async (postId, userId) => {
       const db = getFirestore(firebaseApp);
@@ -266,6 +278,8 @@ export default {
       navigateToPostDetails,
       likePost,
       unlikePost,
+      sortByLikes,
+      sortByTime,
     };
   }
 };
@@ -338,13 +352,14 @@ export default {
     height: 1.94rem;
   }
 
-  .new {
+  .new,
+  .popular {
     position: absolute;
     top: 0.44rem;
     left: 0rem;
     display: inline-block;
     width: 6.5rem;
-    height: 1.94rem;
+    height: 2rem;
     mix-blend-mode: normal;
     border-radius: var(--br-21xl);
     background-color: var(--color-white);
@@ -410,7 +425,7 @@ export default {
   }
 
   .post-list {
-    margin-top: 8rem;
+    margin-top: 6rem;
     width: 1000px;
     margin-left: 180px;
 
