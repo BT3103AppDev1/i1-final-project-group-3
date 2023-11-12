@@ -35,7 +35,7 @@
                 <div class="comment-upper-section">
                     <button class="comment-user-name" @click="navigateToUserProfile(comment.commentUserId)">{{ comment.commentUserName }}</button>
                     <div class="comment-date">{{ comment.date }}</div>
-                    <button class="delete-button" type="button" @click="removeComment(comment.id)">Delete</button>
+                    <button v-if="comment.commentUserId === uid" class="delete-button" type="button" @click="removeComment(comment.id)">Delete</button>
                 </div>
                 <div class="comment-content-container">
                     <p class="comment-content">{{ comment.comment }}</p>
