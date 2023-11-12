@@ -59,9 +59,9 @@
                         <div class="group-member" v-for="(name, userId) in groupMemberNames" :key="userId">
                           <img :src="getProfileImageUrl(userId)" class="option-image">
                           <div class="name-and-title">
-                            <h6>{{ name }}</h6>
+                            <h6 class="member-name">{{ name }}</h6>
                             <span class="member-title">{{ isGroupAdmin(userId) ? 'Admin' : 'Member' }}</span>
-                            <button v-if="isCurrentUserAdmin && !isGroupAdmin(userId)" @click="confirmMemberRemoval(userId)">Remove</button>
+                            <button v-if="isCurrentUserAdmin && !isGroupAdmin(userId)" @click="confirmMemberRemoval(userId)" class="remove-button">Remove</button>
                           </div>
 
                           
@@ -70,6 +70,7 @@
                     </div>
 
                     <!--- Confirmation Popup -->
+                    <div v-if="showConfirmationPopup" class="backdrop"></div>
                     <div class="confirmation-popup" v-if="showConfirmationPopup">
                       <p>Are you sure you want to remove this member?</p>
                       <button @click="removeMember">Confirm</button>
@@ -1092,11 +1093,23 @@ h4 {
 
 /* styling popup */
 .popup {
-  height: 790px;
+  height: auto;
   display: flex;
   flex-direction: column;
-
   z-index: 10;
+  top: 150px;
+}
+
+.option-title {
+  margin-top: 100px;
+}
+.group-member-container { /* New container for members to apply columns */
+  column-count: 2; /* Creates two columns */
+  column-gap: 50px;
+   /* Adjust the gap between columns */
+  justify-content: center;
+  margin-bottom: 50px;
+  
 }
 
 .group-member {
@@ -1109,45 +1122,96 @@ h4 {
   
 
 }
-.group-member-container { /* New container for members to apply columns */
-  column-count: 2; /* Creates two columns */
-  column-gap: 50px;
-   /* Adjust the gap between columns */
-  justify-content: center;
-  
-}
+
 
 .option-image {
-  width: 9rem;
-  height: 9rem;
+  width: 6rem;
+  height: 6rem;
   border-radius: 50%;
   object-fit: cover;
-
   border-radius: 50%;
   margin-right: 20px;
   margin-top: 10px;
+  margin-left: 10px;
 
 }
 
 h6 {
   color: black;
-  font-size: 30px;
+  font-size: 25px;
   font-weight: bold;
   margin-top: 40px;
-  margin-left: 20px;
-  margin-bottom: 25px;
+
+}
+.name-and-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px; /* Adjust as needed for spacing between elements */
+}
+
+.member-name {
+  margin: 0;
+  align-self: flex-start;
+}
+
+.name-and-title .member-title {
+  white-space: nowrap; /* Prevent the title from wrapping */
+  margin-right: auto; /* Pushes everything else to the right */
+}
+
+.name-and-title h6 {
+
+  margin: 0; /* Remove any default margins */
+  padding: 0; /* Remove any default padding */
+  /* Additional styling */
 }
 
 .member-title {
   color: #767575;
-  font-size: 20px;
+  font-size: 15px;
   font-style: italic;
-  align-content: left;
+  
   
 }
 
+
+.remove-button {
+  width: 100px;
+  height: 25px;
+  font-size: 13px;
+  color: #525fe1;
+  margin-top: 10px;
+  margin:0;
+  align-self: flex-start;
+}
+
+.remove-button:hover {
+  background-color: #525fe1;
+  color: white;
+  border: 2px solid #525fe1;
+  cursor: pointer;
+}
+
 .confirmation-popup {
-  z-index: 10;
+  position: absolute; /* or 'fixed' if you want it to be viewport-centered */
+  top: 50%; /* Center vertically */
+  left: 50%; /* Center horizontally */
+  transform: translate(-50%, -50%); /* Adjust to center perfectly */
+  width: 300px; /* Adjust as needed */
+  padding: 20px;
+  background-color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000; 
+}
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+  z-index: 999; /* Below the popup but above everything else */
 }
 
 
