@@ -639,6 +639,12 @@
 
 }
 
+.group-card:hover {
+    box-shadow: 15px 30px 30px 5px rgba(0, 0, 0, 0.25);
+    transition: 0.5s ease-in-out;
+
+}
+
 
 
 

@@ -56,20 +56,13 @@
           </div>
         </div>
       </div>
-    <div id="group-content" class="tabcontent">
-      <div class="group-format">
-      <b class="group-name">Manifesting for A+</b>
-      <div class="group-description">
-        We are a group of like-minded individuals trying our best to survive
-        CS2030. We will suffer together, but excel as a group!!!!
+      <div id="group-content" class="tabcontent">
+        <div v-for="group in activeGroups" :key="group.id" class="group-format">
+          <b class="group-name">Group: {{ group.name }}</b>
+          <div class="group-description">{{ group.description }}</div>
+
+        </div>
       </div>
-      <img
-        class="studygroup-icon"
-        alt=""
-        src="../assets/studygroup-icon.jpg"
-      />
-      </div>
-    </div>
   
     <hr>
 
@@ -123,6 +116,7 @@
           uploadedImage: false,
           defaultImage: defaultImage,
           posts: [],
+          activeGroups: [],
        }
     },
     
@@ -135,6 +129,7 @@
            this.uid = user.uid;
            this.fetchUserData(this.useremail);
            this.fetchUserPosts(this.useremail);
+           this.fetchGroups();
          } else {
            this.user = null;
            this.useremail = null;
@@ -178,6 +173,37 @@
 
 
       }, 
+
+      async fetchGroups() {
+        try {
+          // Get the user's activeGroups array
+          const userRef = doc(db, 'Users', this.uid);
+          const userSnap = await getDoc(userRef);
+          const userGroups = userSnap.data().activeGroups;
+
+          // Clear the existing groups before fetching new ones
+          this.activeGroups = [];
+
+          // Fetch details for each group
+          for (const groupId of userGroups) {
+            const groupRef = doc(db, 'Groups', groupId);
+            const groupSnap = await getDoc(groupRef);
+
+            if (groupSnap.exists()) {
+              // Add the group details to the activeGroups array
+              this.activeGroups.push({
+                id: groupId,
+                name: groupSnap.data().title,          // Assuming 'title' is the field for the group name
+                description: groupSnap.data().groupDescription, // Assuming 'groupDescription' is the field for the group description
+              });
+            } else {
+              console.error(`Group ${groupId} does not exist`);
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching groups:", error);
+        }
+      },
 
       async fetchUserPosts(useremail) {
         try {
@@ -284,6 +310,8 @@
   }
 }
 </script>
+
+
 <style scoped>
   .users-name {
     position: absolute;
@@ -555,41 +583,32 @@
     font-size: var(--font-size-lg);
     color: var(--color-darkgray);
   }
-
-   .group-name {
-    position: absolute;
-    top: 547px;
-    left: 529px;
-    font-size: 27px;
-    display: inline-block;
-    color: var(--color-black);
-    width: 369px;
-    height: 30px;
-  }
-  .group-description {
-    position: absolute;
-    top: 588px;
-    left: 529px;
-    font-size: var(--font-size-xl);
-    font-weight: 300;
-    color: var(--color-black);
-    display: inline-block;
-    width: 781px;
-  }
-  .studygroup-icon {
-    position: absolute;
-    top: 527px;
-    left: 387px;
-    width: 110px;
-    height: 109px;
-    object-fit: cover;
-  }
   .group-format {
-    background-color: var(--color-white);
-    text-align: left;
-    font-size: var(--font-size-41xl);
-    color: var(--color-white);
+    position: relative;
+    color: var(--color-black);
+    margin-bottom: 20px;
+  }
+
+  #group-content {
+    position: relative;
+    top: 370px;
+    left: 400px;
+
+    color: var(--color-black);
+    margin-bottom: 20px;
+  }
+
+  .group-name {
+    font-size: 35px;
     font-family: var(--font-josefin-sans);
+    font-weight: 600;
+  }
+
+  .group-description {
+    font-size: 20px;
+    color: var(--color-darkgray);
+    margin-top: 10px;
+    font-weight: lighter
   }
 
 
