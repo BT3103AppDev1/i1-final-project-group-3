@@ -4,9 +4,13 @@
       <div class="messaging">
           <div class="inbox_people">
               <div class="convo-list">
-                  <div class="chat-buttons">
-                      <button class="profiles" @click="navigateToProfiles">Profiles</button>
-                      <button class="groups" >Groups</button>
+                <div class="headind_srch">
+                    <div class="group-parent">
+                      <div class="stylish-input-group">
+                            <button class="profiles" @click="navigateToProfiles">Profiles</button>
+                            <button class="groups" >Groups</button>
+                      </div>
+                    </div>
                   </div>
 
                   <div class="inbox_chat">
@@ -59,9 +63,9 @@
                         <div class="group-member" v-for="(name, userId) in groupMemberNames" :key="userId">
                           <img :src="getProfileImageUrl(userId)" class="option-image">
                           <div class="name-and-title">
-                            <h6>{{ name }}</h6>
+                            <h6 class="member-name">{{ name }}</h6>
                             <span class="member-title">{{ isGroupAdmin(userId) ? 'Admin' : 'Member' }}</span>
-                            <button v-if="isCurrentUserAdmin && !isGroupAdmin(userId)" @click="confirmMemberRemoval(userId)">Remove</button>
+                            <button v-if="isCurrentUserAdmin && !isGroupAdmin(userId)" @click="confirmMemberRemoval(userId)" class="remove-button">Remove</button>
                           </div>
 
                           
@@ -70,10 +74,21 @@
                     </div>
 
                     <!--- Confirmation Popup -->
+                    <div v-if="showConfirmationPopup" class="backdrop"></div>
                     <div class="confirmation-popup" v-if="showConfirmationPopup">
-                      <p>Are you sure you want to remove this member?</p>
-                      <button @click="removeMember">Confirm</button>
-                      <button @click="cancelRemoval">Cancel</button>
+                      <div class="confirmation-content">
+                        <h1 class="remove-member-name"> Remove {{ memberToRemoveName }} ?</h1>
+                          <p>Member of {{ selectedGroupName }}</p>
+                          <div class="confirmation-button">
+                            <button @click="removeMember" class="confirm-button">Confirm</button>
+                            <button @click="cancelRemoval">Cancel</button>
+
+                      </div>
+
+                      </div>
+
+                      
+                      
 
                     </div>
 
@@ -124,15 +139,9 @@
                       </div>
                   </div>
                   <div v-else="" class="noSelectedGroup">
-                      <svg class = "imageblank" width="168" height="187" viewBox="0 0 168 187" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M37.0418 121.92L36.3432 122.635L37.0418 121.92ZM63 137.135L63.295 136.179L63 137.135ZM28.875 154.883L28.3648 155.743C28.4139 155.772 28.4654 155.797 28.5188 155.817L28.875 154.883ZM146 84.188C146 118.859 118.375 140.627 84 140.627V142.627C119.213 142.627 148 120.212 148 84.188H146ZM22 84.188C22 54.5091 49.5751 32.167 84 32.167V30.167C48.837 30.167 20 53.0706 20 84.188H22ZM84 32.167C101.242 32.167 116.756 36.5476 127.935 45.2126C139.083 53.8534 146 66.8125 146 84.188H148C148 66.2162 140.814 52.6648 129.16 43.6319C117.538 34.6232 101.552 30.167 84 30.167V32.167ZM37.7403 121.204C27.9511 111.649 22 98.0071 22 84.188H20C20 98.5628 26.1807 112.715 36.3432 122.635L37.7403 121.204ZM84 140.627C76.8234 140.627 69.9248 138.226 63.295 136.179L62.705 138.09C69.2119 140.099 76.4499 142.627 84 142.627V140.627ZM63.295 136.179C62.2278 135.85 61.139 136.271 60.2027 136.84C59.2323 137.43 58.1802 138.332 57.0777 139.375C55.969 140.423 54.7553 141.668 53.4724 142.965C52.1825 144.27 50.8106 145.64 49.3581 146.973C43.4677 152.375 36.6445 156.774 29.2312 153.948L28.5188 155.817C37.1472 159.107 44.8278 153.842 50.71 148.446C52.2007 147.079 53.6013 145.679 54.8945 144.371C56.1948 143.056 57.3749 141.847 58.4521 140.828C59.5354 139.803 60.4611 139.024 61.242 138.549C62.0569 138.053 62.4928 138.025 62.705 138.09L63.295 136.179ZM29.3852 154.023C29.3508 154.002 29.1219 153.822 29.139 152.894C29.1548 152.035 29.3824 150.856 29.7925 149.406C30.6089 146.52 32.0633 142.846 33.5718 139.08C35.0679 135.344 36.6161 131.521 37.5698 128.423C38.0457 126.877 38.3915 125.456 38.498 124.286C38.5512 123.7 38.5489 123.134 38.4515 122.626C38.3541 122.119 38.1483 121.602 37.7403 121.204L36.3432 122.635C36.3648 122.656 36.4376 122.744 36.4873 123.003C36.5369 123.262 36.5499 123.624 36.5062 124.105C36.4187 125.067 36.1212 126.331 35.6583 127.834C34.7348 130.835 33.2248 134.567 31.7152 138.336C30.2179 142.074 28.719 145.854 27.868 148.862C27.4445 150.359 27.16 151.737 27.1393 152.857C27.1199 153.909 27.3301 155.129 28.3648 155.743L29.3852 154.023Z" fill="#343434"/>
-                              <path d="M81 85.959C81 86.5113 80.5523 86.959 80 86.959C79.4477 86.959 79 86.5113 79 85.959C79 85.4067 79.4477 84.959 80 84.959C80.5523 84.959 81 85.4067 81 85.959Z" fill="#343434"/>
-                              <path d="M85 85.959C85 86.5113 84.5523 86.959 84 86.959C83.4477 86.959 83 86.5113 83 85.959C83 85.4067 83.4477 84.959 84 84.959C84.5523 84.959 85 85.4067 85 85.959Z" fill="#343434"/>
-                              <path d="M89 85.959C89 86.5113 88.5523 86.959 88 86.959C87.4477 86.959 87 86.5113 87 85.959C87 85.4067 87.4477 84.959 88 84.959C88.5523 84.959 89 85.4067 89 85.959Z" fill="#343434"/>
-                      </svg>
-
-                      <h2>Your Messages</h2>
-                      <h4>Send private photos and messages to a friend or group!</h4>
+                    <img class="send-message-icon" src="../assets/message.png"  />
+                    <h2 class = "noChatSelectedHeader1">Your Messages</h2>
+                    <h4 class = "noChatSelectedHeader2">Send private photos and messages to a friend or group!</h4>
   
                   </div>
 
@@ -202,6 +211,9 @@ export default {
       const isOptionsPopupOpen = ref(false);
       const showConfirmationPopup = ref(false);
       const memberToRemove = ref(null);
+
+      const memberToRemoveName = ref('');
+    
       
 
 
@@ -582,8 +594,15 @@ export default {
 
       const confirmMemberRemoval = (userId) => {
         memberToRemove.value = userId;
+
+        const memberName = groupMemberNames.value[userId];
+        const groupName = selectedGroupName.value;
+        memberToRemoveName.value = memberName;
+        selectedGroupName.value = groupName;
+
         showConfirmationPopup.value = true;
         isOptionsPopupOpen.value = false;
+        
       };
 
       const removeMember = async () => {
@@ -679,6 +698,7 @@ export default {
           removeMember,
           cancelRemoval,
           isCurrentUserAdmin,
+          memberToRemoveName,
 
       };
   },
@@ -730,6 +750,50 @@ max-width:100%;
 }
 
 
+/* styling buttons */
+button {
+  font-family: var(--font-yeseva-one);
+  border: 2px solid #525fe1;
+  background-color: white;
+  width: 203px;
+  height: 63px;
+  border-radius: 40px;
+  font-size: 25px;
+  
+  cursor: pointer;
+  margin-left: 20px;
+  margin-top: 40px;
+
+}
+.headind_srch{ 
+  padding: 1rem 1rem 1rem 1rem;
+  position: sticky;
+  position: sticky;
+  top: 0;
+  left: 0px;
+  z-index: 3;
+  background: white;
+  border-bottom:1px solid #c4c4c4;
+ 
+  }
+
+.groups {
+  color:#525fe1;
+  background-color: white;
+}
+.profiles:hover {
+  color:white;
+  background-color: #525fe1;
+  transition: 0.3s ease-in-out;
+}
+
+.profiles {
+  color: #525fe1;
+  margin-right: 30px;
+}
+
+
+
 
 .groups {
   font-weight: 600;
@@ -755,10 +819,10 @@ font-weight: bold;
 .inbox_people {
 background: #f8f8f8 none repeat scroll 0 0;
 float: left;
-overflow: hidden;
+overflow: scroll;
 width: 40%; 
 border-right:1px solid #c4c4c4;
-height:1115px;
+height:780px;
 
 }
 
@@ -766,7 +830,7 @@ height:1115px;
 float: left;
 padding: 30px 15px 0 2px;
 width: 60%; 
-height: 1000px; 
+height: 670px; 
 }
 
 
@@ -775,9 +839,27 @@ display: flex;
 flex-direction: column;
 align-items: center;
 justify-content: center;
-height: 100%;
+margin-top: 130px;
+margin-left: 22px;
 text-align: center;
 }
+
+
+.send-message-icon {
+  width: 6rem;  
+  height: 6rem;  
+  margin-top: 11rem;
+}
+
+.noChatSelectedHeader1 { 
+    margin-top: 3rem;
+  }
+
+.noChatSelectedHeader2 {
+    margin-top: -1rem;
+    font-size: 1.1rem;
+    color:darkgrey;
+  }
 
 .msg_history {
 height: 100%;
@@ -962,7 +1044,7 @@ margin-right: 1rem;
 .input_msg_write {
 position: absolute;
 width: 57%;
-top: 1190px;
+top: 850px;
 margin-right: 5%;
 
 
@@ -1014,7 +1096,7 @@ word-wrap: break-word;
 
 .type_msg {
 /* If you want the message typing area to stay at the bottom */
-height: 115px;
+
 padding-left: 25px;
 }
 
@@ -1053,38 +1135,11 @@ h5, p {
 .chat_date {
   color: black;
 }
-/* styling buttons */
-button {
-  font-family: var(--font-yeseva-one);
-  border: 2px solid #525fe1;
-  background-color: white;
-  width: 203px;
-  height: 63px;
-  border-radius: 40px;
-  font-size: 25px;
-  
-  cursor: pointer;
-  margin-left: 20px;
-  margin-top: 40px;
 
-}
 
-.groups {
-  color:white;
-  background-color: #525fe1;
-}
-
-.profiles {
-  color: #525fe1;
-  margin-right: 30px;
-}
-
-.chat-buttons {
-  margin-bottom: 40px;
-}
 
 h4 {
-  font-family: var(--font-josefin-sans);
+
   color: #6a6868;
   font-size: 20px;    
   margin-top: -20px;
@@ -1092,11 +1147,23 @@ h4 {
 
 /* styling popup */
 .popup {
-  height: 790px;
+  height: auto;
   display: flex;
   flex-direction: column;
-
   z-index: 10;
+  top: 150px;
+}
+
+.option-title {
+  margin-top: 100px;
+}
+.group-member-container { /* New container for members to apply columns */
+  column-count: 2; /* Creates two columns */
+  column-gap: 50px;
+   /* Adjust the gap between columns */
+  justify-content: center;
+  margin-bottom: 50px;
+  
 }
 
 .group-member {
@@ -1109,45 +1176,150 @@ h4 {
   
 
 }
-.group-member-container { /* New container for members to apply columns */
-  column-count: 2; /* Creates two columns */
-  column-gap: 50px;
-   /* Adjust the gap between columns */
-  justify-content: center;
-  
-}
+
 
 .option-image {
-  width: 9rem;
-  height: 9rem;
+  width: 6rem;
+  height: 6rem;
   border-radius: 50%;
   object-fit: cover;
-
   border-radius: 50%;
   margin-right: 20px;
   margin-top: 10px;
+  margin-left: 10px;
 
 }
 
 h6 {
   color: black;
-  font-size: 30px;
+  font-size: 25px;
   font-weight: bold;
   margin-top: 40px;
-  margin-left: 20px;
-  margin-bottom: 25px;
+
+}
+.name-and-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px; /* Adjust as needed for spacing between elements */
+}
+
+.member-name {
+  margin: 0;
+  align-self: flex-start;
+}
+
+.name-and-title .member-title {
+  white-space: nowrap; /* Prevent the title from wrapping */
+  margin-right: auto; /* Pushes everything else to the right */
+}
+
+.name-and-title h6 {
+
+  margin: 0; /* Remove any default margins */
+  padding: 0; /* Remove any default padding */
+  /* Additional styling */
 }
 
 .member-title {
   color: #767575;
-  font-size: 20px;
+  font-size: 15px;
   font-style: italic;
-  align-content: left;
+  
   
 }
 
+
+.remove-button {
+  width: 100px;
+  height: 25px;
+  font-size: 13px;
+  color: #525fe1;
+  margin-top: 10px;
+  margin:0;
+  align-self: flex-start;
+}
+
+.remove-button:hover {
+  background-color: #525fe1;
+  color: white;
+  border: 2px solid #525fe1;
+  cursor: pointer;
+}
+
 .confirmation-popup {
-  z-index: 10;
+  position: absolute; /* or 'fixed' if you want it to be viewport-centered */
+  top: 50%; /* Center vertically */
+  left: 50%; /* Center horizontally */
+  transform: translate(-50%, -50%); /* Adjust to center perfectly */
+  width: auto; /* Adjust as needed */
+  height: auto;
+  border-radius: 30px;
+  background-color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000; 
+}
+.confirmation-content {
+  padding:50px 150px 50px 150px;
+}
+
+.confirmation-popup h1 {
+  font-size: 40px;
+  margin-top: 30px;
+  margin-left:0;
+  margin-right:0;
+  text-align: center;
+
+
+}
+
+.confirmation-popup p {
+  font-size: 28px;
+  text-align: center;
+  color:#ADA6A6;
+  font-style:italic;
+  font-weight: 100;
+  margin-top: 30px;
+  margin-left:0;
+  margin-right:0;
+
+}
+
+.confirmation-button {
+  display: flex;
+  justify-content: center; /* This centers the buttons horizontally in the flex container */
+  gap: 60px;
+  margin-top: 30px;
+
+
+
+
+
+}
+
+button {
+  color: #525fe1
+}
+
+button:hover {
+  color: white;
+  background-color:#525fe1;
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+  z-index: 999; /* Below the popup but above everything else */
+}
+.group-parent { 
+  width: 100%; 
 }
 
 

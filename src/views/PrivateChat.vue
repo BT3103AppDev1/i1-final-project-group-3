@@ -511,7 +511,7 @@ img{
   border: 1px solid #c4c4c4;
   clear: both;
   overflow: hidden;
-  height: 1115px;   
+
 
 }
 
@@ -525,13 +525,47 @@ img{
 .group-parent { 
   width: 100%; 
 }
+/* styling buttons */
+button {
+  font-family: var(--font-yeseva-one);
+  border: 2px solid #525fe1;
+  background-color: white;
+  width: 203px;
+  height: 63px;
+  border-radius: 40px;
+  font-size: 25px;
+  
+  cursor: pointer;
+  margin-left: 20px;
+  margin-top: 40px;
 
+}
 .headind_srch{ 
   padding: 1rem 1rem 1rem 1rem;
-  overflow:hidden; 
+  position: sticky;
+  position: sticky;
+  top: 0;
+  left: 0px;
+  z-index: 3;
+  background: white;
   border-bottom:1px solid #c4c4c4;
  
   }
+
+.groups {
+  color:#525fe1;
+  background-color: white;
+}
+.groups:hover {
+  color:white;
+  background-color: #525fe1;
+  transition: 0.3s ease-in-out;
+}
+
+.profiles {
+  color: white;
+  margin-right: 30px;
+}
 
  
 .chat_ib h5{ 
@@ -588,7 +622,7 @@ img{
 }
 
 .inbox_chat { 
-  height: 1280px; 
+  height: 640px; 
   overflow-y: scroll; 
   
 
@@ -598,7 +632,7 @@ img{
   float: left;
   padding: 30px 15px 0 25px;
   width: 60%; 
-  height: 1000px; 
+  height: 762px; 
  
   }
 
@@ -648,15 +682,16 @@ img{
 .input_msg_write {
   position: absolute;
   width: 57%;
-  top: 1190px;
+  top: 860px;
   margin-right: 5%;
-  z-index: 1;
+  z-index: 100;
+  
 
 }
 
   
 .msg_history {
-  height: 100%;
+  height: 89%;
   overflow-y: auto;
   padding-right: 0.6rem;
   overflow-x: hidden;
