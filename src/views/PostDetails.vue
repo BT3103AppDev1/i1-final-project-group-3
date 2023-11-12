@@ -33,7 +33,7 @@
             <div v-for="comment in comments" :key="comment.id" class="allComments">
                 <img class="comment-user-image" :src="comment.commentUserImage" />
                 <div class="comment-upper-section">
-                    <button class="comment-user-name" @click="navigateToUserProfile(comment.postUserId)">{{ comment.commentUserName }}</button>
+                    <button class="comment-user-name" @click="navigateToUserProfile(comment.commentUserId)">{{ comment.commentUserName }}</button>
                     <div class="comment-date">{{ comment.date }}</div>
                     <button class="delete-button" type="button" @click="removeComment(comment.id)">Delete</button>
                 </div>
@@ -118,7 +118,12 @@ export default {
     methods: {
         
         navigateToPostDetails (postId) {
-            router.push({ name: 'PostDetails', params: { postId: postId }});
+          this.$router.push({ name: 'PostDetails', params: { postId: postId }});
+        },
+
+        navigateToUserProfile (userId) {
+          this.$router.push({ name: 'profile', params: { userId }});
+
         },
 
         getCurrentDate() {
