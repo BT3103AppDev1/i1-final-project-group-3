@@ -1,7 +1,7 @@
 <template>
     <NavigationBar/>
 
-    <div class="header">{{ this.header }}</div>
+    <div class="header">Post: {{ this.header }}</div>
     <div class="comments-header">Comments</div>
 
     <div class="post-list">
@@ -46,7 +46,7 @@
         </div>
 
         <div class="comment-bar">
-            <input v-model="comment" id = "enter-your-comment" class="enter-your-comment" placeholder="Enter your comment here...">
+            <input @keyup.enter="confirmSubmitForm" v-model="comment" id = "enter-your-comment" class="enter-your-comment" placeholder="Enter your comment here...">
             <button class="comment-button" @click="submitForm">Comment</button>
         </div>
 
@@ -390,41 +390,45 @@ export default {
         },
 
     
-
         async removeComment(documentId) {
-            const db = getFirestore(firebaseApp);
+          const db = getFirestore(firebaseApp);
 
-            try {
-                const currentPostSnap = await getDoc(doc(db, "Posts", this.$route.params.postId));
-                const postData = currentPostSnap.data();
+          try {
+              // Get the document data to check if the user is the owner of the comment
+              const commentDoc = await getDoc(doc(db, "Posts", this.$route.params.postId, "Comments", documentId));
+              const commentData = commentDoc.data();
 
-                const currentComments = postData.comments;
-                
+              // Check if the current user is the owner of the comment
+              if (commentData.commentUserId === this.uid) {
+                  const currentPostSnap = await getDoc(doc(db, "Posts", this.$route.params.postId));
+                  const postData = currentPostSnap.data();
 
-                const updates = {
-                    comments: currentComments - 1
-                };
+                  const currentComments = postData.comments;
 
-                // Update the comment count for the post
-                await updateDoc(doc(db, "Posts", this.$route.params.postId), updates);
-                await updateDoc(doc(db, "Users", this.postUserId, "Posts", this.$route.params.postId), updates);
+                  const updates = {
+                      comments: currentComments - 1
+                  };
 
-                // Delete the document
-                deleteDoc(doc(db,"Users", this.postUserId ,"Posts" ,this.$route.params.postId, "Comments", documentId))
-                deleteDoc(doc(db,"Posts", this.$route.params.postId, "Comments", documentId)).then(() => {
-                console.log("Comment deleted successfully");
+                  // Update the comment count for the post
+                  await updateDoc(doc(db, "Posts", this.$route.params.postId), updates);
+                  await updateDoc(doc(db, "Users", this.postUserId, "Posts", this.$route.params.postId), updates);
 
-                // Reload the page
-                location.reload();
-                })
-                .catch((error) => {
-                console.error("Error deleting comment:", error);
-                });
+                  // Delete the document
+                  await deleteDoc(doc(db, "Users", this.postUserId, "Posts", this.$route.params.postId, "Comments", documentId));
+                  await deleteDoc(doc(db, "Posts", this.$route.params.postId, "Comments", documentId));
 
-            } catch (error) {
-                console.error('Error deleting comment:', error);
-            }
-        } 
+                  console.log("Comment deleted successfully");
+                  // Reload the page
+                  location.reload();
+              } else {
+                  alert("You are not allowed to delete this comment.");
+              ed
+              }
+          } catch (error) {
+              console.error('Error deleting comment:', error);
+          }
+      }
+
 
     }
 
@@ -495,7 +499,7 @@ export default {
     border: 0px;
     font-size: 1.30rem;
     font-family: var(--font-inter);
-    color: var(--color-dimgray);
+    color: black;
   }
   .likes {
     position: absolute;
@@ -506,7 +510,7 @@ export default {
     border: 0px;
     font-size: 1.30rem;
     font-family: var(--font-inter);
-    color: var(--color-dimgray);
+    color: black;
   }
 
   .likeButton {
@@ -543,7 +547,7 @@ export default {
     cursor: pointer;
     font-size: 1.30rem;
     font-family: var(--font-inter);
-    color: var(--color-dimgray);
+    color: black;
   }
 
   .post-date {
@@ -551,8 +555,14 @@ export default {
     top: 30px;
     margin-left: 300px;
     font-weight: 500;
+    color: black;
     
   }
+
+  .post-content {
+    color: black;
+  }
+
   .post-content-container {
     position: absolute;
     font-weight: 300;
@@ -675,7 +685,7 @@ export default {
     cursor: pointer;
     font-size: 1.30rem;
     font-family: var(--font-inter);
-    color: var(--color-dimgray);
+    color: black;
   }
 
   .comment-date {
@@ -683,8 +693,14 @@ export default {
     top: 30px;
     margin-left: 300px;
     font-weight: 500;
+    color: black;
     
   }
+
+  .comment-content {
+    color: black;
+  }
+
   .comment-content-container {
     position: absolute;
     font-weight: 300;
