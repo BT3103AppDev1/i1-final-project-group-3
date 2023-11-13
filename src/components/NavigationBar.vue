@@ -47,7 +47,7 @@ export default {
   width: 100vw;
   height: 165px;
   align-self: left;
-  position: relative;
+  position: sticky;
   
 }
 
