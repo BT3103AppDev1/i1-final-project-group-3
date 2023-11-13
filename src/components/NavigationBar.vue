@@ -57,7 +57,7 @@ export default {
   font-weight: 700;
   font-family: josefin sans;
   top: 30px;
-  margin-left: -400px;
+  margin-left: -360px;
   
 }
 
