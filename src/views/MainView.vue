@@ -3,9 +3,13 @@
   <div class="home-page-before-login">
 
     <div class="rectangle-parent">
+      <img src="../assets/icon.jpg" alt="" class="logo">
       <div class="rectangle-group">
+        
         <button class="login" @click="navigateToLogin">Login</button>
+        
         <b class="studybuddy">StudyBuddy</b>
+       
       </div>
 
       <div>
@@ -103,6 +107,14 @@
 </script>
 
 <style scoped>
+
+.logo {
+  position: relative;
+  top: 25px;
+  left: -630px;
+  height: 100px;
+  width: 100px;
+}
   h1 {
     font-family: var(--font-yeseva-one);
     font-weight: 800;
@@ -168,8 +180,8 @@
 
   .studybuddy {
     position: absolute;
-    top: 30px;
-    left: 2px;
+    top: 60px;
+    left: 100px;
     font-size: 48px;
     font-weight: 700;
     width: 401px;

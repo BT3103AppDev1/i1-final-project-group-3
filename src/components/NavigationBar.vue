@@ -1,5 +1,6 @@
 <template>
   <div id="logged" >
+    <img src="../assets/icon.jpg" alt="" class="logo">
       <b class="studybuddy" >StudyBuddy</b>
       <div id="nav">
           <router-link to="/home">Home</router-link>
@@ -28,6 +29,14 @@ export default {
 </script>
 
 <style scoped>
+.logo {
+  height: 100px;
+  width: 100px;
+  border-radius: 50%;
+  margin-top: -10px;
+  margin-left: 20px;
+
+}
 
 #logged {
   display: flex;
@@ -48,7 +57,7 @@ export default {
   font-weight: 700;
   font-family: josefin sans;
   top: 30px;
-  padding-left: 20px;
+  margin-left: -400px;
   
 }
 
