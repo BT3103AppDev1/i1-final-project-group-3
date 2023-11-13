@@ -46,7 +46,7 @@
       <input
         class="course-field"
         id="course"
-        placeholder="Current Courses"
+        placeholder="Current Courses (e.g. BT3103, CS2040)"
         type="text"
       />
       <textarea
@@ -100,6 +100,7 @@ const db = getFirestore(firebaseApp);
         let uid = this.uid;
         console.log(uid);
 
+        // transform the user input for courses taken into an array
         let courses = courseInput
           .split(",")
           .map((course) => course.trim());
@@ -108,17 +109,17 @@ const db = getFirestore(firebaseApp);
 
         console.log(validCourses);
 
-        if (year != null && major != "" && validCourses.length > 0 && description != "") {
+        if (year != null && major != "" && validCourses.length > 0 && description != "") { // check if all fields are filled
 
           try{
-            const docRef = await updateDoc(doc(db, "Users", uid),{
+            const docRef = await updateDoc(doc(db, "Users", uid),{  // store user data into firebase
               major: major,
               currentCourses : validCourses,
               yearOfStudy: year,
               description: description,
             })
             console.log(docRef);
-            this.$router.push({ name: 'SignUp4' });
+            this.$router.push({ name: 'SignUp4' });   // redirect the user to registration step 4
             
           }
           catch(error) {
@@ -130,7 +131,7 @@ const db = getFirestore(firebaseApp);
       },
     }, 
     mounted() {
-      const auth = getAuth();
+      const auth = getAuth();   // get signed in user credentials
       onAuthStateChanged(auth, (user) => {
         if (user) {
           this.user = user;

@@ -80,13 +80,7 @@ import { getAdditionalUserInfo, getAuth, onAuthStateChanged } from "firebase/aut
       },
     }, 
     mounted() {
-      // const auth = getAuth();
-      // onAuthStateChanged(auth, (user) => {
-      //   if (user) {
-      //     console.log(user);
-      //     this.user = user;
-      //   }
-      // });
+      // create sign in firebaseui
       var ui = firebaseui.auth.AuthUI.getInstance();
       if (!ui) {
         ui = new firebaseui.auth.AuthUI(firebase.auth());
@@ -99,10 +93,10 @@ import { getAdditionalUserInfo, getAuth, onAuthStateChanged } from "firebase/aut
             console.log(authResult);
             if (authResult) {
               console.log(authResult.additionalUserInfo.isNewUser);
-              if (authResult.additionalUserInfo.isNewUser) {
-                return true;
+              if (authResult.additionalUserInfo.isNewUser) {  // check if the signed in user is new user or not
+                return true;  // if new user, return true and would be directed to signInSuccessUrl, which is registration2
               } else {
-                this.$router.push('/home');
+                this.$router.push('/home'); // if is not new user, direct the user to home page
                 return false;
               }
             }
@@ -110,8 +104,8 @@ import { getAdditionalUserInfo, getAuth, onAuthStateChanged } from "firebase/aut
         },
         signInSuccessUrl:'/registration2',
         signInOptions: [
-          firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-          firebase.auth.EmailAuthProvider.PROVIDER_ID,
+          firebase.auth.GoogleAuthProvider.PROVIDER_ID,  // Google account sign in
+          firebase.auth.EmailAuthProvider.PROVIDER_ID,   // Email account sign in
         ]
       };
       ui.start('#firebaseui-auth-container', uiConfig);
