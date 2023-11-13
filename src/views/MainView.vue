@@ -165,17 +165,19 @@
   }
 
   .welcome {
-    position: center;
+    position: relative;
     padding-top: 190px;
     font-size: 160px;
     font-weight: 300;
     mix-blend-mode: normal;
+    left: -50px;
   }
   .are-you-ready {
     position: relative;
     font-size: 30px;
     font-weight: 500;
-    left:35px;
+    left: 0px;
+  
   }
 
   .studybuddy {

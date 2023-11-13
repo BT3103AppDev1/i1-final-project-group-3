@@ -1,6 +1,6 @@
 <template>
   <div class="rectangle-parent">
-        
+    <img src="../assets/icon.jpg" alt="" class="logo">
       <h1 class="login-main">Login</h1>
       <div class="studybuddy"  @click="navigateToMainView">StudyBuddy</div>
       <div class="create-account">Don't have an account? <em class="sign-up" @click="navigateToRegistration"> Sign up here </em></div>
@@ -33,6 +33,14 @@ export default {
 
 <style scoped>
 
+.logo {
+  position: relative;
+  top: 25px;
+  left: -630px;
+  height: 100px;
+  width: 100px;
+}
+
 h1 {
 color: white; 
 position: relative;
@@ -43,7 +51,7 @@ position: absolute;
 top: 0px;
 left: 0px;
 width: 100%;
-height: 319px;
+height: 450px;
 text-align: center;
 color: white;
 background-color: #525fe1;
@@ -52,8 +60,8 @@ background-color: #525fe1;
 
 .studybuddy {
 position: absolute;
-top: 30px;
-left: 65px;
+top: 60px;
+left: 160px;
 font-size: 48px;
 font-weight: 700;
 width: 40px;

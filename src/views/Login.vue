@@ -167,7 +167,7 @@ div, input {
 
 #firebaseui-auth-container {
   position: relative;
-  top: 400px;
+  top: 500px;
 }
 
 
