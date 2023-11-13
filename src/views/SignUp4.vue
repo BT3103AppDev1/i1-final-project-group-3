@@ -74,8 +74,8 @@ const db = getFirestore(firebaseApp);
     name: "SignUp4",
     data() {
       return {
-        tags: [
-          { label: 'Extroverted', checked: false },
+        tags: [ // list of personality tags displayed on the page, for user to choose from
+          { label: 'Extroverted', checked: false },   // default state is false, meaning that the user hasn't select any tags yet
           { label: 'Introverted', checked: false },
           { label: 'Confident', checked: false },
           { label: 'Adaptable', checked: false },
@@ -93,7 +93,7 @@ const db = getFirestore(firebaseApp);
         ],
         uid: false,
         user: false,
-        moreThan5: false,
+        moreThan5: false,  // check if the user selected more than 5 tags
       };
     },
     methods: {
@@ -108,7 +108,7 @@ const db = getFirestore(firebaseApp);
         event.preventDefault();
         let personalities = [];
 
-        this.tags.forEach((tag) => {
+        this.tags.forEach((tag) => {   // take out the selected personality tags
           if (tag.checked) {
             personalities.push(tag.label);
           }
@@ -119,15 +119,15 @@ const db = getFirestore(firebaseApp);
 
         console.log(personalities);
 
-        if (personalities.length > 5) {
-          alert("Please select at most 5 personality types!")
+        if (personalities.length > 5) {   // check if the user selected more than 5 tags
+          alert("Please select at most 5 personality types!")  // alert the user
         } else {
           try {
             const docRef = await updateDoc(doc(db, "Users", uid),{
-              personalities: personalities,
+              personalities: personalities,  // store the list of personality types into user profile
             })
             console.log(docRef);
-            this.$router.push({ name: 'OwnProfile' });
+            this.$router.push({ name: 'OwnProfile' });   // redirect the user to profile page
             
           }
           catch(error) {
@@ -139,7 +139,7 @@ const db = getFirestore(firebaseApp);
       },
     }, 
     mounted() {
-      const auth = getAuth();
+      const auth = getAuth();   // get signed in user credentials
       onAuthStateChanged(auth, (user) => {
         if (user) {
           this.user = user;

@@ -92,20 +92,20 @@ const db = getFirestore(firebaseApp);
     mounted() {
       const auth = getAuth();
       onAuthStateChanged(auth, (user) => {
-        if (user) {
+        if (user) {   // Google authentication to retrieve current user info, when the page is mounted
           this.user = user;
           this.uid = auth.currentUser.uid;
           this.email = auth.currentUser.email;
-          this.addUserProfile(auth.currentUser.uid);
+          this.addUserProfile(auth.currentUser.uid);  // create a new user document using the current user uid (since this is a new user and no user profile is created yet)
         }
       })
 
     },
     methods: {
-      navigateToSignUp3() {
-        this.$router.push({ name: 'SignUp3' });
+      navigateToSignUp3() {  
+        this.$router.push({ name: 'SignUp3' });  
       },
-      async addUserProfile(uid) {
+      async addUserProfile(uid) {   // create user profile document in the firebase
         try{
           const docRef = await setDoc(doc(db, "Users", uid),{
             
@@ -116,7 +116,7 @@ const db = getFirestore(firebaseApp);
           console.error("Error adding document: ", error);
         }
       },
-      async updateProfile(event) {
+      async updateProfile(event) {   // triggered when user click the "Next" button
         event.preventDefault();
         let firstName = document.getElementById("firstName").value;
         let lastName = document.getElementById("lastName").value;
@@ -126,9 +126,9 @@ const db = getFirestore(firebaseApp);
         let uid = this.uid;
         
 
-        if (firstName != "" && phoneNumber != "" && gender != "" && lastName != "") {
+        if (firstName != "" && phoneNumber != "" && gender != "" && lastName != "") {  // check if user has filled in all fields
           try{
-            const docRef = await updateDoc(doc(db, "Users", uid),{
+            const docRef = await updateDoc(doc(db, "Users", uid),{  // all fields are filled, update user profile and store the data
               phoneNumber: phoneNumber,
               firstName : firstName,
               lastName : lastName,
@@ -137,14 +137,14 @@ const db = getFirestore(firebaseApp);
               email: email,
             })
             console.log(docRef);
-            this.$router.push({ name: 'SignUp3' });
+            this.$router.push({ name: 'SignUp3' });  // then direct user to the next step
             
           }
           catch(error) {
             console.error("Error adding document: ", error);
           }
         } else {
-          alert("Please fill in all fields!");
+          alert("Please fill in all fields!");  // alert the user if not all fields are filled
         }
       },
     }, 
